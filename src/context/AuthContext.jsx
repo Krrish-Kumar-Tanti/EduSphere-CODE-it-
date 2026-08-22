@@ -3,14 +3,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 const API_BASE = 'http://localhost:5001/api';
 
-export const DEMO_USERS = {
+export const INITIAL_USER_ACCOUNTS = {
   student: {
     id: 'STU-2026-8842',
     name: 'Krrish Kumar Tanti',
     role: 'student',
-    email: 'krrish.tanti@adgitm.ac.in',
+    email: 'krrish.tanti@campus.edu',
     enrollment: '04214802722',
-    college: 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
+    college: 'Apex Institute of Technology & Management',
     department: 'Computer Science & Engineering (CSE)',
     semester: '6th Semester (Year 3)',
     section: 'CSE-A',
@@ -18,15 +18,16 @@ export const DEMO_USERS = {
     bloodGroup: 'O+ positive',
     validUpto: 'June 2026',
     attendanceOverall: 88.4,
-    cgpa: '8.92'
+    cgpa: '8.92',
+    designation: 'Student Scholar'
   },
   teacher: {
     id: 'FAC-1092',
     name: 'Dr. Manish Verma',
     role: 'teacher',
-    email: 'manish.verma@adgitm.ac.in',
+    email: 'manish.verma@campus.edu',
     enrollment: 'FAC-1092',
-    college: 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
+    college: 'Apex Institute of Technology & Management',
     department: 'Computer Science & Engineering (CSE)',
     designation: 'Associate Professor',
     semester: 'Faculty',
@@ -34,68 +35,74 @@ export const DEMO_USERS = {
     bloodGroup: 'B+ positive',
     validUpto: 'Permanent',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
-    subjects: ['Operating Systems', 'Cloud Computing', 'Computer Networks']
+    subjects: 'Operating Systems, Cloud Computing, Computer Networks',
+    cabin: 'Room 304, Academic Block A'
   },
   hod: {
     id: 'HOD-001',
     name: 'Prof. S. K. Naitik',
     role: 'hod',
-    email: 'hod.cse@adgitm.ac.in',
+    email: 'hod.cse@campus.edu',
     enrollment: 'HOD-001',
-    college: 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
-    department: 'Department of Computer Science',
-    designation: 'Head of Department',
+    college: 'Apex Institute of Technology & Management',
+    department: 'Department of Computer Science & Engineering',
+    designation: 'Head of Department & Professor',
     semester: 'HOD Office',
-    section: 'All',
+    section: 'All Sections',
     bloodGroup: 'A+ positive',
     validUpto: 'Permanent',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Room 304, Admin Block 2'
+    cabin: 'Room 101, Executive Wing',
+    adminCode: 'HOD-001',
+    digitalSignature: 'RSA-SEAL-HOD-CSE-VALID'
   },
   staff: {
     id: 'STF-504',
     name: 'Rajesh Sharma',
     role: 'staff',
-    email: 'rajesh.facilities@adgitm.ac.in',
+    email: 'rajesh.facilities@campus.edu',
     enrollment: 'STF-504',
-    college: 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
+    college: 'Apex Institute of Technology & Management',
     department: 'Ground Operations & Maintenance',
-    subDomain: 'Campus Infrastructure & Cleanliness',
+    assignedUnit: 'Campus Infrastructure & Cleanliness',
+    supervisorLevel: 'Lead Operations Supervisor',
     semester: 'Staff',
-    section: 'Campus',
+    section: 'Campus Wide',
     bloodGroup: 'AB+ positive',
     validUpto: 'Permanent',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
-    badgeLevel: 'Lead Supervisor'
+    badgeLevel: 'Lead Supervisor',
+    badgeId: 'STF-504'
   }
 };
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
-    const savedStudent = localStorage.getItem('edusphere_student_profile');
-    if (savedStudent) {
+    const saved = localStorage.getItem('edusphere_auth_user');
+    if (saved) {
       try {
-        return JSON.parse(savedStudent);
+        return JSON.parse(saved);
       } catch (e) {}
     }
-    const saved = localStorage.getItem('edusphere_user');
-    return saved ? JSON.parse(saved) : DEMO_USERS.student;
+    return null;
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const saved = localStorage.getItem('edusphere_auth_user');
+    return !!saved;
+  });
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('edusphere_user', JSON.stringify(currentUser));
-      if (currentUser.role === 'student') {
-        localStorage.setItem('edusphere_student_profile', JSON.stringify(currentUser));
-      }
+      localStorage.setItem('edusphere_auth_user', JSON.stringify(currentUser));
+      setIsAuthenticated(true);
     } else {
-      localStorage.removeItem('edusphere_user');
+      localStorage.removeItem('edusphere_auth_user');
+      setIsAuthenticated(false);
     }
   }, [currentUser]);
 
-  // Login method with backend API sync
+  // Login method with backend API sync & credentials validation
   const login = async (role = 'student', credentials = null) => {
     try {
       if (credentials) {
@@ -107,84 +114,100 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json();
         if (data.success && data.user) {
           setCurrentUser(data.user);
-          if (data.user.role === 'student') {
-            localStorage.setItem('edusphere_student_profile', JSON.stringify(data.user));
-          }
           setIsAuthenticated(true);
           return { success: true, user: data.user };
+        } else if (data.error) {
+          return { success: false, error: data.error };
         }
       }
     } catch (e) {
-      console.warn('Backend offline, using fallback auth:', e);
+      console.warn('Backend offline, checking fallback account:', e);
     }
 
-    // If logging in as student and we have a custom saved student profile with photo, use it!
-    if (role === 'student') {
-      const savedStudent = localStorage.getItem('edusphere_student_profile');
-      if (savedStudent) {
-        const parsed = JSON.parse(savedStudent);
-        setCurrentUser(parsed);
+    // Offline / fallback auth check
+    if (credentials?.identifier) {
+      const match = Object.values(INITIAL_USER_ACCOUNTS).find(
+        u => (u.enrollment === credentials.identifier || 
+              u.email === credentials.identifier || 
+              u.id === credentials.identifier ||
+              u.adminCode === credentials.identifier ||
+              u.badgeId === credentials.identifier)
+      );
+
+      if (match) {
+        setCurrentUser(match);
         setIsAuthenticated(true);
-        return { success: true, user: parsed };
+        return { success: true, user: match };
       }
     }
 
-    const user = DEMO_USERS[role] || DEMO_USERS.student;
-    setCurrentUser(user);
+    const defaultRoleUser = INITIAL_USER_ACCOUNTS[role] || INITIAL_USER_ACCOUNTS.student;
+    setCurrentUser(defaultRoleUser);
     setIsAuthenticated(true);
-    return { success: true, user };
+    return { success: true, user: defaultRoleUser };
   };
 
-  // Register a brand new student with real info & uploaded photo
-  const register = async (studentData) => {
+  // Register brand new user for any of the 4 roles
+  const register = async (userData) => {
     try {
       const res = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData)
+        body: JSON.stringify(userData)
       });
       const data = await res.json();
       if (data.success && data.user) {
         setCurrentUser(data.user);
-        localStorage.setItem('edusphere_student_profile', JSON.stringify(data.user));
         setIsAuthenticated(true);
         return { success: true, user: data.user };
+      } else if (data.error) {
+        return { success: false, error: data.error };
       }
     } catch (e) {
       console.warn('Backend register offline, creating local profile:', e);
     }
 
+    const randomSuffix = Date.now().toString().slice(-4);
+    let idPrefix = 'USR';
+    if (userData.role === 'student') idPrefix = 'STU';
+    else if (userData.role === 'teacher') idPrefix = 'FAC';
+    else if (userData.role === 'hod') idPrefix = 'HOD';
+    else if (userData.role === 'staff') idPrefix = 'STF';
+
     const localUser = {
-      id: `STU-${Date.now().toString().slice(-4)}`,
-      name: studentData.name,
-      email: studentData.email || `${studentData.name.toLowerCase().replace(/\s+/g, '.')}@adgitm.ac.in`,
-      role: 'student',
-      enrollment: studentData.enrollment || '04214802722',
-      college: studentData.college || 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
-      department: studentData.department || 'Computer Science & Engineering (CSE)',
-      semester: studentData.semester || '6th Semester (Year 3)',
-      section: studentData.section || 'CSE-A',
-      bloodGroup: studentData.bloodGroup || 'O+ positive',
-      validUpto: studentData.validUpto || 'June 2026',
-      avatar: studentData.avatar || DEMO_USERS.student.avatar,
-      cgpa: studentData.cgpa || '8.50',
-      attendanceOverall: 88.4
+      id: `${idPrefix}-${randomSuffix}`,
+      name: userData.name,
+      email: userData.email || `${userData.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@campus.edu`,
+      role: userData.role || 'student',
+      enrollment: userData.enrollment || (userData.role === 'student' ? `0421480${randomSuffix}` : `${idPrefix}-${randomSuffix}`),
+      college: userData.college || 'Apex Institute of Technology & Management',
+      department: userData.department || 'Computer Science & Engineering (CSE)',
+      semester: userData.semester || (userData.role === 'student' ? '6th Semester (Year 3)' : 'Permanent'),
+      section: userData.section || (userData.role === 'student' ? 'CSE-A' : 'Campus'),
+      bloodGroup: userData.bloodGroup || 'O+ positive',
+      validUpto: userData.validUpto || (userData.role === 'student' ? 'June 2026' : 'Permanent'),
+      avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+      cgpa: userData.role === 'student' ? '8.50' : 'N/A',
+      attendanceOverall: userData.role === 'student' ? 88.4 : 100,
+      designation: userData.designation || (userData.role === 'teacher' ? 'Associate Professor' : userData.role === 'hod' ? 'Head of Department' : userData.role === 'staff' ? 'Lead Supervisor' : 'Student Scholar'),
+      subjects: userData.subjects || null,
+      cabin: userData.cabin || null,
+      assignedUnit: userData.assignedUnit || null,
+      supervisorLevel: userData.supervisorLevel || null,
+      adminCode: userData.adminCode || null,
+      badgeId: userData.badgeId || null,
+      digitalSignature: userData.digitalSignature || null
     };
 
     setCurrentUser(localUser);
-    localStorage.setItem('edusphere_student_profile', JSON.stringify(localUser));
     setIsAuthenticated(true);
     return { success: true, user: localUser };
   };
 
-  // Update user profile and ID card information dynamically
+  // Update profile and ID card info dynamically
   const updateUserProfile = async (updatedFields) => {
     const updated = { ...currentUser, ...updatedFields };
     setCurrentUser(updated);
-
-    if (updated.role === 'student') {
-      localStorage.setItem('edusphere_student_profile', JSON.stringify(updated));
-    }
 
     try {
       if (currentUser?.id) {
@@ -201,7 +224,7 @@ export const AuthProvider = ({ children }) => {
     return updated;
   };
 
-  // Upload user photo to backend server or Base64
+  // Upload user photo to backend server or Base64 fallback
   const uploadPhoto = async (file) => {
     try {
       const formData = new FormData();
@@ -219,7 +242,6 @@ export const AuthProvider = ({ children }) => {
       console.warn('Photo upload server error, converting to base64:', e);
     }
 
-    // Fallback: convert file to local Base64 data URL
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
@@ -227,34 +249,11 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  // Genuine logout that clears all auth state
   const logout = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
-  };
-
-  // Switch role without wiping student custom profile & photo
-  const switchRole = (role) => {
-    if (role === 'student') {
-      const savedStudent = localStorage.getItem('edusphere_student_profile');
-      if (savedStudent) {
-        try {
-          const parsed = JSON.parse(savedStudent);
-          setCurrentUser(parsed);
-          setIsAuthenticated(true);
-          return;
-        } catch (e) {}
-      }
-    } else {
-      // If currently on student, save active student profile first before switching
-      if (currentUser && currentUser.role === 'student') {
-        localStorage.setItem('edusphere_student_profile', JSON.stringify(currentUser));
-      }
-    }
-
-    if (DEMO_USERS[role]) {
-      setCurrentUser(DEMO_USERS[role]);
-      setIsAuthenticated(true);
-    }
+    localStorage.removeItem('edusphere_auth_user');
   };
 
   return (
@@ -264,7 +263,6 @@ export const AuthProvider = ({ children }) => {
       login, 
       register, 
       logout, 
-      switchRole, 
       updateUserProfile, 
       uploadPhoto 
     }}>
@@ -274,3 +272,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+

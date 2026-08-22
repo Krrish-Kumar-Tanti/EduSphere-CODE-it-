@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import confetti from 'canvas-confetti';
 import { 
   Radio, 
@@ -18,6 +19,7 @@ import {
 
 export default function AttendanceClient() {
   const { activeSession, markStudentAttendance, studentAttendanceRecord } = useData();
+  const { currentUser } = useAuth();
   const [passcode, setPasscode] = useState('');
   const [bleStatus, setBleStatus] = useState('scanning'); // 'scanning' | 'connected' | 'out-of-range'
   const [statusMessage, setStatusMessage] = useState(null);
@@ -27,7 +29,7 @@ export default function AttendanceClient() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setBleStatus('connected');
-    }, 1200);
+    }, 800);
 
     return () => clearTimeout(timer);
   }, []);
@@ -41,21 +43,19 @@ export default function AttendanceClient() {
     });
   };
 
-  const handleSubmitAttendance = (e) => {
+  const handleSubmitAttendance = async (e) => {
     e.preventDefault();
     if (!passcode.trim()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const result = markStudentAttendance(passcode);
-      setStatusMessage(result);
-      setIsSubmitting(false);
+    const result = await markStudentAttendance(passcode, currentUser);
+    setStatusMessage(result);
+    setIsSubmitting(false);
 
-      if (result.success) {
-        triggerConfetti();
-        setPasscode('');
-      }
-    }, 600);
+    if (result.success) {
+      triggerConfetti();
+      setPasscode('');
+    }
   };
 
   const handleQuickPasteCode = () => {
@@ -63,6 +63,7 @@ export default function AttendanceClient() {
       setPasscode(activeSession.code);
     }
   };
+
 
   return (
     <div className="space-y-6">

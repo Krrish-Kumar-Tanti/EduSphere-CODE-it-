@@ -1,113 +1,91 @@
-export const GGSIPU_COLLEGES = [
+export const UNIVERSAL_COLLEGES = [
   {
-    code: '156',
-    name: 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)',
+    code: '101',
+    name: 'Apex Institute of Technology & Management (AITM)',
+    location: 'Academic City Campus',
+    type: 'Affiliated Technical Institute'
+  },
+  {
+    code: '102',
+    name: 'Metro College of Engineering & Research',
+    location: 'Innovation District, Sector 18',
+    type: 'Affiliated Engineering College'
+  },
+  {
+    code: '103',
+    name: 'National Institute of Technical Sciences (NITS)',
+    location: 'Knowledge Park, Central Avenue',
+    type: 'Autonomous Institute'
+  },
+  {
+    code: '104',
+    name: 'City University School of Computing & Robotics',
+    location: 'University Enclave Phase 1',
+    type: 'University Department'
+  },
+  {
+    code: '105',
+    name: 'Royal Academy of Engineering & Technology',
+    location: 'Tech Corridor, South Hub',
+    type: 'Affiliated Institute'
+  },
+  {
+    code: '106',
+    name: 'Premier Institute of Professional Studies',
+    location: 'Outer Ring Campus',
+    type: 'Affiliated College'
+  },
+  {
+    code: '107',
+    name: 'Federal Engineering & Technological Campus',
+    location: 'Institutional Area, Sector 22',
+    type: 'State Technical Campus'
+  },
+  {
+    code: '108',
+    name: 'Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)',
     location: 'Shastri Park, FC-26, New Delhi',
     type: 'Affiliated Institute'
   },
   {
-    code: '164',
-    name: 'USICT (University School of Information, Communication & Technology)',
-    location: 'Sector 16C, Dwarka Main Campus, New Delhi',
-    type: 'University Main School'
-  },
-  {
-    code: '148',
-    name: 'MAIT (Maharaja Agrasen Institute of Technology)',
-    location: 'PSP Area, Sector 22, Rohini, Delhi',
+    code: '109',
+    name: 'Maharaja Agrasen Institute of Technology (MAIT)',
+    location: 'PSP Area, Sector 22, Rohini',
     type: 'Affiliated Institute'
   },
   {
-    code: '149',
-    name: 'MSIT (Maharaja Surajmal Institute of Technology)',
-    location: 'C-4, Janakpuri, New Delhi',
+    code: '110',
+    name: 'Maharaja Surajmal Institute of Technology (MSIT)',
+    location: 'C-4, Janakpuri Campus',
     type: 'Affiliated Institute'
   },
   {
-    code: '208',
-    name: 'BPIT (Bhagwan Parshuram Institute of Technology)',
-    location: 'PSP-4, Sector 17, Rohini, Delhi',
+    code: '111',
+    name: 'Bharati Vidyapeeth College of Engineering (BVCOE)',
+    location: 'A-4, Paschim Vihar',
     type: 'Affiliated Institute'
   },
   {
-    code: '115',
-    name: 'BVCOE (Bharati Vidyapeeth\'s College of Engineering)',
-    location: 'A-4, Paschim Vihar, New Delhi',
+    code: '112',
+    name: 'Bhagwan Parshuram Institute of Technology (BPIT)',
+    location: 'PSP-4, Sector 17, Rohini',
     type: 'Affiliated Institute'
-  },
-  {
-    code: '132',
-    name: 'GTBIT (Guru Tegh Bahadur Institute of Technology)',
-    location: 'G-8 Area, Rajouri Garden / Hari Nagar, New Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '190',
-    name: 'USAR (University School of Automation & Robotics)',
-    location: 'Surajmal Vihar, East Delhi Campus',
-    type: 'University Campus'
-  },
-  {
-    code: '191',
-    name: 'USDI (University School of Design & Innovation)',
-    location: 'Surajmal Vihar, East Delhi Campus',
-    type: 'University Campus'
-  },
-  {
-    code: '177',
-    name: 'VIPS (Vivekananda Institute of Professional Studies)',
-    location: 'AU Block, Outer Ring Rd, Pitampura, Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '133',
-    name: 'HMR Institute of Technology and Management',
-    location: 'Hamidpur, Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '180',
-    name: 'DTC (Delhi Technical Campus)',
-    location: 'Knowledge Park III, Greater Noida',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '140',
-    name: 'JIMS (Jagan Institute of Management Studies)',
-    location: 'Sector-5, Rohini, Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '137',
-    name: 'IITM (Institute of Information Technology & Management)',
-    location: 'D-29, Institutional Area, Janakpuri, New Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '209',
-    name: 'Ch. Brahm Prakash Government Engineering College',
-    location: 'Jaffarpur, New Delhi',
-    type: 'Govt. Affiliated Institute'
-  },
-  {
-    code: '210',
-    name: 'GB Pant Government Engineering College',
-    location: 'Okhla Industrial Estate, Phase III, New Delhi',
-    type: 'Govt. Affiliated Institute'
   }
 ];
+
+export const GGSIPU_COLLEGES = UNIVERSAL_COLLEGES;
 
 export const DEPARTMENTS = [
   'Computer Science & Engineering (CSE)',
   'CSE - Artificial Intelligence & Machine Learning (AIML)',
-  'CSE - Data Science (DS)',
+  'CSE - Data Science & Analytics (DS)',
   'Information Technology (IT)',
   'Electronics & Communication Engineering (ECE)',
   'Artificial Intelligence & Data Science (AI&DS)',
   'Automation & Robotics Engineering (AR)',
   'Electrical & Electronics Engineering (EEE)',
   'Mechanical & Automation Engineering (MAE)',
-  'Civil Engineering (CE)',
+  'Civil & Infrastructure Engineering (CE)',
   'Master of Computer Applications (MCA)',
   'Bachelor of Computer Applications (BCA)',
   'Department of Management Studies (BBA/MBA)'
@@ -150,3 +128,33 @@ export const SECTIONS = [
   'Morning Shift',
   'Evening Shift'
 ];
+
+export const DESIGNATIONS = [
+  'Head of Department & Professor',
+  'Professor',
+  'Associate Professor',
+  'Assistant Professor (Senior Grade)',
+  'Assistant Professor',
+  'Visiting Faculty / Lecturer',
+  'Lab In-Charge & Research Associate'
+];
+
+export const STAFF_UNITS = [
+  'Campus Infrastructure & Maintenance',
+  'Electrical & Power Systems',
+  'Sanitation & Cleanliness Wing',
+  'Emergency Medical Response Desk',
+  'IT & Network Infrastructure',
+  'Anti-Bullying & Campus Security Cell',
+  'Student Welfare & Admission Desk'
+];
+
+export const SUPERVISOR_LEVELS = [
+  'Lead Operations Supervisor',
+  'Senior Technical Officer',
+  'Field Operations Manager',
+  'Shift Supervisor',
+  'First Responder Lead',
+  'Maintenance Officer'
+];
+

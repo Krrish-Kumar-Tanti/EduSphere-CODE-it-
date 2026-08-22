@@ -3,15 +3,17 @@ import { useAuth } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
 import SearchableSelect from '../../components/SearchableSelect';
 import { 
-  GGSIPU_COLLEGES, 
+  UNIVERSAL_COLLEGES, 
   DEPARTMENTS, 
   BLOOD_GROUPS, 
   SEMESTERS, 
-  SECTIONS 
+  SECTIONS,
+  DESIGNATIONS,
+  STAFF_UNITS,
+  SUPERVISOR_LEVELS
 } from '../../data/ggsipuData';
 import { 
   QrCode, 
-  ShieldCheck, 
   RotateCw, 
   Sparkles, 
   Building, 
@@ -19,65 +21,69 @@ import {
   Calendar, 
   Heart, 
   CheckCircle2, 
-  Fingerprint,
-  Award,
-  Share2,
-  Download,
-  Edit3,
-  Camera,
-  Upload,
-  X,
-  Save,
-  Check,
-  Radio,
-  Wifi,
+  Award, 
+  Share2, 
+  Download, 
+  Edit3, 
+  Camera, 
+  Upload, 
+  X, 
+  Save, 
+  Check, 
+  Layers, 
+  Smartphone, 
+  ChevronRight, 
+  Maximize2, 
+  Zap,
+  Briefcase,
+  Wrench,
+  ShieldCheck,
   PhoneCall,
-  MapPin,
-  Flame,
-  FileCheck,
-  Stamp,
-  CreditCard,
-  Layers,
-  Smartphone,
-  ExternalLink,
-  ChevronRight,
-  Maximize2,
-  Lock,
-  Zap
+  CreditCard
 } from 'lucide-react';
 
 export default function VirtualIDCard() {
   const { currentUser, updateUserProfile, uploadPhoto } = useAuth();
   const [secondsRemaining, setSecondsRemaining] = useState(30);
-  const [qrToken, setQrToken] = useState('IPU-AUTH-9842');
+  const [qrToken, setQrToken] = useState('EDUS-SEC-9842');
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Edit form state
+  const role = currentUser?.role || 'student';
+
+  // Edit form states
   const [editName, setEditName] = useState(currentUser?.name || '');
   const [editEnrollment, setEditEnrollment] = useState(currentUser?.enrollment || '');
-  const [editCollege, setEditCollege] = useState(currentUser?.college || 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)');
+  const [editCollege, setEditCollege] = useState(currentUser?.college || 'Apex Institute of Technology & Management (AITM)');
   const [editDepartment, setEditDepartment] = useState(currentUser?.department || 'Computer Science & Engineering (CSE)');
   const [editSemester, setEditSemester] = useState(currentUser?.semester || '6th Semester (Year 3)');
   const [editSection, setEditSection] = useState(currentUser?.section || 'CSE-A');
   const [editBloodGroup, setEditBloodGroup] = useState(currentUser?.bloodGroup || 'O+ positive');
   const [editValidUpto, setEditValidUpto] = useState(currentUser?.validUpto || 'June 2026');
   const [editAvatar, setEditAvatar] = useState(currentUser?.avatar || '');
+  const [editDesignation, setEditDesignation] = useState(currentUser?.designation || '');
+  const [editCabin, setEditCabin] = useState(currentUser?.cabin || '');
+  const [editAssignedUnit, setEditAssignedUnit] = useState(currentUser?.assignedUnit || '');
+  const [editSupervisorLevel, setEditSupervisorLevel] = useState(currentUser?.supervisorLevel || '');
 
   // Keep edit state synchronized when currentUser changes
   useEffect(() => {
     if (currentUser) {
       setEditName(currentUser.name || '');
       setEditEnrollment(currentUser.enrollment || '');
-      setEditCollege(currentUser.college || 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)');
+      setEditCollege(currentUser.college || 'Apex Institute of Technology & Management (AITM)');
       setEditDepartment(currentUser.department || 'Computer Science & Engineering (CSE)');
       setEditSemester(currentUser.semester || '6th Semester (Year 3)');
       setEditSection(currentUser.section || 'CSE-A');
       setEditBloodGroup(currentUser.bloodGroup || 'O+ positive');
       setEditValidUpto(currentUser.validUpto || 'June 2026');
       setEditAvatar(currentUser.avatar || '');
+      setEditDesignation(currentUser.designation || '');
+      setEditCabin(currentUser.cabin || '');
+      setEditAssignedUnit(currentUser.assignedUnit || '');
+      setEditSupervisorLevel(currentUser.supervisorLevel || '');
     }
   }, [currentUser]);
 
@@ -87,7 +93,7 @@ export default function VirtualIDCard() {
       setSecondsRemaining((prev) => {
         if (prev <= 1) {
           const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-          setQrToken(`IPU-SEC-${randomSuffix}`);
+          setQrToken(`EDUS-${role.toUpperCase()}-${randomSuffix}`);
           return 30;
         }
         return prev - 1;
@@ -95,19 +101,53 @@ export default function VirtualIDCard() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [role]);
 
-  // Unique scannable payload generated dynamically for the student
+  // Role badges & styling config
+  const roleCardStyles = {
+    student: {
+      badgeTitle: 'Scholar Digital Pass',
+      themeGradient: 'from-indigo-600 to-sky-600',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      accentColor: 'text-indigo-600',
+      icon: Award
+    },
+    teacher: {
+      badgeTitle: 'Faculty Member Digital Pass',
+      themeGradient: 'from-emerald-600 to-teal-700',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      accentColor: 'text-emerald-600',
+      icon: Briefcase
+    },
+    hod: {
+      badgeTitle: 'Department Executive Pass',
+      themeGradient: 'from-purple-600 to-indigo-800',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
+      accentColor: 'text-purple-600',
+      icon: ShieldCheck
+    },
+    staff: {
+      badgeTitle: 'Operations & Facilities Badge',
+      themeGradient: 'from-amber-600 to-orange-700',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+      accentColor: 'text-amber-600',
+      icon: Wrench
+    }
+  };
+
+  const cardStyle = roleCardStyles[role] || roleCardStyles.student;
+
+  // Unique scannable payload generated dynamically for the user
   const qrPayload = JSON.stringify({
-    university: 'GGSIPU New Delhi',
-    college: currentUser?.college || 'ADGITM',
-    student: currentUser?.name || 'Scholar',
-    enrollment: currentUser?.enrollment || '04214802722',
-    department: currentUser?.department || 'CSE',
-    bloodGroup: currentUser?.bloodGroup || 'O+',
+    system: 'EduSphere Smart Campus OS',
+    college: currentUser?.college || 'Apex Institute of Technology & Management',
+    role: currentUser?.role || 'student',
+    user: currentUser?.name || 'Authorized Member',
+    id: currentUser?.enrollment || currentUser?.id || 'EDUS-001',
+    department: currentUser?.department || 'Computer Science',
     status: 'VERIFIED_ACTIVE',
     token: qrToken,
-    validity: currentUser?.validUpto || 'June 2026'
+    validity: currentUser?.validUpto || 'Permanent'
   });
 
   const handlePhotoUpload = async (e) => {
@@ -129,7 +169,11 @@ export default function VirtualIDCard() {
       section: editSection,
       bloodGroup: editBloodGroup,
       validUpto: editValidUpto,
-      avatar: editAvatar
+      avatar: editAvatar,
+      designation: editDesignation,
+      cabin: editCabin,
+      assignedUnit: editAssignedUnit,
+      supervisorLevel: editSupervisorLevel
     });
 
     setSaveSuccess(true);
@@ -150,13 +194,13 @@ export default function VirtualIDCard() {
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <span>GGSIPU Smart Dynamic Virtual ID Pass</span>
+              <span>{cardStyle.badgeTitle}</span>
               <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-black flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Scannable
               </span>
             </h4>
             <p className="text-xs text-slate-600 mt-0.5">
-              Unique high-resolution cryptographic QR code with 30s rotation to prevent screenshot proxy fraud.
+              Anti-proxy high-resolution cryptographic digital pass with 30s rotating beacon token.
             </p>
           </div>
         </div>
@@ -198,22 +242,22 @@ export default function VirtualIDCard() {
 
             {!isFlipped ? (
               /* ========================================================
-                 FRONT PASS
+                 FRONT PASS (4-ROLE DYNAMIC)
                  ======================================================== */
               <div className="relative rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-2xl p-6 backdrop-blur-xl transition-all">
                 
-                {/* Top University Brand Bar */}
+                {/* Top Institution Brand Bar */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-sky-600 flex items-center justify-center shadow-md text-white font-black text-xs">
-                      IPU
+                    <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr ${cardStyle.themeGradient} flex items-center justify-center shadow-md text-white font-black text-xs`}>
+                      EDU
                     </div>
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 line-clamp-1">
-                        {currentUser?.college || 'ADGITM Smart Campus'}
+                        {currentUser?.college || 'Apex Institute of Technology'}
                       </h3>
                       <p className="text-[10px] text-indigo-600 font-extrabold tracking-tight">
-                        GGSIPU AFFILIATED • NEW DELHI
+                        CENTRAL SMART CAMPUS NETWORK
                       </p>
                     </div>
                   </div>
@@ -224,11 +268,11 @@ export default function VirtualIDCard() {
                   </span>
                 </div>
 
-                {/* Photo & Basic Details */}
+                {/* Photo & Identity Details */}
                 <div className="mt-4 flex gap-4 items-center">
                   <div className="relative flex-shrink-0">
                     <img
-                      src={currentUser?.avatar}
+                      src={currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'}
                       alt={currentUser?.name}
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-indigo-200 shadow-md shadow-indigo-100"
                     />
@@ -245,41 +289,48 @@ export default function VirtualIDCard() {
                     <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
                       {currentUser?.name}
                     </h2>
-                    <p className="text-xs font-bold text-indigo-600 line-clamp-1">
-                      {currentUser?.department}
+                    <p className={`text-xs font-bold ${cardStyle.accentColor} line-clamp-1`}>
+                      {currentUser?.designation || currentUser?.department}
                     </p>
                     <div className="flex flex-wrap gap-1.5 pt-1.5">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                        {currentUser?.semester}
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${cardStyle.badgeColor} border`}>
+                        {role.toUpperCase()}
                       </span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                        Sec: {currentUser?.section}
-                      </span>
+                      {currentUser?.semester && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                          {currentUser?.semester}
+                        </span>
+                      )}
+                      {currentUser?.section && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                          Sec: {currentUser?.section}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Grid of Credentials */}
+                {/* Grid of Credentials (Role Adaptive) */}
                 <div className="mt-4 grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs">
                   <div>
-                    <span className="text-[10px] text-slate-500 font-semibold block">Enrollment No:</span>
-                    <span className="font-mono font-bold text-slate-900">{currentUser?.enrollment}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-500 font-semibold block">Student ID:</span>
-                    <span className="font-mono font-bold text-slate-900">{currentUser?.id}</span>
+                    <span className="text-[10px] text-slate-500 font-semibold block">ID / Identifier:</span>
+                    <span className="font-mono font-bold text-slate-900">{currentUser?.enrollment || currentUser?.id}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 font-semibold block">Blood Group:</span>
-                    <span className="font-bold text-rose-600">{currentUser?.bloodGroup}</span>
+                    <span className="font-bold text-rose-600">{currentUser?.bloodGroup || 'O+ positive'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-semibold block">Operating Department:</span>
+                    <span className="font-bold text-slate-800 line-clamp-1">{currentUser?.department?.split('(')[0] || 'CSE'}</span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 font-semibold block">Valid Upto:</span>
-                    <span className="font-mono font-semibold text-slate-700">{currentUser?.validUpto}</span>
+                    <span className="font-mono font-semibold text-slate-700">{currentUser?.validUpto || 'Permanent'}</span>
                   </div>
                 </div>
 
-                {/* Real High-Resolution Scannable QR Code */}
+                {/* High-Resolution Dynamic Scannable QR Code */}
                 <div className="mt-4 p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-indigo-50/40 border border-indigo-200/80 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-inner">
                   
                   <div className="p-3 bg-white rounded-2xl shadow-lg border border-indigo-100 relative group cursor-pointer" onClick={() => setShowQrModal(true)}>
@@ -300,15 +351,15 @@ export default function VirtualIDCard() {
                     {qrToken}
                   </p>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    Scan with any smartphone camera to verify student credentials
+                    Scan with any mobile device to verify genuine authenticated credentials
                   </p>
                 </div>
 
-                {/* Bottom Barcode */}
+                {/* Bottom Barcode & Security Badge */}
                 <div className="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                   <span className="font-mono tracking-widest text-slate-400">||| | ||||| || |||||| |</span>
                   <span className="flex items-center gap-1 text-indigo-600 text-xs font-bold">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Verified Scholar
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Cryptographically Sealed
                   </span>
                 </div>
 
@@ -331,16 +382,16 @@ export default function VirtualIDCard() {
                 <div className="p-3 rounded-2xl bg-rose-50/70 border border-rose-200/70 text-xs space-y-1">
                   <div className="flex items-center gap-1.5 font-bold text-rose-900">
                     <PhoneCall className="w-3.5 h-3.5 text-rose-600" />
-                    <span>Emergency & SOS Contact Info</span>
+                    <span>Emergency SOS & Campus Dispatch</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
                     <div>
-                      <span className="text-slate-500 block">Parent/Guardian:</span>
-                      <span className="font-bold text-slate-800">+91 9810X-XXXXX</span>
+                      <span className="text-slate-500 block">Campus Security Cell:</span>
+                      <span className="font-bold text-slate-800">Ext: 108 / 109</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Campus Medical Desk:</span>
-                      <span className="font-bold text-slate-800">Ext: 104 (Block 2)</span>
+                      <span className="text-slate-500 block">Operations Control:</span>
+                      <span className="font-bold text-slate-800">Block A, Wing 2</span>
                     </div>
                   </div>
                 </div>
@@ -349,12 +400,12 @@ export default function VirtualIDCard() {
                 <div className="p-3 rounded-2xl bg-sky-50/70 border border-sky-200/70 text-xs space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-sky-900 flex items-center gap-1">
-                      <CreditCard className="w-3.5 h-3.5 text-sky-600" /> Transit Concession Pass
+                      <CreditCard className="w-3.5 h-3.5 text-sky-600" /> Campus RFID / BLE Pass Token
                     </span>
-                    <span className="font-mono font-bold text-[10px] text-sky-800">DTC / DMRC Token</span>
+                    <span className="font-mono font-bold text-[10px] text-sky-800">ACTIVE NFC</span>
                   </div>
                   <p className="text-[10px] text-slate-600">
-                    Concession Route: Shastri Park & Kashmere Gate Interchange
+                    Validated for turnstiles, smart labs, library vaults, and dining facility gates.
                   </p>
                 </div>
 
@@ -362,13 +413,13 @@ export default function VirtualIDCard() {
                 <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-center">
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                     <div className="font-serif italic font-bold text-indigo-700 text-sm">
-                      Prof. Dr. R. K. Sharma
+                      Prof. S. K. Naitik
                     </div>
                     <span className="text-[9px] text-slate-500 uppercase tracking-wider block font-bold mt-0.5">
-                      Controller of Examinations
+                      Head of Examination & Academic Board
                     </span>
                     <div className="text-[8px] text-emerald-600 font-mono mt-0.5">
-                      ✓ Cryptographically Signed
+                      ✓ RSA Digital Signature Verified
                     </div>
                   </div>
 
@@ -377,14 +428,14 @@ export default function VirtualIDCard() {
                       SEAL
                     </div>
                     <span className="text-[9px] text-slate-500 uppercase tracking-wider font-bold mt-1">
-                      GGSIPU Official Seal
+                      Central Campus Authority
                     </span>
                   </div>
                 </div>
 
                 {/* Terms Note */}
                 <div className="text-[9px] text-slate-400 text-center leading-tight">
-                  This digital identity card is non-transferable and remains property of GGSIPU. In case of emergency or loss, report via the EduSphere Portal immediately.
+                  This digital identity badge is non-transferable and remains official property of the Central Smart Campus Operating System.
                 </div>
 
               </div>
@@ -407,7 +458,7 @@ export default function VirtualIDCard() {
                   Live Gate Scanner QR
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Ready to scan at university turnstiles & lab exams.
+                  Ready to scan at smart turnstiles, attendance checkpoints, and entry gates.
                 </p>
               </div>
               <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -432,7 +483,7 @@ export default function VirtualIDCard() {
                 TOKEN: {qrToken}
               </div>
               <p className="text-[11px] text-slate-500">
-                Point any phone camera or barcode scanner at the code above.
+                Point any mobile camera to decrypt and verify official identity credentials.
               </p>
             </div>
 
@@ -449,16 +500,16 @@ export default function VirtualIDCard() {
           {/* Export Suite */}
           <div className="glass-panel p-5 rounded-3xl border border-slate-200 bg-white shadow-sm space-y-2">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
-              Pass Tools & Export
+              Digital Pass Tools & Export
             </span>
 
             <button
-              onClick={() => alert(`High-Resolution Vector ID Pass for ${currentUser?.name} exported successfully!`)}
+              onClick={() => alert(`High-Resolution Vector Digital ID Badge for ${currentUser?.name} exported successfully!`)}
               className="w-full py-2.5 px-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold flex items-center justify-between transition"
             >
               <span className="flex items-center gap-2">
                 <Download className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Download High-Res Printable Pass</span>
+                <span>Download High-Res Vector Pass</span>
               </span>
               <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
@@ -475,7 +526,7 @@ export default function VirtualIDCard() {
             </button>
 
             <button
-              onClick={() => alert("Encrypted student pass link copied to clipboard!")}
+              onClick={() => alert("Encrypted digital pass link copied to clipboard!")}
               className="w-full py-2.5 px-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold flex items-center justify-between transition"
             >
               <span className="flex items-center gap-2">
@@ -490,9 +541,7 @@ export default function VirtualIDCard() {
 
       </div>
 
-      {/* ========================================================
-          FULLSCREEN GATE SCANNER QR MODAL
-          ======================================================== */}
+      {/* Fullscreen Gate Scanner QR Modal */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 text-center animate-fadeIn relative">
@@ -528,7 +577,7 @@ export default function VirtualIDCard() {
 
             <div className="space-y-1 text-xs">
               <span className="font-bold text-slate-900 block">{currentUser?.name}</span>
-              <span className="font-mono text-slate-500 block">{currentUser?.enrollment}</span>
+              <span className="font-mono text-slate-500 block">{currentUser?.enrollment || currentUser?.id}</span>
               <span className="font-mono text-indigo-600 font-bold block pt-1">{qrToken}</span>
             </div>
 
@@ -543,9 +592,7 @@ export default function VirtualIDCard() {
         </div>
       )}
 
-      {/* ========================================================
-          ADVANCED EDIT ID CARD & PROFILE MODAL
-          ======================================================== */}
+      {/* Advanced Edit ID Card & Profile Modal */}
       {isEditing && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
@@ -554,10 +601,10 @@ export default function VirtualIDCard() {
               <div>
                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                   <Edit3 className="w-5 h-5 text-indigo-600" />
-                  Customize Virtual ID & GGSIPU Profile
+                  Customize Digital ID Pass
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Update your details with searchable GGSIPU dropdowns and upload your real picture.
+                  Update your identity details, affiliation, and profile photo saved in SQLite backend.
                 </p>
               </div>
               <button
@@ -571,7 +618,7 @@ export default function VirtualIDCard() {
             {saveSuccess && (
               <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-fadeIn">
                 <Check className="w-4 h-4 text-emerald-600" />
-                <span>Profile updated & saved to SQLite database successfully!</span>
+                <span>Profile updated & synchronized to database successfully!</span>
               </div>
             )}
 
@@ -585,7 +632,7 @@ export default function VirtualIDCard() {
                   className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-200 shadow"
                 />
                 <div>
-                  <span className="block font-bold text-slate-800">Upload Your Photo</span>
+                  <span className="block font-bold text-slate-800">Upload Digital Badge Photo</span>
                   <span className="text-[11px] text-slate-500 block mb-2">JPG, PNG (stored in backend database)</span>
                   <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-indigo-700 font-bold cursor-pointer hover:bg-indigo-50 shadow-sm transition">
                     <Upload className="w-3.5 h-3.5 text-indigo-600" />
@@ -595,10 +642,10 @@ export default function VirtualIDCard() {
                 </div>
               </div>
 
-              {/* Name & Enrollment */}
+              {/* Name & Identifier */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Student Full Name</label>
+                  <label className="block font-bold text-slate-700 mb-1">Full Name</label>
                   <input
                     type="text"
                     required
@@ -608,7 +655,7 @@ export default function VirtualIDCard() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Enrollment / Roll No</label>
+                  <label className="block font-bold text-slate-700 mb-1">Enrollment / Badge ID</label>
                   <input
                     type="text"
                     required
@@ -619,67 +666,112 @@ export default function VirtualIDCard() {
                 </div>
               </div>
 
-              {/* Searchable GGSIPU College & Department */}
+              {/* College & Department */}
               <div className="space-y-3">
                 <SearchableSelect
-                  label="Select GGSIPU Affiliated College"
-                  options={GGSIPU_COLLEGES}
+                  label="Affiliated College / Institute"
+                  options={UNIVERSAL_COLLEGES}
                   value={editCollege}
                   onChange={setEditCollege}
-                  placeholder="Search GGSIPU College..."
+                  placeholder="Search College..."
                   icon={Building}
                   isCollegeList={true}
                 />
 
                 <SearchableSelect
-                  label="Academic Department / Branch"
+                  label="Academic or Operations Department"
                   options={DEPARTMENTS}
                   value={editDepartment}
                   onChange={setEditDepartment}
-                  placeholder="Search Department..."
+                  placeholder="Select Department..."
                   icon={Award}
                 />
               </div>
 
-              {/* Semester, Section, Blood Group, Valid Date */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                <SearchableSelect
-                  label="Semester"
-                  options={SEMESTERS}
-                  value={editSemester}
-                  onChange={setEditSemester}
-                  placeholder="Select Semester"
-                  icon={Calendar}
-                />
+              {/* Role specific editing fields */}
+              {role === 'student' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                  <SearchableSelect
+                    label="Semester"
+                    options={SEMESTERS}
+                    value={editSemester}
+                    onChange={setEditSemester}
+                    placeholder="Semester"
+                    icon={Calendar}
+                  />
 
-                <SearchableSelect
-                  label="Section"
-                  options={SECTIONS}
-                  value={editSection}
-                  onChange={setEditSection}
-                  placeholder="Select Section"
-                  icon={Hash}
-                />
+                  <SearchableSelect
+                    label="Section"
+                    options={SECTIONS}
+                    value={editSection}
+                    onChange={setEditSection}
+                    placeholder="Section"
+                    icon={Hash}
+                  />
 
-                <SearchableSelect
-                  label="Blood Group"
-                  options={BLOOD_GROUPS}
-                  value={editBloodGroup}
-                  onChange={setEditBloodGroup}
-                  placeholder="Blood Group"
-                  icon={Heart}
-                />
+                  <SearchableSelect
+                    label="Blood Group"
+                    options={BLOOD_GROUPS}
+                    value={editBloodGroup}
+                    onChange={setEditBloodGroup}
+                    placeholder="Blood Group"
+                    icon={Heart}
+                  />
 
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Valid Upto</label>
-                  <input
-                    type="text"
-                    value={editValidUpto}
-                    onChange={(e) => setEditValidUpto(e.target.value)}
-                    className="w-full px-2.5 py-2.5 rounded-xl bg-white border border-slate-300 font-semibold text-slate-800 text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Valid Upto</label>
+                    <input
+                      type="text"
+                      value={editValidUpto}
+                      onChange={(e) => setEditValidUpto(e.target.value)}
+                      className="w-full px-2.5 py-2.5 rounded-xl bg-white border border-slate-300 font-semibold text-slate-800 text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {role === 'teacher' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <SearchableSelect
+                    label="Designation"
+                    options={DESIGNATIONS}
+                    value={editDesignation}
+                    onChange={setEditDesignation}
+                    placeholder="Designation"
+                    icon={Briefcase}
+                  />
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Cabin Room</label>
+                    <input
+                      type="text"
+                      value={editCabin}
+                      onChange={(e) => setEditCabin(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 font-semibold text-slate-800 text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {role === 'staff' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <SearchableSelect
+                    label="Assigned Unit"
+                    options={STAFF_UNITS}
+                    value={editAssignedUnit}
+                    onChange={setEditAssignedUnit}
+                    placeholder="Unit"
+                    icon={Wrench}
+                  />
+                  <SearchableSelect
+                    label="Supervisor Level"
+                    options={SUPERVISOR_LEVELS}
+                    value={editSupervisorLevel}
+                    onChange={setEditSupervisorLevel}
+                    placeholder="Level"
+                    icon={Award}
                   />
                 </div>
-              </div>
+              )}
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                 <button
@@ -707,3 +799,4 @@ export default function VirtualIDCard() {
     </div>
   );
 }
+

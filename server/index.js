@@ -33,17 +33,17 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ 
   storage,
-  limits: { fileSize: 15 * 1024 * 1024 }
+  limits: { fileSize: 25 * 1024 * 1024 }
 });
 
 app.use(cors());
-app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
-// --- 1. AUTH & USER PROFILE ROUTES ---
+// --- 1. AUTH & USER PROFILE ROUTES (4-ROLE ENGINE) ---
 
-// Registration
+// Role-specific Registration
 app.post('/api/register', (req, res) => {
   try {
     const { 
@@ -51,28 +51,58 @@ app.post('/api/register', (req, res) => {
       email, 
       role = 'student', 
       enrollment, 
-      college = 'ADGITM (Dr. Akhilesh Das Gupta Institute of Technology & Management)', 
+      college = 'Apex Institute of Technology & Management', 
       department = 'Computer Science & Engineering (CSE)', 
       semester = '6th Semester (Year 3)', 
       section = 'CSE-A', 
       bloodGroup = 'O+ positive', 
       validUpto = 'June 2026', 
       avatar, 
-      password 
+      password,
+      designation,
+      subjects,
+      cabin,
+      assignedUnit,
+      supervisorLevel,
+      adminCode,
+      badgeId,
+      digitalSignature
     } = req.body;
 
-    if (!name || !password || (!email && !enrollment)) {
-      return res.status(400).json({ error: 'Name, password, and Email or Enrollment number are required.' });
+    if (!name || !password) {
+      return res.status(400).json({ error: 'Full name and password are required.' });
     }
 
-    const userId = `STU-${Date.now().toString().slice(-4)}`;
-    const effectiveEnrollment = enrollment || `0421480${Math.floor(1000 + Math.random() * 9000)}`;
-    const effectiveEmail = email || `${name.toLowerCase().replace(/\s+/g, '.')}@adgitm.ac.in`;
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    let userId = '';
+    let effectiveEnrollment = enrollment;
+
+    if (role === 'student') {
+      userId = `STU-${Date.now().toString().slice(-4)}`;
+      effectiveEnrollment = enrollment || `0421480${randomDigits}`;
+    } else if (role === 'teacher') {
+      userId = badgeId || `FAC-${randomDigits}`;
+      effectiveEnrollment = userId;
+    } else if (role === 'hod') {
+      userId = adminCode || `HOD-${randomDigits}`;
+      effectiveEnrollment = userId;
+    } else if (role === 'staff') {
+      userId = badgeId || `STF-${randomDigits}`;
+      effectiveEnrollment = userId;
+    } else {
+      userId = `USR-${Date.now().toString().slice(-4)}`;
+    }
+
+    const effectiveEmail = email || `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@campus.edu`;
     const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250';
 
     const insertStmt = db.prepare(`
-      INSERT INTO users (id, name, email, role, enrollment, college, department, semester, section, bloodGroup, validUpto, avatar, password, cgpa, attendanceOverall)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (
+        id, name, email, role, enrollment, college, department, semester, section, 
+        bloodGroup, validUpto, avatar, password, cgpa, attendanceOverall,
+        designation, subjects, cabin, assignedUnit, supervisorLevel, adminCode, badgeId, digitalSignature
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     insertStmt.run(
@@ -83,14 +113,22 @@ app.post('/api/register', (req, res) => {
       effectiveEnrollment,
       college,
       department,
-      semester,
-      section,
-      bloodGroup,
-      validUpto,
+      semester || (role === 'student' ? '6th Semester (Year 3)' : 'Permanent'),
+      section || (role === 'student' ? 'CSE-A' : 'Campus'),
+      bloodGroup || 'O+ positive',
+      validUpto || (role === 'student' ? 'June 2026' : 'Permanent'),
       avatar || defaultAvatar,
       password,
-      '8.50',
-      88.4
+      role === 'student' ? '8.50' : 'N/A',
+      role === 'student' ? 88.4 : 100,
+      designation || (role === 'teacher' ? 'Associate Professor' : role === 'hod' ? 'Head of Department' : role === 'staff' ? 'Lead Supervisor' : 'Student Scholar'),
+      subjects || null,
+      cabin || null,
+      assignedUnit || null,
+      supervisorLevel || null,
+      adminCode || null,
+      badgeId || null,
+      digitalSignature || null
     );
 
     const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
@@ -103,23 +141,31 @@ app.post('/api/register', (req, res) => {
   }
 });
 
-// Login
+// Role-verified Login
 app.post('/api/login', (req, res) => {
   try {
     const { identifier, password, role } = req.body;
 
     if (!identifier) {
-      return res.status(400).json({ error: 'Enrollment or Email is required.' });
+      return res.status(400).json({ error: 'Enrollment, Employee ID, or Email is required.' });
     }
 
     const user = db.prepare(`
       SELECT * FROM users 
-      WHERE (enrollment = ? OR email = ? OR id = ?)
+      WHERE (enrollment = ? OR email = ? OR id = ? OR adminCode = ? OR badgeId = ?)
       ${role ? 'AND role = ?' : ''}
-    `).get(role ? [identifier, identifier, identifier, role] : [identifier, identifier, identifier]);
+    `).get(
+      role 
+        ? [identifier, identifier, identifier, identifier, identifier, role] 
+        : [identifier, identifier, identifier, identifier, identifier]
+    );
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found with provided credentials.' });
+      return res.status(404).json({ error: 'Account not found with provided credentials.' });
+    }
+
+    if (password && user.password && user.password !== password) {
+      return res.status(401).json({ error: 'Invalid password. Please check your credentials.' });
     }
 
     delete user.password;
@@ -144,7 +190,15 @@ app.put('/api/user/:id', (req, res) => {
       bloodGroup, 
       validUpto, 
       avatar, 
-      cgpa 
+      cgpa,
+      designation,
+      subjects,
+      cabin,
+      assignedUnit,
+      supervisorLevel,
+      adminCode,
+      badgeId,
+      digitalSignature
     } = req.body;
 
     const existing = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
@@ -163,7 +217,15 @@ app.put('/api/user/:id', (req, res) => {
         bloodGroup = COALESCE(?, bloodGroup),
         validUpto = COALESCE(?, validUpto),
         avatar = COALESCE(?, avatar),
-        cgpa = COALESCE(?, cgpa)
+        cgpa = COALESCE(?, cgpa),
+        designation = COALESCE(?, designation),
+        subjects = COALESCE(?, subjects),
+        cabin = COALESCE(?, cabin),
+        assignedUnit = COALESCE(?, assignedUnit),
+        supervisorLevel = COALESCE(?, supervisorLevel),
+        adminCode = COALESCE(?, adminCode),
+        badgeId = COALESCE(?, badgeId),
+        digitalSignature = COALESCE(?, digitalSignature)
       WHERE id = ?
     `);
 
@@ -178,6 +240,14 @@ app.put('/api/user/:id', (req, res) => {
       validUpto || null,
       avatar || null,
       cgpa || null,
+      designation || null,
+      subjects || null,
+      cabin || null,
+      assignedUnit || null,
+      supervisorLevel || null,
+      adminCode || null,
+      badgeId || null,
+      digitalSignature || null,
       id
     );
 
@@ -203,7 +273,35 @@ app.post('/api/upload-avatar', upload.single('photo'), (req, res) => {
   }
 });
 
-// --- 2. GGSIPU COLLEGE SEARCH ---
+// Get User by ID
+app.get('/api/user/:id', (req, res) => {
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    delete user.password;
+    return res.json({ success: true, user });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get All Users (optionally by role)
+app.get('/api/users', (req, res) => {
+  try {
+    const { role } = req.query;
+    let users = [];
+    if (role) {
+      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin FROM users WHERE role = ?').all(role);
+    } else {
+      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin FROM users').all();
+    }
+    return res.json({ success: true, users });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// --- 2. UNIVERSAL COLLEGE SEARCH ---
 app.get('/api/colleges', (req, res) => {
   try {
     const q = req.query.q || '';
@@ -237,43 +335,105 @@ app.get('/api/qrcode', async (req, res) => {
 });
 
 // --- 4. ATTENDANCE & LIVE CLASS SESSIONS ---
+
+// Get active session
 app.get('/api/attendance/session', (req, res) => {
   try {
-    const session = db.prepare("SELECT * FROM attendance_sessions WHERE status = 'active' ORDER BY startTime DESC LIMIT 1").get();
+    let session = db.prepare("SELECT * FROM attendance_sessions WHERE status = 'active' ORDER BY startTime DESC LIMIT 1").get();
+    if (!session) {
+      session = {
+        id: 'SESS-LIVE-01',
+        subject: 'Operating Systems Lab (CSE-301)',
+        code: 'OS42',
+        room: 'Lab 204, Block A',
+        beaconId: 'BLE_BEACON_CSE_LAB_204',
+        faculty: 'Dr. Manish Verma',
+        status: 'active'
+      };
+    }
     return res.json({ success: true, session });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
 });
 
+// Set / Start active session (Teacher creates/updates)
+app.post('/api/attendance/session', (req, res) => {
+  try {
+    const { subject, code, room, beaconId, faculty } = req.body;
+    const sessionId = `SESS-${Date.now().toString().slice(-4)}`;
+
+    // Deactivate previous active sessions
+    db.prepare("UPDATE attendance_sessions SET status = 'completed' WHERE status = 'active'").run();
+
+    db.prepare(`
+      INSERT INTO attendance_sessions (id, subject, code, room, beaconId, faculty, status)
+      VALUES (?, ?, ?, ?, ?, ?, 'active')
+    `).run(
+      sessionId,
+      subject || 'Operating Systems Lab (CSE-301)',
+      code || `EDUS-${Math.floor(1000 + Math.random() * 9000)}`,
+      room || 'Lab 204, Block A',
+      beaconId || 'BLE_BEACON_CSE_LAB_204',
+      faculty || 'Dr. Manish Verma'
+    );
+
+    const session = db.prepare("SELECT * FROM attendance_sessions WHERE id = ?").get(sessionId);
+    return res.json({ success: true, session });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Student attendance verification
 app.post('/api/attendance/verify', (req, res) => {
   try {
-    const { studentEnrollment, studentName, passcode, sessionId, verifiedVia } = req.body;
+    const { studentEnrollment, studentName, passcode, verifiedVia } = req.body;
     const active = db.prepare("SELECT * FROM attendance_sessions WHERE status = 'active' ORDER BY startTime DESC LIMIT 1").get();
     
-    if (active && active.code !== passcode) {
+    if (active && active.code.trim().toUpperCase() !== passcode?.trim().toUpperCase()) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Invalid room passcode. Please check teacher board code.' 
+        message: `Invalid room passcode "${passcode}". Please check teacher display board.` 
       });
     }
 
+    const enr = studentEnrollment || '04214802722';
+    const name = studentName || 'Krrish Kumar Tanti';
+    const sessId = active?.id || 'SESS-LIVE-01';
+    const sub = active?.subject || 'Operating Systems Lab (CSE-301)';
+    const via = verifiedVia || 'Dual-Factor BLE Proximity (0.8m) + PIN';
+
+    // Insert into logs
     db.prepare(`
       INSERT INTO attendance_logs (studentEnrollment, studentName, sessionId, subject, verifiedVia, status)
       VALUES (?, ?, ?, ?, ?, 'Present')
-    `).run(studentEnrollment || '04214802722', studentName || 'Krrish Kumar Tanti', active?.id || 'SESS-01', active?.subject || 'Operating Systems Lab', verifiedVia || 'Dual-Factor BLE Proximity');
+    `).run(enr, name, sessId, sub, via);
 
     return res.json({
       success: true,
-      message: `Attendance verified! Marked Present.`,
-      subject: active?.subject || 'Operating Systems Lab',
-      verifiedAt: new Date().toLocaleTimeString()
+      message: `Attendance verified! Marked Present in ${sub}.`,
+      subject: sub,
+      studentName: name,
+      studentEnrollment: enr,
+      verifiedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 });
 
+// Get session logs / live verified roster
+app.get('/api/attendance/logs', (req, res) => {
+  try {
+    const logs = db.prepare("SELECT * FROM attendance_logs ORDER BY timestamp DESC LIMIT 50").all();
+    return res.json({ success: true, logs });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get user attendance history
 app.get('/api/attendance/:userId', (req, res) => {
   try {
     const records = db.prepare('SELECT * FROM attendance_records WHERE userId = ? ORDER BY createdAt DESC').all(req.params.userId);
@@ -283,24 +443,7 @@ app.get('/api/attendance/:userId', (req, res) => {
   }
 });
 
-app.post('/api/attendance', (req, res) => {
-  try {
-    const { userId, subject, date, status = 'Present', verifiedVia = 'BLE Proximity' } = req.body;
-    const attId = `ATT-${Date.now().toString().slice(-4)}`;
-    
-    db.prepare(`
-      INSERT INTO attendance_records (id, userId, subject, date, status, verifiedVia)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(attId, userId, subject, date, status, verifiedVia);
-
-    const records = db.prepare('SELECT * FROM attendance_records WHERE userId = ? ORDER BY createdAt DESC').all(userId);
-    return res.json({ success: true, records });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-// --- 5. GRIEVANCES ---
+// --- 5. GRIEVANCES (DOUBLE-TRIAGE) ---
 app.get('/api/grievances', (req, res) => {
   try {
     const { destination } = req.query;
@@ -333,6 +476,7 @@ app.post('/api/grievances', upload.single('evidencePhoto'), (req, res) => {
 
     const imageUrl = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.imageUrl || null;
     const grvId = `GRV-${Math.floor(1000 + Math.random() * 9000)}`;
+    const isAnon = (isAnonymous === 'true' || isAnonymous === true || isAnonymous === 1);
     
     db.prepare(`
       INSERT INTO grievances (id, userId, studentName, studentEnrollment, isAnonymous, title, category, destination, priority, description, imageUrl, status, assignedTo, timestamp)
@@ -340,28 +484,49 @@ app.post('/api/grievances', upload.single('evidencePhoto'), (req, res) => {
     `).run(
       grvId, 
       userId || null, 
-      (isAnonymous === 'true' || isAnonymous === true) ? 'Anonymous Scholar' : (studentName || 'Krrish Kumar Tanti'), 
-      (isAnonymous === 'true' || isAnonymous === true) ? 'REDACTED' : (studentEnrollment || '04214802722'), 
-      (isAnonymous === 'true' || isAnonymous === true) ? 1 : 0, 
+      isAnon ? 'Anonymous Scholar' : (studentName || 'Krrish Kumar Tanti'), 
+      isAnon ? 'REDACTED-PRIVACY-SHIELD' : (studentEnrollment || '04214802722'), 
+      isAnon ? 1 : 0, 
       title, 
-      category, 
-      destination, 
-      priority, 
+      category || 'General', 
+      destination || 'staff', 
+      priority || 'Medium', 
       description, 
       imageUrl, 
       'In-Progress', 
       assignedTo || (destination === 'hod' ? 'HOD Academic Office' : category), 
-      'Just now'
+      'Today, Just now'
     );
 
+    const createdTicket = db.prepare('SELECT * FROM grievances WHERE id = ?').get(grvId);
     const allGrievances = db.prepare('SELECT * FROM grievances ORDER BY createdAt DESC').all();
-    return res.status(201).json({ success: true, grievances: allGrievances, id: grvId });
+    return res.status(201).json({ success: true, ticket: createdTicket, grievances: allGrievances, id: grvId });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 });
 
-// --- 6. NOTES & BROADCASTS ---
+// Update grievance status & remarks
+app.patch('/api/grievances/:id/status', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, resolutionNotes } = req.body;
+
+    db.prepare(`
+      UPDATE grievances 
+      SET status = COALESCE(?, status), 
+          resolutionNotes = COALESCE(?, resolutionNotes)
+      WHERE id = ?
+    `).run(status || null, resolutionNotes || null, id);
+
+    const updated = db.prepare('SELECT * FROM grievances WHERE id = ?').get(id);
+    return res.json({ success: true, ticket: updated });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// --- 6. NOTES VAULT ---
 app.get('/api/notes', (req, res) => {
   try {
     const notes = db.prepare('SELECT * FROM notes ORDER BY createdAt DESC').all();
@@ -382,12 +547,23 @@ app.post('/api/notes', upload.single('noteFile'), (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(noteId, subject, title, faculty, fileSize || '2.5 MB', semester, fileUrl);
 
-    return res.json({ success: true, message: 'Notes published to vault.' });
+    const newNote = db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId);
+    return res.json({ success: true, note: newNote, message: 'Notes published to vault.' });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
 });
 
+app.delete('/api/notes/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM notes WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Note deleted from vault.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// --- 7. CAMPUS BROADCASTS ---
 app.get('/api/broadcasts', (req, res) => {
   try {
     const broadcasts = db.prepare('SELECT * FROM broadcasts ORDER BY isUrgent DESC, createdAt DESC').all();
@@ -401,14 +577,33 @@ app.post('/api/broadcasts', (req, res) => {
   try {
     const { title, message, priority, isUrgent, sender, targetAudience } = req.body;
     const id = `BC-${Date.now().toString().slice(-4)}`;
-    const time = 'Just now';
+    const time = 'Just now (Today)';
 
     db.prepare(`
-      INSERT INTO broadcasts (id, sender, role, title, message, time, isUrgent)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(id, sender || 'HOD Office', 'HOD', title, message, time, isUrgent ? 1 : 0);
+      INSERT INTO broadcasts (id, sender, role, title, message, time, isUrgent, targetAudience)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id, 
+      sender || 'HOD Office', 
+      'HOD', 
+      title, 
+      message, 
+      time, 
+      (isUrgent === true || isUrgent === 'true' || isUrgent === 1 || priority === 'Urgent') ? 1 : 0,
+      targetAudience || 'All Campus'
+    );
 
-    return res.json({ success: true, id, message: 'Broadcast transmitted.' });
+    const newBroadcast = db.prepare('SELECT * FROM broadcasts WHERE id = ?').get(id);
+    return res.json({ success: true, id, broadcast: newBroadcast, message: 'Broadcast transmitted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/broadcasts/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM broadcasts WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Broadcast recalled.' });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
@@ -417,3 +612,4 @@ app.post('/api/broadcasts', (req, res) => {
 app.listen(PORT, () => {
   console.log(`⚡ EduSphere SQLite Backend API running on http://localhost:${PORT}`);
 });
+
