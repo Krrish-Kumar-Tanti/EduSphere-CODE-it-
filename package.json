@@ -4,16 +4,24 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"node server/index.js\" \"vite\"",
+    "server": "node server/index.js",
+    "client": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "better-sqlite3": "^13.0.3",
     "canvas-confetti": "^1.9.4",
+    "concurrently": "^10.0.5",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.33.0",
+    "multer": "^2.2.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"

@@ -98,7 +98,7 @@ export const INITIAL_BROADCASTS = [
     sender: 'Ground Security & Operations',
     role: 'Staff',
     title: '📡 BLE Beacon Calibration at Block 3',
-    message: 'Proximity beacons in Labs 301-305 upgraded to DTU-style ultra-low latency mesh.',
+    message: 'Proximity beacons in Labs 301-305 upgraded to smart ultra-low latency mesh.',
     time: '2 hours ago',
     isUrgent: false
   }
