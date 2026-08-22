@@ -273,9 +273,6 @@ export default function Login() {
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
             EduSphere
           </h1>
-          <p className="text-slate-600 text-xs sm:text-sm mt-1.5 max-w-xl mx-auto">
-            Universal 4-role campus operating system with cross-tab live synchronization & SQLite database persistence.
-          </p>
         </div>
 
         {/* Mode Switcher Tabs (Sign In vs Register 4-Role Digital ID) */}
