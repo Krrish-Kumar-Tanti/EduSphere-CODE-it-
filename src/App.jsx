@@ -17,7 +17,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-indigo-500 selection:text-white">
       {/* Top Navbar */}
       <Navbar />
 
@@ -32,8 +32,8 @@ function AppContent() {
       {/* Global Roaming AI Campus Companion */}
       <EduBot />
 
-      {/* Subtle Footer */}
-      <footer className="border-t border-slate-900/80 py-6 text-center text-xs text-slate-500">
+      {/* Clean Light Footer */}
+      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-500 bg-white">
         <p>EduSphere © 2026 • Smart Campus Operating System • Team CODE it</p>
       </footer>
     </div>
@@ -49,3 +49,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

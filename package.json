@@ -4,16 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue.bold,green.bold\" \"node server/index.js\" \"vite --host\"",
+    "client": "vite --host",
+    "server": "node server/index.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rolldown/binding-linux-x64-gnu": "^1.2.5",
     "@tailwindcss/vite": "^4.3.3",
+    "better-sqlite3": "^13.0.3",
     "canvas-confetti": "^1.9.4",
+    "concurrently": "^10.0.5",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.33.0",
+    "multer": "^2.2.0",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
