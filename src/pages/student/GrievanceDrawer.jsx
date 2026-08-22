@@ -75,94 +75,100 @@ export default function GrievanceDrawer() {
       description,
       imageUrl: imagePreview,
       status: 'In-Progress',
-      timestamp: 'Just now (Today)',
-      assignedTo: destination === 'hod' ? 'HOD Academic Committee' : category
+      assignedTo: destination === 'hod' ? 'HOD Academic Office' : `Ground Unit: ${category}`,
+      timestamp: 'Today, Just now'
     };
 
     addGrievance(newTicket);
     setShowSuccessToast(true);
 
-    // Reset form
+    // Reset Form
     setTitle('');
     setDescription('');
     setImagePreview(null);
-    setTimeout(() => setShowSuccessToast(false), 4000);
+
+    setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 4000);
   };
 
-  const filteredGrievances = filterCategory === 'all' 
-    ? grievances 
-    : grievances.filter(g => g.destination === filterCategory);
+  const filteredGrievances = grievances.filter(g => {
+    if (filterCategory === 'all') return true;
+    return g.destination === filterCategory;
+  });
 
   return (
     <div className="space-y-6">
       
-      {/* Top Banner explaining Double-Escalation Triage */}
-      <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+      {/* Top Banner Alert */}
+      <div className="p-4 rounded-3xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-rose-600 text-white shadow-sm">
+          <div className="p-2.5 rounded-2xl bg-amber-500 text-white shadow-sm">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-900">
-              Direct Zero-Bureaucracy Double-Escalation Desk
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span>Double-Triage Grievance Matrix</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold">
+                Zero-Retaliation Protocol
+              </span>
             </h4>
-            <p className="text-xs text-slate-600">
-              Route academic issues directly to the HOD (with grading anonymity) or ground issues straight to maintenance/medical staff.
+            <p className="text-xs text-slate-600 mt-0.5">
+              Academics auto-route directly to the HOD. Infrastructure & Hygiene route directly to Ground Operations.
             </p>
           </div>
         </div>
-
-        <span className="text-[11px] font-bold px-3 py-1 rounded-xl bg-white border border-rose-200 text-rose-700 shadow-sm">
-          🛡 Zero Retaliation Shield Active
-        </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column: Complaint Creation Form */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          <div className="glass-panel-elevated p-6 rounded-3xl border border-slate-200 shadow-xl relative bg-white/95">
+        {/* Left 7 Columns: File a Grievance Form */}
+        <div className="lg:col-span-7">
+          <div className="glass-panel-elevated p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl bg-white/95">
             
-            <h3 className="text-base font-black text-slate-900 flex items-center gap-2 mb-4">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
-              File New Issue / Grievance Ticket
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-500" />
+                  File Anonymous or Named Grievance
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  End-to-end encrypted ticket dispatch.
+                </p>
+              </div>
+            </div>
 
             {showSuccessToast && (
-              <div className="mb-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Ticket lodged and routed successfully with instant tracking token!</span>
-                </div>
-                <button onClick={() => setShowSuccessToast(false)}><X className="w-3.5 h-3.5" /></button>
+              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-3 animate-fadeIn">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <span>Ticket registered in SQLite database and routed successfully!</span>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               
-              {/* Step 1: Destination Selector (HOD vs Ground Staff) */}
+              {/* Triage Routing Selector */}
               <div>
-                <label className="text-slate-700 font-bold block mb-2">
-                  1. Choose Triage Routing Destination:
+                <label className="block font-bold text-slate-700 mb-2">
+                  Select Triage Destination:
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       setDestination('hod');
-                      setCategory('Academic Concern & Syllabus Pace');
+                      setCategory(hodCategories[0]);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left flex items-start gap-2.5 transition ${
+                    className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition ${
                       destination === 'hod'
-                        ? 'bg-purple-50 border-purple-300 ring-2 ring-purple-600/20 text-purple-900 shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'border-purple-500 bg-purple-50/70 text-purple-900 shadow-sm ring-1 ring-purple-500/20'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <Building2 className="w-4 h-4 text-purple-600 mt-0.5" />
+                    <Building2 className={`w-4 h-4 mt-0.5 ${destination === 'hod' ? 'text-purple-600' : 'text-slate-400'}`} />
                     <div>
-                      <span className="font-bold text-slate-900 block">HOD Academic Office</span>
-                      <span className="text-[10px] text-slate-500">Curriculum, faculty pace, leaves</span>
+                      <span className="font-bold block text-xs">HOD Academic Office</span>
+                      <span className="text-[10px] text-slate-500">Grading, Exam, Syllabus Pace</span>
                     </div>
                   </button>
 
@@ -170,104 +176,104 @@ export default function GrievanceDrawer() {
                     type="button"
                     onClick={() => {
                       setDestination('staff');
-                      setCategory('Maintenance & Infrastructure');
+                      setCategory(staffCategories[0]);
                     }}
-                    className={`p-3.5 rounded-2xl border text-left flex items-start gap-2.5 transition ${
+                    className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition ${
                       destination === 'staff'
-                        ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-600/20 text-amber-900 shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'border-amber-500 bg-amber-50/70 text-amber-900 shadow-sm ring-1 ring-amber-500/20'
+                        : 'border-slate-200 hover:bg-slate-50 text-slate-600'
                     }`}
                   >
-                    <Wrench className="w-4 h-4 text-amber-600 mt-0.5" />
+                    <Wrench className={`w-4 h-4 mt-0.5 ${destination === 'staff' ? 'text-amber-600' : 'text-slate-400'}`} />
                     <div>
-                      <span className="font-bold text-slate-900 block">Ground Operations Staff</span>
-                      <span className="text-[10px] text-slate-500">AC, cleaning, anti-bullying, medical</span>
+                      <span className="font-bold block text-xs">Ground Staff & Facilities</span>
+                      <span className="text-[10px] text-slate-500">AC, Cleanliness, Lab Wi-Fi</span>
                     </div>
                   </button>
                 </div>
               </div>
 
-              {/* Step 2: Category & Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-slate-700 font-bold block mb-1.5">
-                    2. Specific Issue Domain:
-                  </label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 focus:border-indigo-600 focus:outline-none"
-                  >
-                    {(destination === 'hod' ? hodCategories : staffCategories).map((cat, i) => (
-                      <option key={i} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Category Dropdown */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Category Tag:
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
+                >
+                  {destination === 'hod' ? (
+                    hodCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)
+                  ) : (
+                    staffCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)
+                  )}
+                </select>
+              </div>
 
+              {/* Title & Priority */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block font-bold text-slate-700 mb-1.5">
+                    Ticket Subject / Title:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g. Lab 204 Air Conditioner Tripping Power"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
+                  />
+                </div>
                 <div>
-                  <label className="text-slate-700 font-bold block mb-1.5">
-                    Priority Urgency:
+                  <label className="block font-bold text-slate-700 mb-1.5">
+                    Urgency Priority:
                   </label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 focus:border-indigo-600 focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
                   >
-                    <option value="Normal">Normal</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Urgent">Emergency / Urgent</option>
+                    <option value="Low">Low Priority</option>
+                    <option value="Medium">Medium Priority</option>
+                    <option value="High">High Urgency</option>
+                    <option value="Critical">Critical</option>
                   </select>
                 </div>
               </div>
 
-              {/* Title & Description */}
+              {/* Description */}
               <div>
-                <label className="text-slate-700 font-bold block mb-1.5">
-                  Subject / Summary:
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Lab 204 Air Conditioner Not Functioning"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 focus:border-indigo-600 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-slate-700 font-bold block mb-1.5">
-                  Detailed Description & Exact Location:
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Detailed Description & Location:
                 </label>
                 <textarea
+                  required
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Provide details (Room number, machine ID, symptoms)..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 focus:border-indigo-600 focus:outline-none"
-                />
+                  placeholder="Provide details of the issue so the assigned officer can inspect immediately..."
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 focus:border-indigo-600 focus:outline-none shadow-sm"
+                ></textarea>
               </div>
 
-              {/* Image / Proof Attachment */}
+              {/* Image Upload Preview */}
               <div>
-                <label className="text-slate-700 font-bold block mb-1.5">
-                  Attach Photo / Proof (Optional):
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Attach Photo Evidence (Optional):
                 </label>
                 <div className="flex items-center gap-3">
-                  <label className="cursor-pointer px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold flex items-center gap-2 transition shadow-sm">
-                    <ImageIcon className="w-4 h-4 text-indigo-600" />
-                    <span>Upload Picture</span>
+                  <label className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold text-xs cursor-pointer flex items-center gap-1.5 shadow-sm transition">
+                    <ImageIcon className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Upload Image</span>
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                   </label>
                   {imagePreview && (
-                    <div className="relative">
-                      <img src={imagePreview} alt="Preview" className="w-12 h-12 object-cover rounded-xl border border-indigo-200" />
-                      <button 
-                        type="button" 
-                        onClick={() => setImagePreview(null)}
-                        className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-600 rounded-full flex items-center justify-center text-white text-[10px]"
-                      >
-                        ✕
+                    <div className="flex items-center gap-2">
+                      <img src={imagePreview} alt="Evidence" className="w-10 h-10 rounded-lg object-cover border border-slate-300" />
+                      <button type="button" onClick={() => setImagePreview(null)} className="p-1 rounded-lg text-rose-500 hover:bg-rose-50">
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   )}
@@ -275,116 +281,99 @@ export default function GrievanceDrawer() {
               </div>
 
               {/* Anonymous Shield Toggle */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl ${isAnonymous ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                  <div className="p-2 rounded-xl bg-indigo-600 text-white">
                     <EyeOff className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 block">Anonymous Scholar Mode</span>
-                    <span className="text-[10px] text-slate-500">
-                      Hides your name & enrollment from faculty to prevent grading bias.
-                    </span>
+                    <span className="font-bold text-indigo-950 block text-xs">Enable Anonymous Identity Shield</span>
+                    <span className="text-[10px] text-indigo-700">Zero name or roll number will be visible to recipient.</span>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsAnonymous(!isAnonymous)}
-                  className={`w-11 h-6 rounded-full transition-colors relative ${isAnonymous ? 'bg-indigo-600' : 'bg-slate-300'}`}
-                >
-                  <span className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${isAnonymous ? 'left-6' : 'left-1'}`} />
-                </button>
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition"
+                className="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition"
               >
-                <Send className="w-4 h-4" />
-                <span>Submit Grievance to {destination === 'hod' ? 'HOD Office' : 'Ground Staff'}</span>
+                <Send className="w-3.5 h-3.5" />
+                <span>Submit Grievance Ticket</span>
               </button>
 
             </form>
 
           </div>
-
         </div>
 
-        {/* Right Column: Live Track Tickets & Status Timeline */}
+        {/* Right 5 Columns: Grievance Stream */}
         <div className="lg:col-span-5 space-y-4">
           
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-600" />
-              Live Campus Ticket Queue
-            </h4>
-
-            {/* Filter */}
-            <div className="flex items-center gap-1 text-[11px]">
-              <button 
-                onClick={() => setFilterCategory('all')} 
-                className={`px-2.5 py-0.5 rounded-md font-semibold ${filterCategory === 'all' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'text-slate-500'}`}
-              >
-                All
-              </button>
-              <button 
-                onClick={() => setFilterCategory('hod')} 
-                className={`px-2.5 py-0.5 rounded-md font-semibold ${filterCategory === 'hod' ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'text-slate-500'}`}
-              >
-                HOD
-              </button>
-              <button 
-                onClick={() => setFilterCategory('staff')} 
-                className={`px-2.5 py-0.5 rounded-md font-semibold ${filterCategory === 'staff' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'text-slate-500'}`}
-              >
-                Staff
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3 max-h-[560px] overflow-y-auto pr-1">
-            {filteredGrievances.map((g) => (
-              <div key={g.id} className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-xs space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <span className="text-[10px] font-mono text-indigo-600 font-bold">{g.id}</span>
-                    <h5 className="font-bold text-slate-900 text-sm mt-0.5">{g.title}</h5>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    g.status === 'Resolved' 
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                      : g.status === 'In-Progress' 
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                      : 'bg-purple-50 text-purple-700 border border-purple-200'
-                  }`}>
-                    {g.status}
-                  </span>
-                </div>
-
-                <p className="text-slate-600 text-xs leading-relaxed">{g.description}</p>
-
-                {g.imageUrl && (
-                  <div className="mt-2">
-                    <img src={g.imageUrl} alt="Attached Proof" className="h-28 w-full object-cover rounded-xl border border-slate-200" />
-                  </div>
-                )}
-
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    {g.isAnonymous ? (
-                      <span className="text-indigo-600 font-bold flex items-center gap-1">
-                        <EyeOff className="w-3 h-3" /> Anonymous
-                      </span>
-                    ) : (
-                      <span>By {g.studentName}</span>
-                    )}
-                  </span>
-                  <span>Routed to: <strong className="text-slate-800">{g.assignedTo}</strong></span>
-                </div>
+          <div className="glass-panel p-5 rounded-3xl border border-slate-200 bg-white shadow-sm space-y-3">
+            
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                Live Ticket Stream ({filteredGrievances.length})
+              </span>
+              
+              {/* Filter */}
+              <div className="flex items-center gap-1">
+                {['all', 'hod', 'staff'].map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilterCategory(f)}
+                    className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase transition ${
+                      filterCategory === f
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+              {filteredGrievances.map((ticket) => (
+                <div key={ticket.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-2">
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] font-bold text-slate-400">{ticket.id}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      ticket.priority === 'Urgent' || ticket.priority === 'High' || ticket.priority === 'Critical'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    }`}>
+                      {ticket.priority} Priority
+                    </span>
+                  </div>
+
+                  <h4 className="font-bold text-slate-900">{ticket.title}</h4>
+                  <p className="text-slate-600 text-[11px] leading-relaxed line-clamp-2">{ticket.description}</p>
+
+                  {ticket.imageUrl && (
+                    <img src={ticket.imageUrl} alt="Attached" className="w-full h-24 object-cover rounded-xl border border-slate-200" />
+                  )}
+
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
+                    <span className="text-slate-500 font-semibold">{ticket.studentName}</span>
+                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                      {ticket.status}
+                    </span>
+                  </div>
+
+                </div>
+              ))}
+            </div>
+
           </div>
 
         </div>

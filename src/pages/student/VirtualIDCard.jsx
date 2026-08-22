@@ -288,14 +288,6 @@ export default function VirtualIDCard() {
                       size={150}
                       level="H"
                       includeMargin={false}
-                      imageSettings={{
-                        src: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/150px-WhatsApp.svg.png",
-                        x: undefined,
-                        y: undefined,
-                        height: 24,
-                        width: 24,
-                        excavate: true,
-                      }}
                     />
                     <div className="absolute inset-0 bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition rounded-2xl flex items-center justify-center">
                       <span className="p-1.5 rounded-lg bg-white shadow text-indigo-700 font-bold text-[10px] flex items-center gap-1">

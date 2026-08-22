@@ -12,7 +12,8 @@ import {
   ShieldAlert, 
   KeyRound,
   History,
-  RefreshCw
+  RefreshCw,
+  Wifi
 } from 'lucide-react';
 
 export default function AttendanceClient() {
@@ -54,27 +55,32 @@ export default function AttendanceClient() {
         triggerConfetti();
         setPasscode('');
       }
-    }, 500);
+    }, 600);
   };
 
   const handleQuickPasteCode = () => {
-    setPasscode(activeSession.code);
+    if (activeSession?.code) {
+      setPasscode(activeSession.code);
+    }
   };
 
   return (
     <div className="space-y-6">
       
-      {/* Top Banner explaining the Smart BLE anti-proxy system */}
-      <div className="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+      {/* Protocol Banner */}
+      <div className="p-4 rounded-3xl bg-indigo-50/80 border border-indigo-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-sm">
-            <Bluetooth className="w-5 h-5 animate-pulse" />
+          <div className="p-2.5 rounded-2xl bg-indigo-600 text-white shadow-sm">
+            <Bluetooth className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-900">
-              Dual-Factor BLE Presence Protocol
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span>Dual-Factor BLE Presence Protocol</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-extrabold">
+                Anti-Proxy Mesh
+              </span>
             </h4>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-600 mt-0.5">
               Requires physical classroom BLE beacon proximity + teacher's live dynamic board PIN to prevent remote proxy attendance.
             </p>
           </div>
@@ -169,112 +175,108 @@ export default function AttendanceClient() {
                     onClick={handleQuickPasteCode}
                     className="text-[11px] text-indigo-600 hover:text-indigo-700 font-bold underline"
                   >
-                    Demo Auto-Fill ({activeSession.code})
+                    Quick Paste Code ({activeSession.code})
                   </button>
                 </div>
 
-                <div className="relative">
+                <div className="flex gap-2">
                   <input
                     type="text"
+                    required
+                    maxLength={8}
                     value={passcode}
                     onChange={(e) => setPasscode(e.target.value.toUpperCase())}
-                    placeholder="e.g. EDUS-8492"
-                    maxLength={12}
-                    className="w-full px-4 py-3.5 rounded-2xl bg-white border border-slate-300 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 text-center font-mono text-lg font-black text-indigo-700 placeholder-slate-400 tracking-widest uppercase transition shadow-inner"
+                    placeholder={`e.g. ${activeSession.code}`}
+                    className="flex-1 px-4 py-3 rounded-2xl bg-white border border-slate-200 font-mono font-bold text-center tracking-widest text-slate-900 text-base focus:border-indigo-600 focus:outline-none shadow-sm uppercase placeholder-slate-300"
                   />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !passcode.trim()}
+                    className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5"
+                  >
+                    {isSubmitting ? (
+                      <span>Verifying...</span>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Validate Presence</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
               {/* Status feedback message */}
               {statusMessage && (
-                <div className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 ${
+                <div className={`p-4 rounded-2xl text-xs font-semibold flex items-center gap-3 animate-fadeIn ${
                   statusMessage.success 
                     ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
                     : 'bg-rose-50 border border-rose-200 text-rose-800'
                 }`}>
                   {statusMessage.success ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
                   )}
                   <span>{statusMessage.message}</span>
                 </div>
               )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting || bleStatus !== 'connected'}
-                className={`w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md ${
-                  bleStatus === 'connected'
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Cryptographically Verifying Attendance...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Submit & Mark Present</span>
-                  </>
-                )}
-              </button>
             </form>
 
           </div>
 
         </div>
 
-        {/* Right Column: Attendance History & Statistics */}
+        {/* Right Column: Attendance Records & Metrics */}
         <div className="lg:col-span-5 space-y-6">
           
-          {/* Attendance KPI Card */}
-          <div className="glass-panel p-5 rounded-3xl border border-slate-200 shadow-md">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-indigo-600" />
-              Semester Attendance Metric
-            </h4>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-black text-slate-900">88.4%</div>
-                <p className="text-xs text-emerald-600 mt-0.5 font-bold">
-                  +13.4% above 75% mandatory criteria
-                </p>
-              </div>
-              
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-                <span className="text-base font-black text-emerald-700">Safe</span>
-              </div>
+          {/* Attendance Stats Card */}
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                Semester Attendance Metric
+              </span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Safe
+              </span>
             </div>
 
-            <div className="w-full bg-slate-100 h-2.5 rounded-full mt-4 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-600 to-emerald-500 h-full rounded-full w-[88.4%]"></div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-black text-slate-900">88.4%</span>
+              <span className="text-xs font-bold text-emerald-600">+13.4% above 75% mandatory criteria</span>
+            </div>
+
+            <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden mt-3">
+              <div className="h-full bg-gradient-to-r from-indigo-500 to-sky-500 rounded-full" style={{ width: '88.4%' }}></div>
             </div>
           </div>
 
-          {/* Recent Attendance Log */}
-          <div className="glass-panel p-5 rounded-3xl border border-slate-200 shadow-md">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <History className="w-4 h-4 text-sky-600" />
-              Recent Verification Logs
-            </h4>
+          {/* Verification Logs */}
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-indigo-600" />
+                Recent Verification Logs
+              </h4>
+            </div>
 
-            <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-              {studentAttendanceRecord.map((rec, i) => (
-                <div key={i} className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-800">{rec.subject}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <div className="space-y-3">
+              {studentAttendanceRecord.map((rec) => (
+                <div key={rec.id} className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+                  <div>
+                    <h5 className="font-bold text-slate-900">{rec.subject}</h5>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{rec.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      rec.status === 'Present' 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                    }`}>
                       {rec.status}
                     </span>
-                  </div>
-                  <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{rec.date}</span>
-                    <span className="font-mono text-indigo-600 text-[10px] font-semibold">{rec.verifiedVia}</span>
+                    <span className="block text-[10px] text-slate-400 mt-0.5">{rec.verifiedVia}</span>
                   </div>
                 </div>
               ))}

@@ -44,8 +44,8 @@ export default function Navbar() {
         
         {/* Brand Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-600 to-indigo-700 shadow-md shadow-indigo-200">
-            <GraduationCap className="w-5 h-5 text-white" />
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-600 to-indigo-700 shadow-md shadow-indigo-200 text-white">
+            <GraduationCap className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
@@ -97,7 +97,7 @@ export default function Navbar() {
             </button>
 
             {showRoleMenu && (
-              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50">
+              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50 animate-fadeIn">
                 <div className="px-3 py-2 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                   Select Live Persona (1-Click)
                 </div>
@@ -105,9 +105,9 @@ export default function Navbar() {
                 <div className="space-y-1 mt-1">
                   {[
                     { role: 'student', label: 'Krrish (Student)', sub: 'B.Tech CSE 3rd Year', icon: GraduationCap, color: 'text-indigo-600 bg-indigo-50' },
-                    { role: 'teacher', label: 'Dr. Manish (Faculty)', sub: 'Assigned to Manish', icon: UserCheck, color: 'text-emerald-600 bg-emerald-50' },
-                    { role: 'hod', label: 'Prof. Naitik (HOD)', sub: 'Assigned to Manish', icon: ShieldCheck, color: 'text-purple-600 bg-purple-50' },
-                    { role: 'staff', label: 'Rajesh (Ground Staff)', sub: 'Assigned to Manish', icon: Wrench, color: 'text-amber-600 bg-amber-50' }
+                    { role: 'teacher', label: 'Dr. Manish (Faculty)', sub: 'OS & Networks Dept.', icon: UserCheck, color: 'text-emerald-600 bg-emerald-50' },
+                    { role: 'hod', label: 'Prof. Naitik (HOD)', sub: 'CSE Department Head', icon: ShieldCheck, color: 'text-purple-600 bg-purple-50' },
+                    { role: 'staff', label: 'Rajesh (Ground Staff)', sub: 'Maintenance & Facilities', icon: Wrench, color: 'text-amber-600 bg-amber-50' }
                   ].map((item) => {
                     const ItemIcon = item.icon;
                     const isActive = currentUser?.role === item.role;
@@ -120,7 +120,7 @@ export default function Navbar() {
                         }}
                         className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition ${
                           isActive 
-                            ? 'bg-indigo-50/80 text-indigo-900 border border-indigo-200 font-semibold' 
+                            ? 'bg-indigo-50/80 text-indigo-900 border border-indigo-200 font-bold' 
                             : 'hover:bg-slate-50 text-slate-700'
                         }`}
                       >
@@ -157,7 +157,7 @@ export default function Navbar() {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3 z-50">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl p-3 z-50 animate-fadeIn">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                   <span className="text-xs font-bold text-slate-800">Campus Broadcast Feed</span>
                   <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">

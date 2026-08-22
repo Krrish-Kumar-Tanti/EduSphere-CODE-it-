@@ -50,69 +50,71 @@ export default function StudentDashboard() {
             />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {currentUser?.enrollment}
                 </span>
-                <span className="text-xs text-slate-500 font-semibold">
+                <span className="text-xs font-semibold text-slate-500">
                   {currentUser?.section}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">
-                Welcome back, {currentUser?.name?.split(' ')[0]} 👋
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 mt-1">
+                Welcome back, {currentUser?.name?.split(' ')[0] || 'Krrish'} 👋
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
                 {currentUser?.department} • {currentUser?.semester}
               </p>
             </div>
           </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full lg:w-auto">
-            
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Overall Attendance</span>
-              <span className="text-lg sm:text-xl font-black text-indigo-700">88.4%</span>
-              <span className="text-[10px] text-emerald-600 block font-bold">Eligible for Exams</span>
+          {/* Quick Metrics */}
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="flex-1 lg:flex-none p-3.5 px-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Overall Attendance</span>
+              <div className="text-lg font-black text-indigo-600 mt-0.5">{currentUser?.attendanceOverall || 88.4}%</div>
+              <span className="text-[10px] text-emerald-600 font-semibold">Eligible for Exams</span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-center">
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Current CGPA</span>
-              <span className="text-lg sm:text-xl font-black text-sky-700">{currentUser?.cgpa || '8.92'}</span>
-              <span className="text-[10px] text-slate-500 block font-semibold">Top 5% Rank</span>
+            <div className="flex-1 lg:flex-none p-3.5 px-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Current CGPA</span>
+              <div className="text-lg font-black text-indigo-600 mt-0.5">{currentUser?.cgpa || '8.92'}</div>
+              <span className="text-[10px] text-slate-500">Top 5% Rank</span>
             </div>
 
-            <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-center flex flex-col justify-center">
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Active Class</span>
-              <span className="text-xs font-bold text-emerald-700 flex items-center justify-center gap-1.5 mt-0.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <div className="flex-1 lg:flex-none p-3.5 px-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm text-center">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Active Class</span>
+              <div className="text-sm font-bold text-slate-800 mt-1 flex items-center justify-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Lab 204
-              </span>
+              </div>
             </div>
-
           </div>
 
         </div>
 
       </div>
 
-      {/* Live Broadcast Banner if any urgent announcements */}
-      {broadcasts.length > 0 && broadcasts[0].isUrgent && (
-        <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-3 text-xs shadow-sm">
+      {/* Broadcast Flash Announcement */}
+      {broadcasts.length > 0 && (
+        <div className="p-3.5 px-5 rounded-2xl bg-rose-50/70 border border-rose-200/80 flex items-center justify-between gap-3 text-xs shadow-sm animate-fadeIn">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">
-              <Bell className="w-4 h-4" />
+            <span className="p-1.5 rounded-xl bg-rose-500 text-white">
+              <Bell className="w-3.5 h-3.5" />
             </span>
-            <span className="font-bold text-rose-900">{broadcasts[0].title}:</span>
-            <span className="text-slate-700 line-clamp-1">{broadcasts[0].message}</span>
+            <span className="font-bold text-rose-950">
+              {broadcasts[0].title}:
+            </span>
+            <span className="text-rose-800 hidden md:inline">
+              {broadcasts[0].message}
+            </span>
           </div>
-          <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap hidden sm:inline">
+          <span className="text-[10px] text-rose-500 font-mono flex-shrink-0">
             {broadcasts[0].time}
           </span>
         </div>
       )}
 
-      {/* Main Feature Tabs Navigation */}
-      <div className="flex overflow-x-auto pb-1 gap-3 scrollbar-none">
+      {/* Main Tab Navigation Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -121,32 +123,36 @@ export default function StudentDashboard() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 min-w-[200px] p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex items-center justify-between ${
+              className={`p-4 sm:p-5 rounded-3xl border text-left transition-all duration-200 relative overflow-hidden flex flex-col justify-between ${
                 isActive
-                  ? 'bg-white border-indigo-600 shadow-lg shadow-indigo-100 ring-2 ring-indigo-600/20'
-                  : 'bg-white/80 border-slate-200/80 hover:bg-white hover:border-slate-300 text-slate-600'
+                  ? 'bg-white border-indigo-500 shadow-lg ring-2 ring-indigo-500/10'
+                  : 'glass-panel hover:bg-white hover:border-slate-300 hover:shadow-md'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl border border-slate-200/60 ${tab.color}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className={`p-2.5 rounded-2xl ${tab.color} border border-slate-200/60`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <div>
-                  <span className={`text-xs font-bold block ${isActive ? 'text-slate-900' : 'text-slate-700'}`}>{tab.label}</span>
-                  <span className="text-[10px] text-slate-500">{tab.badge}</span>
-                </div>
+                {isActive && (
+                  <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                )}
               </div>
 
-              {isActive && (
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>
-              )}
+              <div>
+                <span className="text-xs sm:text-sm font-black text-slate-900 block tracking-tight">
+                  {tab.label}
+                </span>
+                <span className="text-[11px] text-slate-500 mt-0.5 block font-medium">
+                  {tab.badge}
+                </span>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Active Tab View Rendering */}
-      <div className="transition-all">
+      {/* Tab Content Display */}
+      <div className="pt-2">
         {activeTab === 'attendance' && <AttendanceClient />}
         {activeTab === 'idcard' && <VirtualIDCard />}
         {activeTab === 'grievance' && <GrievanceDrawer />}
