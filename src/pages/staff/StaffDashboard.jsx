@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import TicketInbox from './TicketInbox';
+import VirtualIDCard from '../student/VirtualIDCard';
 import { 
   Wrench, 
   CheckCircle2, 
@@ -17,12 +18,15 @@ import {
   Flame,
   Radio,
   Zap,
-  Activity
+  Activity,
+  CreditCard,
+  Inbox
 } from 'lucide-react';
 
 export default function StaffDashboard() {
   const { currentUser } = useAuth();
   const { grievances } = useData();
+  const [activeTab, setActiveTab] = useState('inbox'); // 'inbox' | 'pass'
   const [activeDomain, setActiveDomain] = useState('All');
   const [showHotlineModal, setShowHotlineModal] = useState(false);
   const [hotlineCalling, setHotlineCalling] = useState(false);
@@ -68,7 +72,7 @@ export default function StaffDashboard() {
                   <Wrench className="w-3 h-3" />
                   Ground Operations & Facilities
                 </span>
-                <span className="text-xs text-slate-500 font-semibold">{currentUser?.badgeLevel}</span>
+                <span className="text-xs text-slate-500 font-semibold">{currentUser?.badgeLevel || 'Supervisor'}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
                 {currentUser?.name}
@@ -104,53 +108,87 @@ export default function StaffDashboard() {
 
       </div>
 
-      {/* Ground Operations KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-slate-400 font-bold block uppercase tracking-wider">Active Open Tickets</span>
-            <span className="text-2xl font-black text-slate-900">{openCount} Incident{openCount !== 1 ? 's' : ''}</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">
-            <AlertCircle className="w-5 h-5" />
-          </div>
-        </div>
+      {/* Primary Tab Switcher */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setActiveTab('inbox')}
+          className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition ${
+            activeTab === 'inbox'
+              ? 'bg-amber-500 text-slate-950 shadow-sm'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <Inbox className="w-4 h-4" />
+          <span>Incident & Work Order Inbox</span>
+        </button>
 
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-amber-800 font-bold block uppercase tracking-wider">In-Progress Repairs</span>
-            <span className="text-2xl font-black text-amber-700">{inProgressCount}</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-emerald-800 font-bold block uppercase tracking-wider">Resolved Today</span>
-            <span className="text-2xl font-black text-emerald-700">{resolvedCount}</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <span className="text-[11px] text-indigo-800 font-bold block uppercase tracking-wider">Avg Response Time</span>
-            <span className="text-2xl font-black text-indigo-700">14.2 Mins</span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-700">
-            <Zap className="w-5 h-5" />
-          </div>
-        </div>
-
+        <button
+          onClick={() => setActiveTab('pass')}
+          className={`px-5 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 transition ${
+            activeTab === 'pass'
+              ? 'bg-amber-500 text-slate-950 shadow-sm'
+              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Operations Security Badge</span>
+        </button>
       </div>
 
-      {/* Main Ticket Inbox & Domain Triage */}
-      <TicketInbox activeDomain={activeDomain} setActiveDomain={setActiveDomain} />
+      {activeTab === 'pass' ? (
+        <VirtualIDCard />
+      ) : (
+        <>
+          {/* Ground Operations KPI Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-slate-400 font-bold block uppercase tracking-wider">Active Open Tickets</span>
+                <span className="text-2xl font-black text-slate-900">{openCount} Incident{openCount !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-amber-800 font-bold block uppercase tracking-wider">In-Progress Repairs</span>
+                <span className="text-2xl font-black text-amber-700">{inProgressCount}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-700">
+                <Clock className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-emerald-800 font-bold block uppercase tracking-wider">Resolved Today</span>
+                <span className="text-2xl font-black text-emerald-700">{resolvedCount}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-indigo-800 font-bold block uppercase tracking-wider">Avg Response Time</span>
+                <span className="text-2xl font-black text-indigo-700">14.2 Mins</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-700">
+                <Zap className="w-5 h-5" />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Main Ticket Inbox & Domain Triage */}
+          <TicketInbox activeDomain={activeDomain} setActiveDomain={setActiveDomain} />
+        </>
+      )}
+
 
       {/* On-Duty Field Squad Roster */}
       <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">

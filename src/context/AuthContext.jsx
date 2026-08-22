@@ -159,6 +159,16 @@ export const AuthProvider = ({ children }) => {
       if (data.success && data.user) {
         setCurrentUser(data.user);
         setIsAuthenticated(true);
+
+        if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+          try {
+            const bc = new BroadcastChannel('edusphere_channel');
+            if (data.user.role === 'teacher') {
+              bc.postMessage({ type: 'FACULTY_REGISTERED', payload: data.user, timestamp: Date.now() });
+            }
+          } catch (e) {}
+        }
+
         return { success: true, user: data.user };
       } else if (data.error) {
         return { success: false, error: data.error };
@@ -166,6 +176,7 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.warn('Backend register offline, creating local profile:', e);
     }
+
 
     const randomSuffix = Date.now().toString().slice(-4);
     let idPrefix = 'USR';

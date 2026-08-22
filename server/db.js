@@ -126,7 +126,22 @@ export function initDB() {
       programs TEXT NOT NULL,
       grade TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS direct_messages (
+      id TEXT PRIMARY KEY,
+      senderId TEXT NOT NULL,
+      senderName TEXT NOT NULL,
+      senderRole TEXT NOT NULL,
+      senderAvatar TEXT,
+      receiverId TEXT NOT NULL,
+      receiverName TEXT NOT NULL,
+      receiverRole TEXT NOT NULL,
+      message TEXT NOT NULL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      readReceipt INTEGER DEFAULT 0
+    );
   `);
+
 
   // Migration column additions in case table already exists
   const userTableInfo = db.prepare("PRAGMA table_info(users)").all();

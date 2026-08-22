@@ -3,7 +3,7 @@ import { ChevronDown, Search, Check, Building2 } from 'lucide-react';
 
 export default function SearchableSelect({
   label,
-  options,
+  options = [],
   value,
   onChange,
   placeholder = "Select or search...",
@@ -12,6 +12,7 @@ export default function SearchableSelect({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState('bottom'); // 'bottom' | 'top'
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -24,9 +25,22 @@ export default function SearchableSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Viewport collision detection
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 260 && rect.top > 260) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+  }, [isOpen]);
+
   const filtered = options.filter(opt => {
     const text = isCollegeList ? `${opt.name} ${opt.code} ${opt.location}` : opt;
-    return text.toLowerCase().includes(search.toLowerCase());
+    return text?.toLowerCase().includes(search.toLowerCase());
   });
 
   const getDisplayValue = () => {
@@ -58,15 +72,18 @@ export default function SearchableSelect({
             {getDisplayValue()}
           </span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu with Collision Aware Top/Bottom Positioning */}
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1.5 z-50 bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden max-h-72 flex flex-col animate-fadeIn">
-          
+        <div 
+          className={`absolute left-0 right-0 z-50 bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden max-h-56 flex flex-col animate-fadeIn ${
+            dropdownPosition === 'top' ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          }`}
+        >
           {/* Search Box inside dropdown */}
-          <div className="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+          <div className="p-2 border-b border-slate-100 bg-slate-50 flex items-center gap-2 sticky top-0 z-10">
             <Search className="w-3.5 h-3.5 text-slate-400" />
             <input
               type="text"
@@ -87,8 +104,8 @@ export default function SearchableSelect({
             )}
           </div>
 
-          {/* Options List */}
-          <div className="overflow-y-auto p-1.5 space-y-1">
+          {/* Options List with Smooth Scroll */}
+          <div className="overflow-y-auto p-1.5 space-y-1 max-h-44 scrollbar-thin scrollbar-thumb-slate-200">
             {filtered.length === 0 ? (
               <div className="p-3 text-center text-xs text-slate-400">
                 No matching options found.
@@ -141,3 +158,4 @@ export default function SearchableSelect({
     </div>
   );
 }
+

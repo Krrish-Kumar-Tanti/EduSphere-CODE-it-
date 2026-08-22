@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import confetti from 'canvas-confetti';
+import { TARGET_BRANCH_OPTIONS } from '../../data/ggsipuData';
 import { 
   Send, 
   Bell, 
@@ -23,15 +24,9 @@ export default function Broadcasts() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [isUrgent, setIsUrgent] = useState(true);
-  const [targetAudience, setTargetAudience] = useState('CSE Department (All Semesters)');
+  const [targetAudience, setTargetAudience] = useState(TARGET_BRANCH_OPTIONS[0]);
   const [isSent, setIsSent] = useState(false);
-
-  const audienceOptions = [
-    'All Campus Students',
-    'CSE Department (All Semesters)',
-    '6th Semester Students Only',
-    'Faculty & Ground Staff Only'
-  ];
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const handleTransmitBroadcast = (e) => {
     e.preventDefault();
@@ -39,7 +34,7 @@ export default function Broadcasts() {
 
     const newBroadcast = {
       id: `BC-${Math.floor(10 + Math.random() * 90)}`,
-      sender: `${currentUser?.name || 'Prof. S. K. Naitik'} (HOD CSE)`,
+      sender: `${currentUser?.name || 'Prof. S. K. Naitik'} (HOD Office)`,
       role: 'HOD',
       title: `${isUrgent ? '🚨 ' : '📢 '}${title}`,
       message,
@@ -76,15 +71,15 @@ export default function Broadcasts() {
             </span>
             <span className="text-xs text-slate-500 font-medium">Instantly overlays student dashboards & alert feeds</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mt-1">Urgent Department Broadcast Console</h2>
+          <h2 className="text-xl font-bold text-slate-900 mt-1">Urgent Multi-Branch Broadcast Console</h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Broadcast emergency alerts, exam schedule shifts, or campus advisories directly to all student smartphones.
+            Broadcast emergency alerts, exam schedule shifts, or department advisories directly to student devices in real-time.
           </p>
         </div>
 
         <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800">
           <span className="font-bold block text-sm">Real-Time Sync</span>
-          <span className="text-rose-600">Reflects immediately on student marquee</span>
+          <span className="text-rose-600">Reflects immediately on global marquee</span>
         </div>
       </div>
 
@@ -132,16 +127,16 @@ export default function Broadcasts() {
                 </div>
               </div>
 
-              {/* Target Audience */}
+              {/* Multi-Branch Targeted Audience Selector */}
               <div>
-                <label className="text-slate-700 font-bold block mb-1.5">Target Audience Segment:</label>
+                <label className="text-slate-700 font-bold block mb-1.5">Target Department / Branch Segment:</label>
                 <select
                   value={targetAudience}
                   onChange={(e) => setTargetAudience(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:border-purple-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:border-purple-500 focus:outline-none font-medium"
                 >
-                  {audienceOptions.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  {TARGET_BRANCH_OPTIONS.map((opt, idx) => (
+                    <option key={idx} value={opt}>{opt}</option>
                   ))}
                 </select>
               </div>
@@ -154,7 +149,7 @@ export default function Broadcasts() {
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Mid-Term Lab Exam Slot Shift for CSE-6A"
+                  placeholder="e.g. Mid-Term Lab Practical Slot Rescheduled"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:border-purple-500 focus:outline-none placeholder-slate-400 font-medium"
                 />
               </div>
@@ -167,7 +162,7 @@ export default function Broadcasts() {
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type clear instructions for students, timings, required ID card passes, etc."
+                  placeholder="Type clear instructions for students, venue, digital ID pass requirements..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 focus:bg-white focus:border-purple-500 focus:outline-none placeholder-slate-400 leading-relaxed font-medium"
                 />
               </div>
@@ -237,13 +232,33 @@ export default function Broadcasts() {
                       </h4>
                     </div>
 
-                    <button
-                      onClick={() => deleteBroadcast(bc.id)}
-                      className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition"
-                      title="Recall / Delete Broadcast"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {deleteConfirmId === bc.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            deleteBroadcast(bc.id);
+                            setDeleteConfirmId(null);
+                          }}
+                          className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold hover:bg-rose-700 transition"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="px-2 py-1 rounded-lg bg-slate-200 text-slate-700 text-[10px]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeleteConfirmId(bc.id)}
+                        className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 transition"
+                        title="Recall / Delete Broadcast"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
 
                   <p className="text-slate-700 leading-relaxed font-medium">
@@ -266,4 +281,5 @@ export default function Broadcasts() {
     </div>
   );
 }
+
 

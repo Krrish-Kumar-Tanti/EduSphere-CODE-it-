@@ -3,10 +3,16 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 const DataContext = createContext();
 const API_BASE = 'http://localhost:5001/api';
 
-// Create or connect to universal multi-tab live synchronization channel
+// Create or connect to universal multi-tab live synchronization channels
 let syncChannel = null;
+let syncChannelAlt = null;
 if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-  syncChannel = new BroadcastChannel('edusphere_live_sync');
+  try {
+    syncChannel = new BroadcastChannel('edusphere_channel');
+    syncChannelAlt = new BroadcastChannel('edusphere_live_sync');
+  } catch (e) {
+    console.warn('BroadcastChannel initialization error:', e);
+  }
 }
 
 export const INITIAL_GRIEVANCES = [
@@ -89,7 +95,7 @@ export const INITIAL_NOTES = [
     fileSize: '4.8 MB',
     uploadDate: '21 Aug 2026',
     downloadUrl: '#',
-    semester: '6th Semester',
+    semester: '6th Semester (Year 3)',
     format: 'PDF',
     downloads: 142
   },
@@ -101,7 +107,7 @@ export const INITIAL_NOTES = [
     fileSize: '12.4 MB',
     uploadDate: '20 Aug 2026',
     downloadUrl: '#',
-    semester: '6th Semester',
+    semester: '6th Semester (Year 3)',
     format: 'PPTX',
     downloads: 98
   },
@@ -113,7 +119,7 @@ export const INITIAL_NOTES = [
     fileSize: '8.1 MB',
     uploadDate: '19 Aug 2026',
     downloadUrl: '#',
-    semester: '6th Semester',
+    semester: '6th Semester (Year 3)',
     format: 'PDF',
     downloads: 215
   },
@@ -125,7 +131,7 @@ export const INITIAL_NOTES = [
     fileSize: '3.2 MB',
     uploadDate: '17 Aug 2026',
     downloadUrl: '#',
-    semester: '6th Semester',
+    semester: '6th Semester (Year 3)',
     format: 'PDF',
     downloads: 176
   }
@@ -140,7 +146,7 @@ export const INITIAL_BROADCASTS = [
     message: 'All 6th-semester students must carry their digital Virtual ID cards for entry starting Monday. Zero physical paperwork required.',
     time: '25 mins ago',
     isUrgent: true,
-    targetAudience: 'CSE Department (All Semesters)'
+    targetAudience: 'Computer Science & Engineering (CSE)'
   },
   {
     id: 'BC-02',
@@ -150,7 +156,7 @@ export const INITIAL_BROADCASTS = [
     message: 'Proximity beacons in Labs 301-305 upgraded to smart ultra-low latency mesh.',
     time: '2 hours ago',
     isUrgent: false,
-    targetAudience: 'All Campus Students'
+    targetAudience: 'All Campus Departments (Global)'
   }
 ];
 
@@ -272,12 +278,12 @@ export const INITIAL_STUDENT_ROSTER = [
   { id: '12', roll: '04214802733', name: 'Aman Deep', status: 'present', bleRssi: '-47 dBm (1.1m)', device: 'Realme GT', verifiedAt: '02:20 PM' }
 ];
 
-export const FACULTY_DIRECTORY = [
+export const INITIAL_FACULTY_DIRECTORY = [
   {
-    id: 'FAC-01',
+    id: 'FAC-1092',
     name: 'Dr. Manish Verma',
     designation: 'Associate Professor',
-    department: 'CSE',
+    department: 'Computer Science & Engineering (CSE)',
     subject: 'Operating Systems & Linux Kernel',
     experience: '12 Years',
     rating: '4.9/5.0',
@@ -286,10 +292,10 @@ export const FACULTY_DIRECTORY = [
     cabin: 'Room 304, Academic Block A'
   },
   {
-    id: 'FAC-02',
+    id: 'HOD-001',
     name: 'Prof. S. K. Naitik',
     designation: 'Head of Department & Professor',
-    department: 'CSE',
+    department: 'Department of Computer Science & Engineering',
     subject: 'Cloud Architectures & AI Systems',
     experience: '18 Years',
     rating: '5.0/5.0',
@@ -298,11 +304,11 @@ export const FACULTY_DIRECTORY = [
     cabin: 'Room 101, Executive Wing'
   },
   {
-    id: 'FAC-03',
+    id: 'FAC-2041',
     name: 'Dr. Priya Sen',
     designation: 'Assistant Professor',
-    department: 'CSE',
-    subject: 'Database Systems & Big Data',
+    department: 'Information Technology (IT)',
+    subject: 'Database Systems & Big Data Analytics',
     experience: '8 Years',
     rating: '4.8/5.0',
     email: 'priya.sen@campus.edu',
@@ -310,16 +316,57 @@ export const FACULTY_DIRECTORY = [
     cabin: 'Room 208, Academic Block A'
   },
   {
-    id: 'FAC-04',
+    id: 'FAC-3094',
     name: 'Prof. Vikram Seth',
     designation: 'Professor',
-    department: 'CSE',
+    department: 'AI & Data Science (AIDS)',
     subject: 'Algorithms & Computational Complexity',
     experience: '15 Years',
     rating: '4.7/5.0',
     email: 'vikram.seth@campus.edu',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
     cabin: 'Room 312, Academic Block B'
+  },
+  {
+    id: 'STF-504',
+    name: 'Rajesh Sharma',
+    designation: 'Facilities Lead Supervisor',
+    department: 'Ground Operations & Maintenance',
+    subject: 'Campus Infrastructure, Electrical & Sanitation',
+    experience: '10 Years',
+    rating: '4.9/5.0',
+    email: 'rajesh.facilities@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Operations Control Room 04'
+  }
+];
+
+export const INITIAL_MESSAGES = [
+  {
+    id: 'MSG-001',
+    senderId: 'STU-2026-8842',
+    senderName: 'Krrish Kumar Tanti',
+    senderRole: 'student',
+    senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+    receiverId: 'FAC-1092',
+    receiverName: 'Dr. Manish Verma',
+    receiverRole: 'teacher',
+    message: 'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose scripts pre-configured?',
+    timestamp: 'Today, 01:45 PM',
+    readReceipt: 1
+  },
+  {
+    id: 'MSG-002',
+    senderId: 'FAC-1092',
+    senderName: 'Dr. Manish Verma',
+    senderRole: 'teacher',
+    senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
+    receiverId: 'STU-2026-8842',
+    receiverName: 'Krrish Kumar Tanti',
+    receiverRole: 'student',
+    message: 'Hello Krrish! Yes, please have the memory management container ready. We will benchmark Banker’s algorithm live in Lab 204.',
+    timestamp: 'Today, 02:00 PM',
+    readReceipt: 1
   }
 ];
 
@@ -330,7 +377,14 @@ export const DataProvider = ({ children }) => {
   const [substitutions, setSubstitutions] = useState(INITIAL_SUBSTITUTIONS);
   const [approvals, setApprovals] = useState(INITIAL_APPROVALS);
   const [studentsRoster, setStudentsRoster] = useState(INITIAL_STUDENT_ROSTER);
+  const [facultyDirectory, setFacultyDirectory] = useState(INITIAL_FACULTY_DIRECTORY);
   
+  // Direct Messaging State (WhatsApp Style)
+  const [directMessages, setDirectMessages] = useState(INITIAL_MESSAGES);
+  const [activeChatPartner, setActiveChatPartner] = useState(null);
+  const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
+  const [incomingChatToast, setIncomingChatToast] = useState(null);
+
   // Active classroom session
   const [activeSession, setActiveSession] = useState({
     id: 'SESS-LIVE-01',
@@ -352,28 +406,25 @@ export const DataProvider = ({ children }) => {
     { id: '4', subject: 'Web Technologies', code: 'WT33', date: '19 Aug 2026', status: 'Present', verifiedVia: 'BLE + Passcode' }
   ]);
 
-  // Broadcast helper function to notify all other open tabs
+  // Broadcast helper function to notify all other open tabs across channels
   const broadcastSync = (type, payload) => {
+    const message = { type, payload, timestamp: Date.now() };
     if (syncChannel) {
-      try {
-        syncChannel.postMessage({ type, payload, timestamp: Date.now() });
-      } catch (e) {
-        console.warn('BroadcastChannel post error:', e);
-      }
+      try { syncChannel.postMessage(message); } catch (e) {}
+    }
+    if (syncChannelAlt) {
+      try { syncChannelAlt.postMessage(message); } catch (e) {}
     }
   };
 
   // 1. Listen for cross-tab BroadcastChannel sync messages
   useEffect(() => {
-    if (!syncChannel) return;
-
     const handleMessage = (event) => {
       const { type, payload } = event.data || {};
       if (!type) return;
 
       switch (type) {
         case 'ATTENDANCE_VERIFIED':
-          // Instantly update teacher's live roster
           setStudentsRoster(prev => {
             const exists = prev.some(s => s.roll === payload.studentEnrollment || s.name === payload.studentName);
             if (exists) {
@@ -385,7 +436,6 @@ export const DataProvider = ({ children }) => {
                 device: payload.device || 'BLE Verified Phone'
               } : s);
             } else {
-              // Prepend newly registered student to roster
               return [
                 {
                   id: `STU-${Date.now()}`,
@@ -444,6 +494,10 @@ export const DataProvider = ({ children }) => {
           } : g));
           break;
 
+        case 'GRIEVANCE_DELETED':
+          setGrievances(prev => prev.filter(g => g.id !== payload.id));
+          break;
+
         case 'NOTE_ADDED':
           setNotes(prev => {
             if (prev.some(n => n.id === payload.id)) return prev;
@@ -484,6 +538,13 @@ export const DataProvider = ({ children }) => {
           } : a));
           break;
 
+        case 'APPROVAL_ACKNOWLEDGED':
+          setApprovals(prev => prev.map(a => a.id === payload.appId ? {
+            ...a,
+            status: 'Acknowledged (Under Review)'
+          } : a));
+          break;
+
         case 'APPROVAL_REJECTED':
           setApprovals(prev => prev.map(a => a.id === payload.appId ? {
             ...a,
@@ -492,15 +553,50 @@ export const DataProvider = ({ children }) => {
           } : a));
           break;
 
+        case 'FACULTY_REGISTERED':
+          if (payload) {
+            setFacultyDirectory(prev => {
+              if (prev.some(f => f.id === payload.id || f.email === payload.email)) {
+                return prev.map(f => (f.id === payload.id || f.email === payload.email) ? { ...f, ...payload } : f);
+              }
+              return [payload, ...prev];
+            });
+          }
+          break;
+
+        case 'DIRECT_MESSAGE_SENT':
+          if (payload) {
+            setDirectMessages(prev => {
+              if (prev.some(m => m.id === payload.id)) return prev;
+              return [...prev, payload];
+            });
+
+            // Show floating WhatsApp notification toast on recipient tab
+            setIncomingChatToast({
+              id: payload.id,
+              senderId: payload.senderId,
+              senderName: payload.senderName,
+              senderRole: payload.senderRole,
+              senderAvatar: payload.senderAvatar,
+              message: payload.message,
+              time: 'Just now'
+            });
+          }
+          break;
+
+        case 'DIRECT_MESSAGE_DELETED':
+          setDirectMessages(prev => prev.filter(m => m.id !== payload.id));
+          break;
+
         default:
           break;
       }
     };
 
-    syncChannel.onmessage = handleMessage;
-    return () => {
-      // Don't close global channel on unmount to keep listener alive
-    };
+    if (syncChannel) syncChannel.onmessage = handleMessage;
+    if (syncChannelAlt) syncChannelAlt.onmessage = handleMessage;
+
+    return () => {};
   }, []);
 
   // 2. Fetch fresh data from backend REST API and set up periodic 3s polling fallback
@@ -533,6 +629,43 @@ export const DataProvider = ({ children }) => {
         const bcData = await bcRes.json();
         if (bcData.success && Array.isArray(bcData.broadcasts) && bcData.broadcasts.length > 0) {
           setBroadcasts(bcData.broadcasts);
+        }
+
+        // Fetch registered faculty & staff from DB
+        const usersRes = await fetch(`${API_BASE}/users?role=teacher`);
+        const usersData = await usersRes.json();
+        if (usersData.success && Array.isArray(usersData.users) && usersData.users.length > 0) {
+          const mappedFaculty = usersData.users.map(u => ({
+            id: u.id,
+            name: u.name,
+            designation: u.designation || 'Faculty Member',
+            department: u.department || 'Computer Science',
+            subject: u.subjects || 'Core Academic Curriculum',
+            email: u.email,
+            avatar: u.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
+            cabin: u.cabin || 'Faculty Desk'
+          }));
+
+          // Merge with initial directory without duplicating
+          setFacultyDirectory(prev => {
+            const combined = [...prev];
+            mappedFaculty.forEach(mf => {
+              const idx = combined.findIndex(c => c.id === mf.id || c.email === mf.email);
+              if (idx !== -1) {
+                combined[idx] = { ...combined[idx], ...mf };
+              } else {
+                combined.unshift(mf);
+              }
+            });
+            return combined;
+          });
+        }
+
+        // Fetch direct messages
+        const msgRes = await fetch(`${API_BASE}/messages`);
+        const msgData = await msgRes.json();
+        if (msgData.success && Array.isArray(msgData.messages) && msgData.messages.length > 0) {
+          setDirectMessages(msgData.messages);
         }
       } catch (e) {
         // Backend offline fallback - keeping local state intact
@@ -579,6 +712,17 @@ export const DataProvider = ({ children }) => {
       });
     } catch (e) {
       console.warn('Grievance status API sync error:', e);
+    }
+  };
+
+  const deleteGrievance = async (id) => {
+    setGrievances(prev => prev.filter(g => g.id !== id));
+    broadcastSync('GRIEVANCE_DELETED', { id });
+
+    try {
+      await fetch(`${API_BASE}/grievances/${id}`, { method: 'DELETE' });
+    } catch (e) {
+      console.warn('Grievance delete API error:', e);
     }
   };
 
@@ -648,6 +792,15 @@ export const DataProvider = ({ children }) => {
   };
 
   // E. Digital Approvals Handlers
+  const acknowledgeApproval = (appId) => {
+    setApprovals(prev => prev.map(a => a.id === appId ? {
+      ...a,
+      status: 'Acknowledged (Under Review)'
+    } : a));
+
+    broadcastSync('APPROVAL_ACKNOWLEDGED', { appId });
+  };
+
   const signApproval = (appId, signerName = 'Prof. S. K. Naitik (HOD)') => {
     const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase();
     const signatureHash = `RSA-HOD-CSE-0x${randomHex}89A`;
@@ -704,8 +857,24 @@ export const DataProvider = ({ children }) => {
     broadcastSync('MARK_ALL_ROSTER', { status: statusToSet });
   };
 
+  const deleteAttendanceLog = async (id) => {
+    try {
+      await fetch(`${API_BASE}/attendance/logs/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
+  const purgeAllAttendanceLogs = async () => {
+    setStudentsRoster(prev => prev.map(s => ({
+      ...s,
+      status: 'absent',
+      verifiedAt: '-'
+    })));
+    try {
+      await fetch(`${API_BASE}/attendance/logs`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
   const generateNewPasscode = async () => {
-    // Generate simple readable 4-char or 4-digit code e.g. OS42 or EDUS-XXXX
     const codePrefixes = ['OS', 'CS', 'AI', 'NET', 'ED'];
     const randomPrefix = codePrefixes[Math.floor(Math.random() * codePrefixes.length)];
     const randomDigits = Math.floor(10 + Math.random() * 90);
@@ -827,11 +996,70 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // H. Direct WhatsApp-Style 1-on-1 Messaging Handlers
+  const sendDirectMessage = async (messageText, currentUser, targetPartner) => {
+    if (!messageText.trim() || !targetPartner) return;
+
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      id: `MSG-${Date.now().toString().slice(-6)}`,
+      senderId: currentUser?.id || currentUser?.enrollment || 'STU-001',
+      senderName: currentUser?.name || 'Anonymous Member',
+      senderRole: currentUser?.role || 'student',
+      senderAvatar: currentUser?.avatar,
+      receiverId: targetPartner.id || targetPartner.enrollment || 'FAC-1092',
+      receiverName: targetPartner.name,
+      receiverRole: targetPartner.role || 'teacher',
+      message: messageText.trim(),
+      timestamp: `Today, ${nowTime}`,
+      readReceipt: 0
+    };
+
+    setDirectMessages(prev => [...prev, newMsg]);
+    broadcastSync('DIRECT_MESSAGE_SENT', newMsg);
+
+    try {
+      await fetch(`${API_BASE}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMsg)
+      });
+    } catch (e) {
+      console.warn('Direct message API sync error:', e);
+    }
+
+    return newMsg;
+  };
+
+  const deleteDirectMessage = async (msgId) => {
+    setDirectMessages(prev => prev.filter(m => m.id !== msgId));
+    broadcastSync('DIRECT_MESSAGE_DELETED', { id: msgId });
+
+    try {
+      await fetch(`${API_BASE}/messages/${msgId}`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
+  const openDirectChat = (partner) => {
+    setActiveChatPartner(partner);
+    setIsChatDrawerOpen(true);
+    setIncomingChatToast(null);
+  };
+
+  const closeDirectChat = () => {
+    setIsChatDrawerOpen(false);
+  };
+
+  const dismissIncomingToast = () => {
+    setIncomingChatToast(null);
+  };
+
   return (
     <DataContext.Provider value={{
       grievances,
       addGrievance,
       updateGrievanceStatus,
+      deleteGrievance,
       notes,
       addNote,
       deleteNote,
@@ -843,17 +1071,31 @@ export const DataProvider = ({ children }) => {
       approvals,
       signApproval,
       rejectApproval,
+      acknowledgeApproval,
       studentsRoster,
       setStudentsRoster,
       updateStudentRosterStatus,
       markAllStudents,
+      deleteAttendanceLog,
+      purgeAllAttendanceLogs,
       generateNewPasscode,
       toggleBeaconActive,
-      facultyDirectory: FACULTY_DIRECTORY,
+      facultyDirectory,
+      setFacultyDirectory,
       activeSession,
       setActiveSession,
       studentAttendanceRecord,
-      markStudentAttendance
+      markStudentAttendance,
+      // Direct Messaging
+      directMessages,
+      activeChatPartner,
+      isChatDrawerOpen,
+      incomingChatToast,
+      sendDirectMessage,
+      deleteDirectMessage,
+      openDirectChat,
+      closeDirectChat,
+      dismissIncomingToast
     }}>
       {children}
     </DataContext.Provider>

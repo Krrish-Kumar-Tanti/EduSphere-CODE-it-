@@ -526,6 +526,34 @@ app.patch('/api/grievances/:id/status', (req, res) => {
   }
 });
 
+app.delete('/api/grievances/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM grievances WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Grievance ticket permanently removed.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete Attendance Logs (Single or Purge All)
+app.delete('/api/attendance/logs/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM attendance_logs WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Attendance log entry deleted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/attendance/logs', (req, res) => {
+  try {
+    db.prepare('DELETE FROM attendance_logs').run();
+    return res.json({ success: true, message: 'All attendance logs purged.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 // --- 6. NOTES VAULT ---
 app.get('/api/notes', (req, res) => {
   try {
@@ -609,7 +637,101 @@ app.delete('/api/broadcasts/:id', (req, res) => {
   }
 });
 
+// --- 8. DIRECT WHATSAPP-STYLE 1-ON-1 MESSAGING ---
+app.get('/api/messages', (req, res) => {
+  try {
+    const { user1, user2, userId } = req.query;
+    let messages = [];
+
+    if (user1 && user2) {
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+        ORDER BY timestamp ASC
+      `).all(user1, user2, user2, user1);
+    } else if (userId) {
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        WHERE senderId = ? OR receiverId = ?
+        ORDER BY timestamp ASC
+      `).all(userId, userId);
+    } else {
+      messages = db.prepare('SELECT * FROM direct_messages ORDER BY timestamp ASC LIMIT 100').all();
+    }
+
+    return res.json({ success: true, messages });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/messages', (req, res) => {
+  try {
+    const { 
+      senderId, 
+      senderName, 
+      senderRole, 
+      senderAvatar, 
+      receiverId, 
+      receiverName, 
+      receiverRole, 
+      message 
+    } = req.body;
+
+    if (!senderId || !receiverId || !message) {
+      return res.status(400).json({ error: 'Sender, receiver, and message content required.' });
+    }
+
+    const msgId = `MSG-${Date.now().toString().slice(-6)}`;
+    db.prepare(`
+      INSERT INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+    `).run(
+      msgId,
+      senderId,
+      senderName || 'Anonymous Scholar',
+      senderRole || 'student',
+      senderAvatar || null,
+      receiverId,
+      receiverName || 'Faculty Member',
+      receiverRole || 'teacher',
+      message
+    );
+
+    const created = db.prepare('SELECT * FROM direct_messages WHERE id = ?').get(msgId);
+    return res.status(201).json({ success: true, message: created });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.patch('/api/messages/read', (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    if (senderId && receiverId) {
+      db.prepare(`
+        UPDATE direct_messages 
+        SET readReceipt = 1 
+        WHERE senderId = ? AND receiverId = ?
+      `).run(senderId, receiverId);
+    }
+    return res.json({ success: true, message: 'Messages marked as read.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/messages/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM direct_messages WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Message deleted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`⚡ EduSphere SQLite Backend API running on http://localhost:${PORT}`);
 });
+
 

@@ -8,6 +8,9 @@ import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import HodDashboard from './pages/hod/HodDashboard';
 import StaffDashboard from './pages/staff/StaffDashboard';
 import EduBot from './components/Chatbot/EduBot';
+import GlobalAlertBanner from './components/GlobalAlertBanner';
+import DirectChatDrawer from './components/DirectChatDrawer';
+import IncomingChatToast from './components/IncomingChatToast';
 
 function AppContent() {
   const { currentUser, isAuthenticated } = useAuth();
@@ -18,6 +21,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col selection:bg-indigo-600 selection:text-white">
+      {/* Global Emergency Alert Banner for Urgent Broadcasts */}
+      <GlobalAlertBanner />
+
       {/* Top Navbar */}
       <Navbar />
 
@@ -28,6 +34,10 @@ function AppContent() {
         {currentUser.role === 'hod' && <HodDashboard />}
         {currentUser.role === 'staff' && <StaffDashboard />}
       </main>
+
+      {/* WhatsApp-Style 1-on-1 Direct Messaging Drawer & Floating Toast */}
+      <DirectChatDrawer />
+      <IncomingChatToast />
 
       {/* Global Roaming Context-Aware AI Campus Companion */}
       <EduBot />
@@ -49,3 +59,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

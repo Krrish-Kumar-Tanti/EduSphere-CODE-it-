@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import TakeAttendance from './TakeAttendance';
 import NotesPublisher from './NotesPublisher';
+import VirtualIDCard from '../student/VirtualIDCard';
 import { 
   UserCheck, 
   Radio, 
@@ -16,19 +17,22 @@ import {
   TrendingUp,
   Award,
   Bell,
-  ChevronRight
+  ChevronRight,
+  CreditCard
 } from 'lucide-react';
 
 export default function TeacherDashboard() {
   const { currentUser } = useAuth();
   const { activeSession, notes, studentsRoster } = useData();
-  const [activeTab, setActiveTab] = useState('attendance'); // 'attendance' | 'notes' | 'schedule'
+  const [activeTab, setActiveTab] = useState('attendance'); // 'attendance' | 'notes' | 'schedule' | 'pass'
 
   const tabs = [
     { id: 'attendance', label: 'Attendance Studio', icon: Radio, badge: 'Live BLE Radar', color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { id: 'notes', label: 'Notes & Syllabus Vault', icon: BookOpen, badge: `${notes.length} Active Files`, color: 'text-cyan-600', bg: 'bg-cyan-50' },
-    { id: 'schedule', label: 'Faculty Timetable', icon: Calendar, badge: '3 Classes Today', color: 'text-purple-600', bg: 'bg-purple-50' }
+    { id: 'schedule', label: 'Faculty Timetable', icon: Calendar, badge: '3 Classes Today', color: 'text-purple-600', bg: 'bg-purple-50' },
+    { id: 'pass', label: 'Faculty Digital Pass', icon: CreditCard, badge: 'Scannable Badge', color: 'text-indigo-600', bg: 'bg-indigo-50' }
   ];
+
 
   const todaySchedule = [
     { time: '09:00 AM - 10:00 AM', subject: 'Cloud Computing & DevOps (CSE-305)', room: 'Room 304, Block B', section: 'CSE-6B', status: 'Completed' },
@@ -140,6 +144,7 @@ export default function TeacherDashboard() {
       <div className="transition-all animate-fadeIn">
         {activeTab === 'attendance' && <TakeAttendance />}
         {activeTab === 'notes' && <NotesPublisher />}
+        {activeTab === 'pass' && <VirtualIDCard />}
         {activeTab === 'schedule' && (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
@@ -214,6 +219,7 @@ export default function TeacherDashboard() {
           </div>
         )}
       </div>
+
 
     </div>
   );
