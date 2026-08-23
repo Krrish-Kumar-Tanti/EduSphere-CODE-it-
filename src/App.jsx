@@ -15,6 +15,13 @@ import IncomingChatToast from './components/IncomingChatToast';
 
 function AppContent() {
   const { currentUser, isAuthenticated } = useAuth();
+  const { registerTabUser } = useData();
+
+  React.useEffect(() => {
+    if (currentUser && registerTabUser) {
+      registerTabUser(currentUser);
+    }
+  }, [currentUser, registerTabUser]);
 
   if (!isAuthenticated || !currentUser) {
     return <Login />;

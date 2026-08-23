@@ -62,15 +62,23 @@ export default function DirectChatDrawer() {
   // Strict isolation filter: conversation strictly between currentUser and activeChatPartner
   const conversation = directMessages.filter(m => {
     if (!activeChatPartner || !currentUser) return false;
-    const currentId = currentUser.id || currentUser.enrollment;
-    const partnerId = activeChatPartner.id || activeChatPartner.enrollment;
+    const myIds = [currentUser.id, currentUser.enrollment, currentUser.email].filter(Boolean);
+    const partnerIds = [activeChatPartner.id, activeChatPartner.enrollment, activeChatPartner.email].filter(Boolean);
+    const myName = currentUser.name?.toLowerCase().trim();
+    const partnerName = activeChatPartner.name?.toLowerCase().trim();
+
     const targetRecipient = m.recipientId || m.receiverId;
     const targetSender = m.senderId;
-    
-    return (
-      (targetSender === currentId && targetRecipient === partnerId) ||
-      (targetSender === partnerId && targetRecipient === currentId)
-    );
+    const senderName = m.senderName?.toLowerCase().trim();
+    const recipientName = (m.recipientName || m.receiverName || '')?.toLowerCase().trim();
+
+    const isCurrentSender = myIds.includes(targetSender) || (myName && senderName === myName);
+    const isPartnerRecipient = partnerIds.includes(targetRecipient) || (partnerName && recipientName === partnerName);
+
+    const isPartnerSender = partnerIds.includes(targetSender) || (partnerName && senderName === partnerName);
+    const isCurrentRecipient = myIds.includes(targetRecipient) || (myName && recipientName === myName);
+
+    return (isCurrentSender && isPartnerRecipient) || (isPartnerSender && isCurrentRecipient);
   });
 
   const scrollToBottom = () => {

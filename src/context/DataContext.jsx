@@ -411,6 +411,12 @@ export const DataProvider = ({ children }) => {
   const [isChatDrawerOpen, setIsChatDrawerOpen] = useState(false);
   const [incomingChatToast, setIncomingChatToast] = useState(null);
 
+  // Tab-Aware active user tracker (allows independent multi-tab testing across roles)
+  const tabUserRef = useRef(null);
+  const registerTabUser = (user) => {
+    tabUserRef.current = user;
+  };
+
   // Active classroom session
   const [activeSession, setActiveSession] = useState({
     id: 'SESS-LIVE-01',
@@ -480,39 +486,56 @@ export const DataProvider = ({ children }) => {
 
         case 'DIRECT_MESSAGE_SENT':
           if (payload) {
-            let currentUid = null;
-            try {
-              const userObj = JSON.parse(localStorage.getItem('edusphere_current_user') || 'null');
-              currentUid = userObj?.id || userObj?.enrollment;
-            } catch (e) {}
+            let myUser = tabUserRef.current;
+            if (!myUser && typeof window !== 'undefined') {
+              try {
+                myUser = JSON.parse(localStorage.getItem('edusphere_auth_user') || localStorage.getItem('edusphere_user') || 'null');
+              } catch (e) {}
+            }
 
             const targetRecipient = payload.recipientId || payload.receiverId;
-            const sender = payload.senderId;
+            const targetRecipientName = (payload.recipientName || payload.receiverName || '').toLowerCase().trim();
+            const targetRecipientRole = (payload.recipientRole || payload.receiverRole || '').toLowerCase().trim();
 
-            // ⛔ DROP IMMEDIATELY if current logged-in user is neither recipient nor sender!
-            if (!currentUid || (targetRecipient !== currentUid && sender !== currentUid)) {
+            const sender = payload.senderId;
+            const senderName = (payload.senderName || '').toLowerCase().trim();
+
+            const myIds = [myUser?.id, myUser?.enrollment, myUser?.email].filter(Boolean);
+            const myName = myUser?.name ? myUser.name.toLowerCase().trim() : '';
+            const myRole = myUser?.role ? myUser.role.toLowerCase().trim() : '';
+
+            const isForMe = myIds.includes(targetRecipient) || 
+                            (myName && targetRecipientName === myName) || 
+                            (myRole && targetRecipientRole === myRole && ['teacher', 'faculty', 'hod', 'staff'].includes(myRole));
+                            
+            const isFromMe = myIds.includes(sender) || 
+                             (myName && senderName === myName);
+
+            // ⛔ DROP if neither for me nor from me (prevents message leakage across unrelated roles)
+            if (!isForMe && !isFromMe) {
               return;
             }
 
+            // Always update directMessages state for this tab
             setDirectMessages(prev => {
               if (prev.some(m => m.id === payload.id)) return prev;
               return [...prev, payload];
             });
 
-            // Play incoming WhatsApp sound & show toast ONLY on the intended recipient's tab
-            if (targetRecipient === currentUid) {
+            // If incoming message for this tab's user -> trigger sound & popup toast!
+            if (isForMe && !isFromMe) {
               sounds.playMessageReceived();
               setIncomingChatToast({
                 id: payload.id,
                 threadId: payload.threadId || [sender, targetRecipient].sort().join('_'),
                 senderId: payload.senderId,
-                senderName: payload.senderName,
-                senderRole: payload.senderRole,
-                senderAvatar: payload.senderAvatar,
+                senderName: payload.senderName || 'Student Scholar',
+                senderRole: payload.senderRole || 'student',
+                senderAvatar: payload.senderAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
                 recipientId: targetRecipient,
-                message: payload.text || payload.message,
-                text: payload.text || payload.message,
-                time: 'Just now'
+                message: payload.text || payload.message || 'New message',
+                text: payload.text || payload.message || 'New message',
+                time: payload.timestamp || 'Just now'
               });
             }
           }
@@ -1248,7 +1271,8 @@ export const DataProvider = ({ children }) => {
       deleteDirectMessage,
       openDirectChat,
       closeDirectChat,
-      dismissIncomingToast
+      dismissIncomingToast,
+      registerTabUser
     }}>
       {children}
     </DataContext.Provider>
