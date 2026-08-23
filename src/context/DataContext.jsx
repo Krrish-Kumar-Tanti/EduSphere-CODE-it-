@@ -676,8 +676,22 @@ export const DataProvider = ({ children }) => {
           setGrievances(prev => prev.map(g => g.id === payload.id ? {
             ...g,
             status: payload.status,
-            resolutionNotes: payload.resolutionNotes || g.resolutionNotes
+            resolutionNotes: payload.resolutionNotes !== undefined ? payload.resolutionNotes : g.resolutionNotes,
+            rsaSeal: payload.rsaSeal || g.rsaSeal,
+            resolvedBy: payload.resolvedBy || g.resolvedBy,
+            resolvedAt: payload.resolvedAt || g.resolvedAt
           } : g));
+          break;
+
+        case 'SUBSTITUTION_ASSIGNED':
+          sounds.playSuccessFanfare();
+          setSubstitutions(prev => prev.map(s => s.id === payload.subId ? {
+            ...s,
+            status: 'Assigned',
+            assignedTo: payload.facultyName,
+            notes: payload.notes || s.notes,
+            assignedAt: payload.assignedAt || 'Today, Just now'
+          } : s));
           break;
 
         default:
@@ -749,6 +763,13 @@ export const DataProvider = ({ children }) => {
         const attData = await attRes.json();
         if (attData.success && Array.isArray(attData.records) && attData.records.length > 0) {
           setCalendarAttendance(attData.records);
+        }
+
+        // Fetch substitutions
+        const subRes = await fetch(`${API_BASE}/substitutions`);
+        const subData = await subRes.json();
+        if (subData.success && Array.isArray(subData.substitutions) && subData.substitutions.length > 0) {
+          setSubstitutions(subData.substitutions);
         }
       } catch (e) {
         // Backend offline fallback - keeping state intact
@@ -1135,20 +1156,32 @@ export const DataProvider = ({ children }) => {
     } catch (e) {}
   };
 
-  const updateGrievanceStatus = async (id, newStatus, resolutionNotes = '') => {
+  const updateGrievanceStatus = async (id, newStatus, resolutionNotes = '', rsaSeal = null, resolvedBy = null) => {
+    const resolvedAt = new Date().toISOString();
+
     setGrievances(prev => prev.map(g => g.id === id ? {
       ...g,
       status: newStatus,
-      resolutionNotes: resolutionNotes || g.resolutionNotes
+      resolutionNotes: resolutionNotes || g.resolutionNotes,
+      rsaSeal: rsaSeal || g.rsaSeal,
+      resolvedBy: resolvedBy || g.resolvedBy,
+      resolvedAt
     } : g));
 
-    broadcastSync('GRIEVANCE_STATUS_UPDATED', { id, status: newStatus, resolutionNotes });
+    broadcastSync('GRIEVANCE_STATUS_UPDATED', {
+      id,
+      status: newStatus,
+      resolutionNotes,
+      rsaSeal,
+      resolvedBy,
+      resolvedAt
+    });
 
     try {
       await fetch(`${API_BASE}/grievances/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, resolutionNotes })
+        body: JSON.stringify({ status: newStatus, resolutionNotes, rsaSeal, resolvedBy })
       });
     } catch (e) {}
   };
@@ -1186,12 +1219,26 @@ export const DataProvider = ({ children }) => {
   };
 
   // Substitution Handlers
-  const assignSubstitution = (subId, facultyName) => {
+  const assignSubstitution = async (subId, facultyName, notes = '') => {
+    const assignedAt = `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
     setSubstitutions(prev => prev.map(s => s.id === subId ? {
       ...s,
       status: 'Assigned',
-      assignedTo: facultyName
+      assignedTo: facultyName,
+      notes: notes || s.notes,
+      assignedAt
     } : s));
+
+    broadcastSync('SUBSTITUTION_ASSIGNED', { subId, facultyName, notes, assignedAt });
+
+    try {
+      await fetch(`${API_BASE}/substitutions/${subId}/assign`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assignedTo: facultyName, notes })
+      });
+    } catch (e) {}
   };
 
   // Digital Approval Handlers

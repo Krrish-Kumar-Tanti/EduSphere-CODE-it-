@@ -179,6 +179,24 @@ export function initDB() {
       progress_json TEXT NOT NULL,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS substitutions (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      slot TEXT NOT NULL,
+      subject TEXT NOT NULL,
+      semester TEXT NOT NULL,
+      room TEXT NOT NULL,
+      absentFaculty TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      status TEXT DEFAULT 'Pending',
+      assignedTo TEXT,
+      urgency TEXT DEFAULT 'Normal',
+      suggestedFaculty TEXT,
+      notes TEXT,
+      assignedAt TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Safe migrations for table columns
@@ -247,6 +265,18 @@ export function initDB() {
     { name: 'fileName', type: 'TEXT' }
   ]);
 
+  migrateTable('grievances', [
+    { name: 'resolutionNotes', type: 'TEXT' },
+    { name: 'resolvedBy', type: 'TEXT' },
+    { name: 'rsaSeal', type: 'TEXT' },
+    { name: 'resolvedAt', type: 'TEXT' }
+  ]);
+
+  migrateTable('substitutions', [
+    { name: 'notes', type: 'TEXT' },
+    { name: 'assignedAt', type: 'TEXT' }
+  ]);
+
   // Safe index creation
   try {
     db.prepare('CREATE INDEX IF NOT EXISTS idx_att_date_sub_sec ON attendance_records(date, subject, section)').run();
@@ -254,6 +284,7 @@ export function initDB() {
     db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_pair ON direct_messages(senderId, receiverId)').run();
     db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_thread ON direct_messages(threadId)').run();
     db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_recipient ON direct_messages(recipientId)').run();
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_sub_status ON substitutions(status)').run();
   } catch (e) {}
 
   // Seed default users if missing
@@ -782,6 +813,44 @@ export function initDB() {
     for (const col of standardColleges) {
       insertCollege.run(...col);
     }
+
+    // Seed substitutions
+    const insertSub = db.prepare(`
+      INSERT OR REPLACE INTO substitutions (
+        id, date, slot, subject, semester, room, absentFaculty, reason, status, assignedTo, urgency, suggestedFaculty
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    insertSub.run(
+      'SUB-101',
+      'Today, 23 Aug',
+      '03:00 PM - 04:00 PM',
+      'CSE-304: Design & Analysis of Algorithms',
+      '6th Semester (Sec A)',
+      'Room 302, Block B',
+      'Prof. Vikram Seth',
+      'Medical Emergency Leave',
+      'Pending',
+      null,
+      'Urgent',
+      JSON.stringify(['Dr. Manish Verma', 'Dr. Aditi Zear', 'Dr. N Anand'])
+    );
+
+    insertSub.run(
+      'SUB-102',
+      'Today, 23 Aug',
+      '11:00 AM - 12:00 PM',
+      'CSE-302: Database Management Systems',
+      '4th Semester (Sec B)',
+      'Lab 201, Block A',
+      'Dr. Priya Sen',
+      'IEEE Research Conference Duty',
+      'Assigned',
+      'Dr. Manish Verma',
+      'Normal',
+      JSON.stringify(['Dr. Manish Verma', 'Ms. Poonam'])
+    );
 }
 
 export default db;

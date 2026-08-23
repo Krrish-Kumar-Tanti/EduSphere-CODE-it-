@@ -1048,14 +1048,18 @@ app.post('/api/grievances', upload.single('evidencePhoto'), (req, res) => {
 app.patch('/api/grievances/:id/status', (req, res) => {
   try {
     const { id } = req.params;
-    const { status, resolutionNotes } = req.body;
+    const { status, resolutionNotes, rsaSeal, resolvedBy } = req.body;
+    const resolvedAt = new Date().toISOString();
 
     db.prepare(`
       UPDATE grievances 
       SET status = COALESCE(?, status), 
-          resolutionNotes = COALESCE(?, resolutionNotes)
+          resolutionNotes = COALESCE(?, resolutionNotes),
+          rsaSeal = COALESCE(?, rsaSeal),
+          resolvedBy = COALESCE(?, resolvedBy),
+          resolvedAt = COALESCE(?, resolvedAt)
       WHERE id = ?
-    `).run(status || null, resolutionNotes || null, id);
+    `).run(status || null, resolutionNotes || null, rsaSeal || null, resolvedBy || null, resolvedAt, id);
 
     const updated = db.prepare('SELECT * FROM grievances WHERE id = ?').get(id);
     return res.json({ success: true, ticket: updated });
@@ -1068,6 +1072,74 @@ app.delete('/api/grievances/:id', (req, res) => {
   try {
     db.prepare('DELETE FROM grievances WHERE id = ?').run(req.params.id);
     return res.json({ success: true, message: 'Grievance ticket permanently removed.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================
+// 7. HOD SUBSTITUTION ENGINE ENDPOINTS
+// ==========================================
+
+app.get('/api/substitutions', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM substitutions ORDER BY createdAt DESC').all();
+    const parsed = rows.map(r => ({
+      ...r,
+      suggestedFaculty: typeof r.suggestedFaculty === 'string' ? JSON.parse(r.suggestedFaculty || '[]') : r.suggestedFaculty
+    }));
+    return res.json({ success: true, count: parsed.length, substitutions: parsed, data: parsed });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/substitutions', (req, res) => {
+  try {
+    const { date, slot, subject, semester, room, absentFaculty, reason, urgency, suggestedFaculty } = req.body;
+    const id = `SUB-${Date.now().toString().slice(-4)}`;
+    const suggestedStr = Array.isArray(suggestedFaculty) ? JSON.stringify(suggestedFaculty) : (suggestedFaculty || '[]');
+
+    db.prepare(`
+      INSERT INTO substitutions (id, date, slot, subject, semester, room, absentFaculty, reason, status, urgency, suggestedFaculty)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, ?)
+    `).run(
+      id,
+      date || 'Today',
+      slot || '03:00 PM - 04:00 PM',
+      subject || 'Core Engineering Course',
+      semester || '6th Semester',
+      room || 'Room 302',
+      absentFaculty || 'Faculty Member',
+      reason || 'Official Duty Leave',
+      urgency || 'Normal',
+      suggestedStr
+    );
+
+    const created = db.prepare('SELECT * FROM substitutions WHERE id = ?').get(id);
+    return res.status(201).json({ success: true, substitution: created });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.patch('/api/substitutions/:id/assign', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { assignedTo, notes } = req.body;
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    db.prepare(`
+      UPDATE substitutions 
+      SET status = 'Assigned',
+          assignedTo = ?,
+          notes = COALESCE(?, notes),
+          assignedAt = ?
+      WHERE id = ?
+    `).run(assignedTo, notes || null, `Today, ${nowTime}`, id);
+
+    const updated = db.prepare('SELECT * FROM substitutions WHERE id = ?').get(id);
+    return res.json({ success: true, substitution: updated });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

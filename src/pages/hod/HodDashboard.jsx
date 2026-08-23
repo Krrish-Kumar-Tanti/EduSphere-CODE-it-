@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import DigitalApprovals from './DigitalApprovals';
 import SubstitutionEngine from './SubstitutionEngine';
 import Broadcasts from './Broadcasts';
-import GrievanceDrawer from '../student/GrievanceDrawer';
+import AcademicGrievanceDesk from './AcademicGrievanceDesk';
 import VirtualIDCard from '../student/VirtualIDCard';
 import { 
   PRESET_SECTION_S2_TIMETABLE, 
@@ -396,7 +396,7 @@ export default function HodDashboard() {
         {activeTab === 'approvals' && <DigitalApprovals />}
         {activeTab === 'substitutions' && <SubstitutionEngine />}
         {activeTab === 'broadcasts' && <Broadcasts />}
-        {activeTab === 'grievances' && <GrievanceDrawer />}
+        {activeTab === 'grievances' && <AcademicGrievanceDesk />}
         {activeTab === 'idcard' && <VirtualIDCard />}
 
       </div>

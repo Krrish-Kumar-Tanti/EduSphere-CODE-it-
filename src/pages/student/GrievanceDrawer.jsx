@@ -363,9 +363,32 @@ export default function GrievanceDrawer() {
                     <img src={ticket.imageUrl} alt="Attached" className="w-full h-24 object-cover rounded-xl border border-slate-200" />
                   )}
 
+                  {/* Resolution Notes & RSA Seal display */}
+                  {ticket.status === 'Resolved' && (
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[10px] space-y-1">
+                      <div className="flex items-center justify-between font-bold text-emerald-900">
+                        <span>✅ Resolved by HOD / Staff</span>
+                        {ticket.rsaSeal && (
+                          <span className="font-mono text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded text-[9px]">
+                            {ticket.rsaSeal}
+                          </span>
+                        )}
+                      </div>
+                      {ticket.resolutionNotes && (
+                        <p className="text-slate-700 italic">"{ticket.resolutionNotes}"</p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
                     <span className="text-slate-500 font-semibold">{ticket.studentName}</span>
-                    <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                    <span className={`font-bold px-2 py-0.5 rounded-md border ${
+                      ticket.status === 'Resolved' 
+                        ? 'text-emerald-700 bg-emerald-50 border-emerald-200' 
+                        : ticket.status?.includes('Review') 
+                        ? 'text-amber-700 bg-amber-50 border-amber-200'
+                        : 'text-indigo-700 bg-indigo-50 border-indigo-200'
+                    }`}>
                       {ticket.status}
                     </span>
                   </div>
