@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { sounds } from '../utils/soundEffects';
 import { DEFAULT_TIMETABLES, PRESET_GGSIPU_S2_TIMETABLE, PRESET_DTU_A4_TIMETABLE } from '../data/syllabusData';
+import { API_BASE } from '../config/api';
 
 const DataContext = createContext();
-const API_BASE = 'http://localhost:5001/api';
 
 // Create or connect to universal multi-tab live synchronization channels
 let syncChannel = null;

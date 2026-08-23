@@ -58,10 +58,20 @@ const upload = multer({
   fileFilter
 });
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(uploadsDir));
+
+// Healthcheck endpoint for Cloud Platforms (Render, Railway, Fly.io)
+app.get(['/api/health', '/health'], (req, res) => {
+  return res.json({
+    status: 'ok',
+    app: 'EduSphere Smart Campus Backend API',
+    uptimeSeconds: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // ==========================================
 // 1. AUTH & USER PROFILE ROUTES (4-ROLE ENGINE)
@@ -1243,6 +1253,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(PORT, () => {
-  console.log(`⚡ EduSphere High-Performance SQLite Backend API running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`⚡ EduSphere High-Performance SQLite Backend API running on http://0.0.0.0:${PORT}`);
 });
