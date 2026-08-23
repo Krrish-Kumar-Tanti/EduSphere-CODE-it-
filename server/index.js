@@ -22,18 +22,19 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Multer storage configuration
+// Multer storage configuration with sanitization
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
+    const sanitizedName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E6)}-${sanitizedName}${ext}`;
     cb(null, uniqueSuffix);
   }
 });
 const upload = multer({ 
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 }
+  limits: { fileSize: 30 * 1024 * 1024 } // 30MB
 });
 
 app.use(cors());
@@ -41,7 +42,9 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
-// --- 1. AUTH & USER PROFILE ROUTES (4-ROLE ENGINE) ---
+// ==========================================
+// 1. AUTH & USER PROFILE ROUTES (4-ROLE ENGINE)
+// ==========================================
 
 // Role-specific Registration
 app.post('/api/register', (req, res) => {
@@ -66,7 +69,8 @@ app.post('/api/register', (req, res) => {
       supervisorLevel,
       adminCode,
       badgeId,
-      digitalSignature
+      digitalSignature,
+      university = 'GGSIPU'
     } = req.body;
 
     if (!name || !password) {
@@ -100,9 +104,9 @@ app.post('/api/register', (req, res) => {
       INSERT INTO users (
         id, name, email, role, enrollment, college, department, semester, section, 
         bloodGroup, validUpto, avatar, password, cgpa, attendanceOverall,
-        designation, subjects, cabin, assignedUnit, supervisorLevel, adminCode, badgeId, digitalSignature
+        designation, subjects, cabin, assignedUnit, supervisorLevel, adminCode, badgeId, digitalSignature, university
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     insertStmt.run(
@@ -128,7 +132,8 @@ app.post('/api/register', (req, res) => {
       supervisorLevel || null,
       adminCode || null,
       badgeId || null,
-      digitalSignature || null
+      digitalSignature || null,
+      university || 'GGSIPU'
     );
 
     const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
@@ -176,6 +181,49 @@ app.post('/api/login', (req, res) => {
   }
 });
 
+// Dynamic Faculty Directory: Returns all active and registered teachers
+app.get('/api/users/faculty', (req, res) => {
+  try {
+    const faculty = db.prepare(`
+      SELECT id, name, email, role, department, designation, cabin, avatar, subjects, section, college, university 
+      FROM users 
+      WHERE role = 'teacher' 
+      ORDER BY name ASC
+    `).all();
+    return res.json({ success: true, count: faculty.length, faculty, users: faculty });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get All Users (optionally filtered by role)
+app.get('/api/users', (req, res) => {
+  try {
+    const { role } = req.query;
+    let users = [];
+    if (role) {
+      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin, subjects, section, university FROM users WHERE role = ? ORDER BY name ASC').all(role);
+    } else {
+      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin, subjects, section, university FROM users ORDER BY name ASC').all();
+    }
+    return res.json({ success: true, users });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get User by ID
+app.get('/api/user/:id', (req, res) => {
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    delete user.password;
+    return res.json({ success: true, user });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 // Update Profile & Photo
 app.put('/api/user/:id', (req, res) => {
   try {
@@ -198,7 +246,8 @@ app.put('/api/user/:id', (req, res) => {
       supervisorLevel,
       adminCode,
       badgeId,
-      digitalSignature
+      digitalSignature,
+      university
     } = req.body;
 
     const existing = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
@@ -225,7 +274,8 @@ app.put('/api/user/:id', (req, res) => {
         supervisorLevel = COALESCE(?, supervisorLevel),
         adminCode = COALESCE(?, adminCode),
         badgeId = COALESCE(?, badgeId),
-        digitalSignature = COALESCE(?, digitalSignature)
+        digitalSignature = COALESCE(?, digitalSignature),
+        university = COALESCE(?, university)
       WHERE id = ?
     `);
 
@@ -248,6 +298,7 @@ app.put('/api/user/:id', (req, res) => {
       adminCode || null,
       badgeId || null,
       digitalSignature || null,
+      university || null,
       id
     );
 
@@ -273,35 +324,7 @@ app.post('/api/upload-avatar', upload.single('photo'), (req, res) => {
   }
 });
 
-// Get User by ID
-app.get('/api/user/:id', (req, res) => {
-  try {
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    delete user.password;
-    return res.json({ success: true, user });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-// Get All Users (optionally by role)
-app.get('/api/users', (req, res) => {
-  try {
-    const { role } = req.query;
-    let users = [];
-    if (role) {
-      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin FROM users WHERE role = ?').all(role);
-    } else {
-      users = db.prepare('SELECT id, name, email, role, enrollment, college, department, designation, avatar, cabin FROM users').all();
-    }
-    return res.json({ success: true, users });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-// --- 2. UNIVERSAL COLLEGE SEARCH ---
+// Universal College Search
 app.get('/api/colleges', (req, res) => {
   try {
     const q = req.query.q || '';
@@ -315,7 +338,7 @@ app.get('/api/colleges', (req, res) => {
   }
 });
 
-// --- 3. DYNAMIC QR CODE DATAURL GENERATOR ---
+// Dynamic QR Code DataURL Generator
 app.get('/api/qrcode', async (req, res) => {
   try {
     const data = req.query.data || `EDUS-ROTATING-${Date.now()}`;
@@ -334,9 +357,123 @@ app.get('/api/qrcode', async (req, res) => {
   }
 });
 
-// --- 4. ATTENDANCE & LIVE CLASS SESSIONS ---
+// ==========================================
+// 2. ULTRA-PRIVATE 1-ON-1 WHATSAPP DIRECT CHAT
+// ==========================================
 
-// Get active session
+// Get Messages (Strict Peer-to-Peer Partitioning)
+app.get('/api/messages', (req, res) => {
+  try {
+    const { user1, user2, userId } = req.query;
+    let messages = [];
+
+    if (user1 && user2) {
+      // Strictly filter for the exact conversation pair
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+        ORDER BY timestamp ASC
+      `).all(user1, user2, user2, user1);
+    } else if (userId) {
+      // Return only messages sent or received by this specific user
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        WHERE senderId = ? OR receiverId = ?
+        ORDER BY timestamp ASC
+      `).all(userId, userId);
+    } else {
+      // In production / safety, do not leak all global chats
+      messages = [];
+    }
+
+    return res.json({ success: true, messages });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Send Direct Message
+app.post('/api/messages', upload.single('attachment'), (req, res) => {
+  try {
+    const { 
+      senderId, 
+      senderName, 
+      senderRole, 
+      senderAvatar, 
+      receiverId, 
+      receiverName, 
+      receiverRole, 
+      message = '' 
+    } = req.body;
+
+    if (!senderId || !receiverId) {
+      return res.status(400).json({ error: 'Sender and receiver IDs are required.' });
+    }
+
+    const fileUrl = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.fileUrl || null;
+    const fileName = req.file ? req.file.originalname : req.body.fileName || null;
+
+    if (!message.trim() && !fileUrl) {
+      return res.status(400).json({ error: 'Message text or attachment required.' });
+    }
+
+    const msgId = `MSG-${Date.now().toString().slice(-6)}`;
+    db.prepare(`
+      INSERT INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt, fileUrl, fileName)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+    `).run(
+      msgId,
+      senderId,
+      senderName || 'Campus User',
+      senderRole || 'student',
+      senderAvatar || null,
+      receiverId,
+      receiverName || 'Faculty Member',
+      receiverRole || 'teacher',
+      message.trim(),
+      fileUrl,
+      fileName
+    );
+
+    const created = db.prepare('SELECT * FROM direct_messages WHERE id = ?').get(msgId);
+    return res.status(201).json({ success: true, message: created });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Mark messages as read
+app.patch('/api/messages/read', (req, res) => {
+  try {
+    const { senderId, receiverId } = req.body;
+    if (senderId && receiverId) {
+      db.prepare(`
+        UPDATE direct_messages 
+        SET readReceipt = 1 
+        WHERE senderId = ? AND receiverId = ?
+      `).run(senderId, receiverId);
+    }
+    return res.json({ success: true, message: 'Messages marked as read.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Delete message
+app.delete('/api/messages/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM direct_messages WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Message deleted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================
+// 3. CALENDAR-CENTRIC PERSISTENT ATTENDANCE
+// ==========================================
+
+// Get active classroom session
 app.get('/api/attendance/session', (req, res) => {
   try {
     let session = db.prepare("SELECT * FROM attendance_sessions WHERE status = 'active' ORDER BY startTime DESC LIMIT 1").get();
@@ -357,13 +494,12 @@ app.get('/api/attendance/session', (req, res) => {
   }
 });
 
-// Set / Start active session (Teacher creates/updates)
+// Start / Update Active Session
 app.post('/api/attendance/session', (req, res) => {
   try {
     const { subject, code, room, beaconId, faculty } = req.body;
     const sessionId = `SESS-${Date.now().toString().slice(-4)}`;
 
-    // Deactivate previous active sessions
     db.prepare("UPDATE attendance_sessions SET status = 'completed' WHERE status = 'active'").run();
 
     db.prepare(`
@@ -385,7 +521,7 @@ app.post('/api/attendance/session', (req, res) => {
   }
 });
 
-// Student attendance verification
+// Student Attendance BLE Proximity + Passcode Verification
 app.post('/api/attendance/verify', (req, res) => {
   try {
     const { studentEnrollment, studentName, passcode, verifiedVia } = req.body;
@@ -403,12 +539,29 @@ app.post('/api/attendance/verify', (req, res) => {
     const sessId = active?.id || 'SESS-LIVE-01';
     const sub = active?.subject || 'Operating Systems Lab (CSE-301)';
     const via = verifiedVia || 'Dual-Factor BLE Proximity (0.8m) + PIN';
+    const todayStr = new Date().toISOString().slice(0, 10);
 
-    // Insert into logs
+    // Insert into live logs
     db.prepare(`
       INSERT INTO attendance_logs (studentEnrollment, studentName, sessionId, subject, verifiedVia, status)
       VALUES (?, ?, ?, ?, ?, 'Present')
     `).run(enr, name, sessId, sub, via);
+
+    // Upsert into persistent attendance_records table
+    const recId = `REC-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+    db.prepare(`
+      INSERT OR REPLACE INTO attendance_records (id, student_id, student_name, enrollment, subject, section, date, status, marked_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Present', ?)
+    `).run(
+      recId,
+      enr,
+      name,
+      enr,
+      sub,
+      'CSE-A',
+      todayStr,
+      active?.faculty || 'Dr. Manish Verma'
+    );
 
     return res.json({
       success: true,
@@ -423,7 +576,158 @@ app.post('/api/attendance/verify', (req, res) => {
   }
 });
 
-// Get session logs / live verified roster
+// Batch Save Attendance Records (Faculty Suite)
+app.post('/api/attendance/batch', (req, res) => {
+  try {
+    const { date, subject, section, markedBy, records } = req.body;
+    if (!date || !subject || !Array.isArray(records)) {
+      return res.status(400).json({ error: 'Date, subject, and student records array required.' });
+    }
+
+    const targetDate = date.slice(0, 10);
+    const insertStmt = db.prepare(`
+      INSERT OR REPLACE INTO attendance_records (id, student_id, student_name, enrollment, subject, section, date, status, marked_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const transaction = db.transaction((rows) => {
+      for (const r of rows) {
+        const id = `ATT-${targetDate}-${r.enrollment || r.roll || r.id}-${subject.replace(/[^a-zA-Z0-9]/g, '')}`;
+        insertStmt.run(
+          id,
+          r.id || r.enrollment || 'STU',
+          r.name,
+          r.enrollment || r.roll || '04214802722',
+          subject,
+          section || 'CSE-A',
+          targetDate,
+          r.status || 'Present',
+          markedBy || 'Faculty Member'
+        );
+      }
+    });
+
+    transaction(records);
+    return res.json({ success: true, count: records.length, message: `Attendance saved for ${targetDate} (${records.length} scholars)` });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get Attendance Records with flexible filtering
+app.get('/api/attendance/records', (req, res) => {
+  try {
+    const { enrollment, date, subject, section, month } = req.query;
+    let query = "SELECT * FROM attendance_records WHERE 1=1";
+    const params = [];
+
+    if (enrollment) {
+      query += " AND (enrollment = ? OR student_id = ?)";
+      params.push(enrollment, enrollment);
+    }
+    if (date) {
+      query += " AND date = ?";
+      params.push(date);
+    }
+    if (subject) {
+      query += " AND subject LIKE ?";
+      params.push(`%${subject}%`);
+    }
+    if (section) {
+      query += " AND section = ?";
+      params.push(section);
+    }
+    if (month) {
+      query += " AND date LIKE ?";
+      params.push(`${month}%`);
+    }
+
+    query += " ORDER BY date DESC, timestamp DESC";
+    const records = db.prepare(query).all(...params);
+    return res.json({ success: true, count: records.length, records });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Get Complete Attendance Stats & Calendar Breakdown for Student
+app.get('/api/attendance/stats/:enrollment', (req, res) => {
+  try {
+    const { enrollment } = req.params;
+    const records = db.prepare(`
+      SELECT * FROM attendance_records 
+      WHERE enrollment = ? OR student_id = ? 
+      ORDER BY date ASC
+    `).all(enrollment, enrollment);
+
+    const totalClasses = records.length;
+    const presentClasses = records.filter(r => r.status === 'Present' || r.status === 'present').length;
+    const absentClasses = records.filter(r => r.status === 'Absent' || r.status === 'absent').length;
+    const lateClasses = records.filter(r => r.status.includes('Late') || r.status.includes('Exempt') || r.status.includes('leave')).length;
+
+    const overallPercentage = totalClasses > 0 ? ((presentClasses / totalClasses) * 100).toFixed(1) : '88.4';
+
+    // Subject breakdown
+    const subjectMap = {};
+    records.forEach(r => {
+      if (!subjectMap[r.subject]) {
+        subjectMap[r.subject] = { total: 0, present: 0, absent: 0 };
+      }
+      subjectMap[r.subject].total++;
+      if (r.status === 'Present' || r.status === 'present') {
+        subjectMap[r.subject].present++;
+      } else {
+        subjectMap[r.subject].absent++;
+      }
+    });
+
+    const subjectStats = Object.keys(subjectMap).map(sub => {
+      const s = subjectMap[sub];
+      const pct = ((s.present / s.total) * 100).toFixed(1);
+      return {
+        subject: sub,
+        total: s.total,
+        present: s.present,
+        absent: s.absent,
+        percentage: pct,
+        isSafe: parseFloat(pct) >= 75
+      };
+    });
+
+    // Calculate classes needed to reach 75% or classes safe to skip
+    let classesNeeded = 0;
+    let classesCanSkip = 0;
+    const currentPct = parseFloat(overallPercentage);
+
+    if (currentPct < 75) {
+      // (present + x) / (total + x) >= 0.75 => x >= (0.75 * total - present) / 0.25
+      classesNeeded = Math.max(0, Math.ceil((0.75 * totalClasses - presentClasses) / 0.25));
+    } else {
+      // present / (total + y) >= 0.75 => y <= (present / 0.75) - total
+      classesCanSkip = Math.max(0, Math.floor((presentClasses / 0.75) - totalClasses));
+    }
+
+    return res.json({
+      success: true,
+      stats: {
+        totalClasses,
+        presentClasses,
+        absentClasses,
+        lateClasses,
+        overallPercentage: parseFloat(overallPercentage),
+        isCompliant: parseFloat(overallPercentage) >= 75,
+        classesNeeded,
+        classesCanSkip,
+        subjectStats,
+        records
+      }
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Logs & Deletion
 app.get('/api/attendance/logs', (req, res) => {
   try {
     const logs = db.prepare("SELECT * FROM attendance_logs ORDER BY timestamp DESC LIMIT 50").all();
@@ -433,17 +737,217 @@ app.get('/api/attendance/logs', (req, res) => {
   }
 });
 
-// Get user attendance history
-app.get('/api/attendance/:userId', (req, res) => {
+app.delete('/api/attendance/logs/:id', (req, res) => {
   try {
-    const records = db.prepare('SELECT * FROM attendance_records WHERE userId = ? ORDER BY createdAt DESC').all(req.params.userId);
-    return res.json({ success: true, records });
+    db.prepare('DELETE FROM attendance_logs WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Attendance log entry deleted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/attendance/logs', (req, res) => {
+  try {
+    db.prepare('DELETE FROM attendance_logs').run();
+    return res.json({ success: true, message: 'All attendance logs purged.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================
+// 4. NOTES & ACADEMIC VAULT (FILE STREAMING)
+// ==========================================
+
+app.get('/api/notes', (req, res) => {
+  try {
+    const { university, semester, subject } = req.query;
+    let query = "SELECT * FROM notes WHERE 1=1";
+    const params = [];
+
+    if (university) {
+      query += " AND university = ?";
+      params.push(university);
+    }
+    if (semester) {
+      query += " AND semester LIKE ?";
+      params.push(`%${semester}%`);
+    }
+    if (subject) {
+      query += " AND subject LIKE ?";
+      params.push(`%${subject}%`);
+    }
+
+    query += " ORDER BY createdAt DESC";
+    const notes = db.prepare(query).all(...params);
+    return res.json({ success: true, count: notes.length, notes, data: notes });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 });
 
-// --- 5. GRIEVANCES (DOUBLE-TRIAGE) ---
+app.post('/api/notes', upload.single('noteFile'), (req, res) => {
+  try {
+    const { subject, title, faculty, faculty_name, semester, fileSize, unit, university } = req.body;
+    const fileUrl = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.fileUrl || null;
+    const noteId = `NOTE-${Date.now().toString().slice(-4)}`;
+    const effectiveFaculty = faculty_name || faculty || 'Dr. Manish Verma';
+    const effectiveSize = req.file ? `${(req.file.size / (1024 * 1024)).toFixed(1)} MB` : (fileSize || '3.5 MB');
+    const ext = req.file ? path.extname(req.file.originalname).replace('.', '').toUpperCase() : 'PDF';
+
+    db.prepare(`
+      INSERT INTO notes (id, title, subject, semester, faculty, faculty_name, faculty_id, file_url, file_size, file_type, upload_date, downloads_count, unit, university)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Today', 0, ?, ?)
+    `).run(
+      noteId, 
+      title || 'Course Lecture Notes', 
+      subject || 'Core Engineering', 
+      semester || '6th Semester', 
+      effectiveFaculty,
+      effectiveFaculty, 
+      req.body.faculty_id || null, 
+      fileUrl, 
+      effectiveSize, 
+      ext, 
+      unit || 'Unit 1', 
+      university || 'GGSIPU'
+    );
+
+    const newNote = db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId);
+    return res.json({ success: true, note: newNote, message: 'Notes published to vault.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Increment download counter
+app.post('/api/notes/:id/download', (req, res) => {
+  try {
+    db.prepare('UPDATE notes SET downloads_count = downloads_count + 1 WHERE id = ?').run(req.params.id);
+    const updated = db.prepare('SELECT * FROM notes WHERE id = ?').get(req.params.id);
+    return res.json({ success: true, note: updated });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/notes/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM notes WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Note deleted from vault.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================
+// 5. TIMETABLE MASTER & SCHEDULE BROADCAST
+// ==========================================
+
+app.get('/api/timetables', (req, res) => {
+  try {
+    const { university, department, semester, section } = req.query;
+    let query = "SELECT * FROM timetables WHERE 1=1";
+    const params = [];
+
+    if (university) {
+      query += " AND university = ?";
+      params.push(university);
+    }
+    if (department) {
+      query += " AND department = ?";
+      params.push(department);
+    }
+    if (semester) {
+      query += " AND semester LIKE ?";
+      params.push(`%${semester}%`);
+    }
+    if (section) {
+      query += " AND section = ?";
+      params.push(section);
+    }
+
+    query += " ORDER BY updated_at DESC";
+    const rows = db.prepare(query).all(...params);
+    const parsed = rows.map(r => ({
+      ...r,
+      schedule: JSON.parse(r.schedule_json)
+    }));
+
+    return res.json({ success: true, count: parsed.length, timetables: parsed });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/timetables', (req, res) => {
+  try {
+    const { university, department, semester, section, schedule, publishedBy } = req.body;
+    if (!university || !department || !semester || !section || !schedule) {
+      return res.status(400).json({ error: 'University, department, semester, section, and schedule required.' });
+    }
+
+    const id = `TT-${university}-${department.replace(/[^a-zA-Z0-9]/g, '')}-${semester.replace(/[^a-zA-Z0-9]/g, '')}-${section.replace(/[^a-zA-Z0-9]/g, '')}`;
+    const scheduleJson = typeof schedule === 'string' ? schedule : JSON.stringify(schedule);
+
+    db.prepare(`
+      INSERT OR REPLACE INTO timetables (id, university, department, semester, section, schedule_json, published_by, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).run(id, university, department, semester, section, scheduleJson, publishedBy || 'HOD Office');
+
+    return res.json({ success: true, id, message: `Timetable published for ${university} ${section}` });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/timetables/:id', (req, res) => {
+  try {
+    db.prepare('DELETE FROM timetables WHERE id = ?').run(req.params.id);
+    return res.json({ success: true, message: 'Timetable deleted.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// Syllabus Progress Tracking
+app.get('/api/syllabus/progress', (req, res) => {
+  try {
+    const { faculty_id, university } = req.query;
+    let query = "SELECT * FROM syllabus_progress WHERE 1=1";
+    const params = [];
+    if (faculty_id) { query += " AND faculty_id = ?"; params.push(faculty_id); }
+    if (university) { query += " AND university = ?"; params.push(university); }
+
+    const rows = db.prepare(query).all(...params);
+    const parsed = rows.map(r => ({ ...r, progress: JSON.parse(r.progress_json) }));
+    return res.json({ success: true, progress: parsed });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/syllabus/progress', (req, res) => {
+  try {
+    const { faculty_id, university, department, subject_code, subject_name, progress } = req.body;
+    const id = `SYL-${faculty_id}-${subject_code}`;
+    const progressJson = typeof progress === 'string' ? progress : JSON.stringify(progress);
+
+    db.prepare(`
+      INSERT OR REPLACE INTO syllabus_progress (id, faculty_id, university, department, subject_code, subject_name, progress_json, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).run(id, faculty_id || 'FAC', university || 'GGSIPU', department || 'CSE', subject_code, subject_name, progressJson);
+
+    return res.json({ success: true, message: 'Syllabus progress updated.' });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================
+// 6. GRIEVANCES & CAMPUS BROADCASTS
+// ==========================================
+
 app.get('/api/grievances', (req, res) => {
   try {
     const { destination } = req.query;
@@ -506,7 +1010,6 @@ app.post('/api/grievances', upload.single('evidencePhoto'), (req, res) => {
   }
 });
 
-// Update grievance status & remarks
 app.patch('/api/grievances/:id/status', (req, res) => {
   try {
     const { id } = req.params;
@@ -535,63 +1038,7 @@ app.delete('/api/grievances/:id', (req, res) => {
   }
 });
 
-// Delete Attendance Logs (Single or Purge All)
-app.delete('/api/attendance/logs/:id', (req, res) => {
-  try {
-    db.prepare('DELETE FROM attendance_logs WHERE id = ?').run(req.params.id);
-    return res.json({ success: true, message: 'Attendance log entry deleted.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.delete('/api/attendance/logs', (req, res) => {
-  try {
-    db.prepare('DELETE FROM attendance_logs').run();
-    return res.json({ success: true, message: 'All attendance logs purged.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-// --- 6. NOTES VAULT ---
-app.get('/api/notes', (req, res) => {
-  try {
-    const notes = db.prepare('SELECT * FROM notes ORDER BY createdAt DESC').all();
-    return res.json({ success: true, notes, data: notes });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-app.post('/api/notes', upload.single('noteFile'), (req, res) => {
-  try {
-    const { subject, title, faculty, semester, fileSize } = req.body;
-    const fileUrl = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : null;
-    const noteId = `NOTE-${Date.now().toString().slice(-4)}`;
-
-    db.prepare(`
-      INSERT INTO notes (id, subject, title, faculty, fileSize, semester, fileUrl)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `).run(noteId, subject, title, faculty, fileSize || '2.5 MB', semester, fileUrl);
-
-    const newNote = db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId);
-    return res.json({ success: true, note: newNote, message: 'Notes published to vault.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.delete('/api/notes/:id', (req, res) => {
-  try {
-    db.prepare('DELETE FROM notes WHERE id = ?').run(req.params.id);
-    return res.json({ success: true, message: 'Note deleted from vault.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-// --- 7. CAMPUS BROADCASTS ---
+// Broadcasts
 app.get('/api/broadcasts', (req, res) => {
   try {
     const broadcasts = db.prepare('SELECT * FROM broadcasts ORDER BY isUrgent DESC, createdAt DESC').all();
@@ -637,101 +1084,6 @@ app.delete('/api/broadcasts/:id', (req, res) => {
   }
 });
 
-// --- 8. DIRECT WHATSAPP-STYLE 1-ON-1 MESSAGING ---
-app.get('/api/messages', (req, res) => {
-  try {
-    const { user1, user2, userId } = req.query;
-    let messages = [];
-
-    if (user1 && user2) {
-      messages = db.prepare(`
-        SELECT * FROM direct_messages 
-        WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
-        ORDER BY timestamp ASC
-      `).all(user1, user2, user2, user1);
-    } else if (userId) {
-      messages = db.prepare(`
-        SELECT * FROM direct_messages 
-        WHERE senderId = ? OR receiverId = ?
-        ORDER BY timestamp ASC
-      `).all(userId, userId);
-    } else {
-      messages = db.prepare('SELECT * FROM direct_messages ORDER BY timestamp ASC LIMIT 100').all();
-    }
-
-    return res.json({ success: true, messages });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.post('/api/messages', (req, res) => {
-  try {
-    const { 
-      senderId, 
-      senderName, 
-      senderRole, 
-      senderAvatar, 
-      receiverId, 
-      receiverName, 
-      receiverRole, 
-      message 
-    } = req.body;
-
-    if (!senderId || !receiverId || !message) {
-      return res.status(400).json({ error: 'Sender, receiver, and message content required.' });
-    }
-
-    const msgId = `MSG-${Date.now().toString().slice(-6)}`;
-    db.prepare(`
-      INSERT INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    `).run(
-      msgId,
-      senderId,
-      senderName || 'Anonymous Scholar',
-      senderRole || 'student',
-      senderAvatar || null,
-      receiverId,
-      receiverName || 'Faculty Member',
-      receiverRole || 'teacher',
-      message
-    );
-
-    const created = db.prepare('SELECT * FROM direct_messages WHERE id = ?').get(msgId);
-    return res.status(201).json({ success: true, message: created });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.patch('/api/messages/read', (req, res) => {
-  try {
-    const { senderId, receiverId } = req.body;
-    if (senderId && receiverId) {
-      db.prepare(`
-        UPDATE direct_messages 
-        SET readReceipt = 1 
-        WHERE senderId = ? AND receiverId = ?
-      `).run(senderId, receiverId);
-    }
-    return res.json({ success: true, message: 'Messages marked as read.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-app.delete('/api/messages/:id', (req, res) => {
-  try {
-    db.prepare('DELETE FROM direct_messages WHERE id = ?').run(req.params.id);
-    return res.json({ success: true, message: 'Message deleted.' });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
 app.listen(PORT, () => {
-  console.log(`⚡ EduSphere SQLite Backend API running on http://localhost:${PORT}`);
+  console.log(`⚡ EduSphere High-Performance SQLite Backend API running on http://localhost:${PORT}`);
 });
-
-

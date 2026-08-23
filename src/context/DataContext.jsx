@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { sounds } from '../utils/soundEffects';
+import { DEFAULT_TIMETABLES, PRESET_GGSIPU_S2_TIMETABLE, PRESET_DTU_A4_TIMETABLE } from '../data/syllabusData';
 
 const DataContext = createContext();
 const API_BASE = 'http://localhost:5001/api';
@@ -21,11 +23,11 @@ export const INITIAL_GRIEVANCES = [
     studentName: 'Krrish Kumar Tanti',
     studentEnrollment: '04214802722',
     isAnonymous: false,
-    title: 'Lab 204 AC Compressor Failure',
+    title: 'Lab 204 AC Compressor Tripping on High GPU Workload',
     category: 'Maintenance',
     destination: 'staff',
     priority: 'Urgent',
-    description: 'The AC unit in Lab 204 is vibrating heavily and emitting heat during the 2 PM lab slot.',
+    description: 'The central AC unit in Lab 204 is tripping the circuit breaker during heavy GPU workloads.',
     imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=600',
     status: 'In-Progress',
     timestamp: 'Today, 11:20 AM',
@@ -38,50 +40,16 @@ export const INITIAL_GRIEVANCES = [
     studentName: 'Anonymous Student',
     studentEnrollment: 'REDACTED-PRIVACY-SHIELD',
     isAnonymous: true,
-    title: 'Syllabus Pace for Machine Learning Elective',
+    title: 'Mid-Term Exam Evaluation Transparency & Unit 3 Pace',
     category: 'Academic Concern & Syllabus Pace',
     destination: 'hod',
     priority: 'Medium',
-    description: 'Unit 3 (Backpropagation & CNNs) requires more lab practical sessions before midterms.',
+    description: 'Requesting re-moderation of question 4 in Cloud Computing unit test for section CSE-A.',
     imageUrl: null,
     status: 'Under Review',
     timestamp: 'Yesterday, 04:45 PM',
     assignedTo: 'HOD Academic Committee',
     location: 'Academic Wing, Room 304',
-    resolutionNotes: null
-  },
-  {
-    id: 'GRV-903',
-    studentName: 'Aryan Sharma',
-    studentEnrollment: '04214802723',
-    isAnonymous: false,
-    title: 'Canteen Water Dispenser Filter Replacement',
-    category: 'Cleaning & Hygiene',
-    destination: 'staff',
-    priority: 'High',
-    description: 'Block B Ground Floor water cooler display indicates filter replacement overdue by 12 days.',
-    imageUrl: 'https://images.unsplash.com/photo-1546768292-fb12f6c92568?auto=format&fit=crop&q=80&w=600',
-    status: 'Resolved',
-    timestamp: '2 days ago',
-    assignedTo: 'Hygiene & Cleanliness Cell',
-    location: 'Block B Cafeteria',
-    resolutionNotes: 'Filter cartridge replaced with new NSF-certified filter. Water TDS measured at 85 PPM.'
-  },
-  {
-    id: 'GRV-904',
-    studentName: 'Sneha Patel',
-    studentEnrollment: '04214802726',
-    isAnonymous: false,
-    title: 'Campus WiFi Deadzone in 3rd Floor Library',
-    category: 'Technical Support',
-    destination: 'staff',
-    priority: 'Medium',
-    description: 'Access Point AP-LIB-04 has blinking amber LED and drops connections repeatedly.',
-    imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=600',
-    status: 'In-Progress',
-    timestamp: 'Today, 09:15 AM',
-    assignedTo: 'IT & Network Infrastructure',
-    location: 'Central Library, 3rd Floor',
     resolutionNotes: null
   }
 ];
@@ -91,49 +59,77 @@ export const INITIAL_NOTES = [
     id: 'NOTE-101',
     subject: 'Operating Systems (CSE-301)',
     faculty: 'Dr. Manish Verma',
+    faculty_name: 'Dr. Manish Verma',
     title: 'Unit 4: Deadlocks, Banker\'s Algorithm & Virtual Memory',
     fileSize: '4.8 MB',
+    file_size: '4.8 MB',
     uploadDate: '21 Aug 2026',
-    downloadUrl: '#',
+    upload_date: '21 Aug 2026',
+    fileUrl: null,
+    file_url: null,
     semester: '6th Semester (Year 3)',
     format: 'PDF',
-    downloads: 142
+    downloads: 142,
+    downloads_count: 142,
+    unit: 'Unit 4',
+    university: 'GGSIPU'
   },
   {
     id: 'NOTE-102',
-    subject: 'Computer Networks (CSE-303)',
-    faculty: 'Prof. Ananya Roy',
-    title: 'TCP/IP Flow Control & Congestion Management PPTs',
-    fileSize: '12.4 MB',
+    subject: 'TH-CS207 Operating System Design',
+    faculty: 'Dr. Nipun Bansal',
+    faculty_name: 'Dr. Nipun Bansal',
+    title: 'Unit 2: Process Scheduling, Threads & Synchronization Semaphores',
+    fileSize: '5.1 MB',
+    file_size: '5.1 MB',
     uploadDate: '20 Aug 2026',
-    downloadUrl: '#',
-    semester: '6th Semester (Year 3)',
-    format: 'PPTX',
-    downloads: 98
+    upload_date: '20 Aug 2026',
+    fileUrl: null,
+    file_url: null,
+    semester: '3rd Semester (Year 2)',
+    format: 'PDF',
+    downloads: 188,
+    downloads_count: 188,
+    unit: 'Unit 2',
+    university: 'DTU'
   },
   {
     id: 'NOTE-103',
-    subject: 'Cloud Computing & DevOps (CSE-305)',
-    faculty: 'Dr. S. K. Naitik',
-    title: 'Kubernetes Pod Scheduling & Docker Hands-on Lab Manual',
-    fileSize: '8.1 MB',
+    subject: 'TH-CS203 Object Oriented Design',
+    faculty: 'Dr. Aditi Zear',
+    faculty_name: 'Dr. Aditi Zear',
+    title: 'Unit 3: GoF Design Patterns, Structural & Behavioral UML',
+    fileSize: '6.4 MB',
+    file_size: '6.4 MB',
     uploadDate: '19 Aug 2026',
-    downloadUrl: '#',
-    semester: '6th Semester (Year 3)',
+    upload_date: '19 Aug 2026',
+    fileUrl: null,
+    file_url: null,
+    semester: '3rd Semester (Year 2)',
     format: 'PDF',
-    downloads: 215
+    downloads: 204,
+    downloads_count: 204,
+    unit: 'Unit 3',
+    university: 'DTU'
   },
   {
     id: 'NOTE-104',
-    subject: 'Design & Analysis of Algorithms (CSE-304)',
-    faculty: 'Prof. Vikram Seth',
-    title: 'Dynamic Programming vs Greedy: Complete Practice Problem Set',
-    fileSize: '3.2 MB',
-    uploadDate: '17 Aug 2026',
-    downloadUrl: '#',
-    semester: '6th Semester (Year 3)',
+    subject: 'Data Structure (CSE-201)',
+    faculty: 'Ms. Poonam',
+    faculty_name: 'Ms. Poonam',
+    title: 'Unit 1: Stacks, Circular Queues & Self-Balancing AVL Trees',
+    fileSize: '3.8 MB',
+    file_size: '3.8 MB',
+    uploadDate: '18 Aug 2026',
+    upload_date: '18 Aug 2026',
+    fileUrl: null,
+    file_url: null,
+    semester: '3rd Semester (Year 2)',
     format: 'PDF',
-    downloads: 176
+    downloads: 165,
+    downloads_count: 165,
+    unit: 'Unit 1',
+    university: 'GGSIPU'
   }
 ];
 
@@ -143,10 +139,10 @@ export const INITIAL_BROADCASTS = [
     sender: 'Prof. S. K. Naitik (HOD CSE)',
     role: 'HOD',
     title: '🚨 Mid-Term Practical Exam Schedule Released',
-    message: 'All 6th-semester students must carry their digital Virtual ID cards for entry starting Monday. Zero physical paperwork required.',
+    message: 'All 6th-semester & 3rd-semester students must carry their digital Virtual ID cards for entry starting Monday. Zero physical paperwork required.',
     time: '25 mins ago',
     isUrgent: true,
-    targetAudience: 'Computer Science & Engineering (CSE)'
+    targetAudience: 'CSE Department (All Semesters)'
   },
   {
     id: 'BC-02',
@@ -163,7 +159,7 @@ export const INITIAL_BROADCASTS = [
 export const INITIAL_SUBSTITUTIONS = [
   {
     id: 'SUB-101',
-    date: 'Today, 22 Aug',
+    date: 'Today, 23 Aug',
     slot: '03:00 PM - 04:00 PM',
     subject: 'CSE-304: Design & Analysis of Algorithms',
     semester: '6th Semester (Sec A)',
@@ -173,11 +169,11 @@ export const INITIAL_SUBSTITUTIONS = [
     status: 'Pending',
     assignedTo: null,
     urgency: 'Urgent',
-    suggestedFaculty: ['Dr. Manish Verma', 'Dr. Priya Sen', 'Prof. Ananya Roy']
+    suggestedFaculty: ['Dr. Manish Verma', 'Dr. Aditi Zear', 'Dr. N Anand']
   },
   {
     id: 'SUB-102',
-    date: 'Today, 22 Aug',
+    date: 'Today, 23 Aug',
     slot: '11:00 AM - 12:00 PM',
     subject: 'CSE-302: Database Management Systems',
     semester: '4th Semester (Sec B)',
@@ -188,20 +184,6 @@ export const INITIAL_SUBSTITUTIONS = [
     assignedTo: 'Dr. Manish Verma',
     urgency: 'Normal',
     suggestedFaculty: ['Dr. Manish Verma']
-  },
-  {
-    id: 'SUB-103',
-    date: 'Today, 22 Aug',
-    slot: '04:00 PM - 05:00 PM',
-    subject: 'CSE-308: Machine Learning Lab',
-    semester: '6th Semester (Sec B)',
-    room: 'Lab 204, Block A',
-    absentFaculty: 'Dr. Rahul Saxena',
-    reason: 'Family Emergency Leave',
-    status: 'Pending',
-    assignedTo: null,
-    urgency: 'High',
-    suggestedFaculty: ['Prof. S. K. Naitik', 'Dr. Manish Verma']
   }
 ];
 
@@ -218,27 +200,8 @@ export const INITIAL_APPROVALS = [
     submissionDate: '21 Aug 2026',
     status: 'Pending',
     urgency: 'High',
-    description: 'Procurement of 20x ESP32 BLE Beacon nodes, Raspberry Pi gateways, fast IoT cables, and refreshments for 250 participants.',
-    documents: ['Budget_Breakdown.pdf', 'Vendor_Hardware_Quotations.pdf'],
-    signatureHash: null,
-    signedAt: null,
-    signedBy: null
-  },
-  {
-    id: 'APP-502',
-    title: 'On-Duty (OD) Leave for Smart Hackathon Grand Finale',
-    requester: 'Aryan Sharma',
-    requesterRole: 'Student (Team Lead)',
-    enrollment: '04214802723',
-    category: 'OD Leave Request',
-    amount: null,
-    duration: '3 Days (24 - 26 Aug 2026)',
-    department: 'CSE 6th Semester',
-    submissionDate: '20 Aug 2026',
-    status: 'Pending',
-    urgency: 'Medium',
-    description: 'Selected for National Grand Finale at IIT Bombay nodal center. Requesting official attendance waiver for 6 lecture sessions.',
-    documents: ['Official_Selection_Letter.pdf', 'Travel_Ticket.pdf'],
+    description: 'Procurement of 20x ESP32 BLE Beacon nodes, Raspberry Pi gateways, and refreshments for 250 participants.',
+    documents: ['Budget_Breakdown.pdf', 'Hardware_Quotations.pdf'],
     signatureHash: null,
     signedAt: null,
     signedBy: null
@@ -255,8 +218,8 @@ export const INITIAL_APPROVALS = [
     submissionDate: '18 Aug 2026',
     status: 'Approved',
     urgency: 'Urgent',
-    description: 'Procurement of GPU compute node server for final year AI Capstone projects and faculty LLM research.',
-    documents: ['GPU_Lab_Grant_Proposal.pdf', 'Dell_HPC_Invoice.pdf'],
+    description: 'Procurement of GPU compute node server for final year AI Capstone projects.',
+    documents: ['GPU_Lab_Grant_Proposal.pdf'],
     signatureHash: 'RSA-HOD-CSE-0x9F42A7C8E2',
     signedAt: '19 Aug 2026, 02:30 PM',
     signedBy: 'Prof. S. K. Naitik (HOD)'
@@ -284,12 +247,110 @@ export const INITIAL_FACULTY_DIRECTORY = [
     name: 'Dr. Manish Verma',
     designation: 'Associate Professor',
     department: 'Computer Science & Engineering (CSE)',
-    subject: 'Operating Systems & Linux Kernel',
-    experience: '12 Years',
-    rating: '4.9/5.0',
+    subject: 'Operating Systems Lab, Cloud Computing, Computer Networks',
     email: 'manish.verma@campus.edu',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Room 304, Academic Block A'
+    cabin: 'Room 304, Academic Block A',
+    university: 'GGSIPU'
+  },
+  {
+    id: 'FAC-2031',
+    name: 'Dr. Aditi Zear',
+    designation: 'Assistant Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'TH-CS203 Object Oriented Design (OOPS)',
+    email: 'aditi.zear@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room AB4-305, Academic Block 4',
+    university: 'DTU'
+  },
+  {
+    id: 'FAC-2072',
+    name: 'Dr. Nipun Bansal',
+    designation: 'Associate Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'TH-CS207 Operating System Design (OS)',
+    email: 'nipun.bansal@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room AB4-208, Academic Block 4',
+    university: 'DTU'
+  },
+  {
+    id: 'FAC-2073',
+    name: 'Dr. Ravin Ahuja',
+    designation: 'Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'TH-CS207 Software Engineering (SE)',
+    email: 'ravin.ahuja@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room AB4-303, Academic Block 4',
+    university: 'DTU'
+  },
+  {
+    id: 'FAC-2051',
+    name: 'Dr. N Anand',
+    designation: 'Associate Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'TH-CS205 Design & Analysis of Algorithm (DAA)',
+    email: 'n.anand@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room AB4-203, Academic Block 4',
+    university: 'DTU'
+  },
+  {
+    id: 'FAC-3011',
+    name: 'Ms. Poonam',
+    designation: 'Assistant Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'Data Structure (DS), DS Lab',
+    email: 'poonam.cse@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room 4202, Shastri Park Block',
+    university: 'GGSIPU'
+  },
+  {
+    id: 'FAC-3091',
+    name: 'Mr. Yogesh',
+    designation: 'Assistant Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'Computational Methods (CM), CM Lab',
+    email: 'yogesh.math@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room 4202, Shastri Park Block',
+    university: 'GGSIPU'
+  },
+  {
+    id: 'FAC-3052',
+    name: 'Dr. Swati Juneja',
+    designation: 'Associate Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'Digital Logic Circuit Design (DLCD) Lab',
+    email: 'swati.juneja@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room 5202, Shastri Park Block',
+    university: 'GGSIPU'
+  },
+  {
+    id: 'FAC-3071',
+    name: 'Ms. Ruchita Sareen',
+    designation: 'Assistant Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'Discrete Mathematics (DM)',
+    email: 'ruchita.sareen@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room 4202, Shastri Park Block',
+    university: 'GGSIPU'
+  },
+  {
+    id: 'FAC-3051',
+    name: 'Ms. Shipra',
+    designation: 'Assistant Professor',
+    department: 'Computer Science & Engineering (CSE)',
+    subject: 'Digital Logic & Circuit Design (DLCD)',
+    email: 'shipra.ece@campus.edu',
+    avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=250',
+    cabin: 'Room 4202, Shastri Park Block',
+    university: 'GGSIPU'
   },
   {
     id: 'HOD-001',
@@ -297,47 +358,10 @@ export const INITIAL_FACULTY_DIRECTORY = [
     designation: 'Head of Department & Professor',
     department: 'Department of Computer Science & Engineering',
     subject: 'Cloud Architectures & AI Systems',
-    experience: '18 Years',
-    rating: '5.0/5.0',
     email: 'hod.cse@campus.edu',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Room 101, Executive Wing'
-  },
-  {
-    id: 'FAC-2041',
-    name: 'Dr. Priya Sen',
-    designation: 'Assistant Professor',
-    department: 'Information Technology (IT)',
-    subject: 'Database Systems & Big Data Analytics',
-    experience: '8 Years',
-    rating: '4.8/5.0',
-    email: 'priya.sen@campus.edu',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Room 208, Academic Block A'
-  },
-  {
-    id: 'FAC-3094',
-    name: 'Prof. Vikram Seth',
-    designation: 'Professor',
-    department: 'AI & Data Science (AIDS)',
-    subject: 'Algorithms & Computational Complexity',
-    experience: '15 Years',
-    rating: '4.7/5.0',
-    email: 'vikram.seth@campus.edu',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Room 312, Academic Block B'
-  },
-  {
-    id: 'STF-504',
-    name: 'Rajesh Sharma',
-    designation: 'Facilities Lead Supervisor',
-    department: 'Ground Operations & Maintenance',
-    subject: 'Campus Infrastructure, Electrical & Sanitation',
-    experience: '10 Years',
-    rating: '4.9/5.0',
-    email: 'rajesh.facilities@campus.edu',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
-    cabin: 'Operations Control Room 04'
+    cabin: 'Room 101, Executive Wing',
+    university: 'GGSIPU'
   }
 ];
 
@@ -351,7 +375,7 @@ export const INITIAL_MESSAGES = [
     receiverId: 'FAC-1092',
     receiverName: 'Dr. Manish Verma',
     receiverRole: 'teacher',
-    message: 'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose scripts pre-configured?',
+    message: 'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose memory benchmarks pre-configured?',
     timestamp: 'Today, 01:45 PM',
     readReceipt: 1
   },
@@ -378,6 +402,8 @@ export const DataProvider = ({ children }) => {
   const [approvals, setApprovals] = useState(INITIAL_APPROVALS);
   const [studentsRoster, setStudentsRoster] = useState(INITIAL_STUDENT_ROSTER);
   const [facultyDirectory, setFacultyDirectory] = useState(INITIAL_FACULTY_DIRECTORY);
+  const [timetables, setTimetables] = useState(DEFAULT_TIMETABLES);
+  const [syllabusProgress, setSyllabusProgress] = useState([]);
   
   // Direct Messaging State (WhatsApp Style)
   const [directMessages, setDirectMessages] = useState(INITIAL_MESSAGES);
@@ -399,14 +425,30 @@ export const DataProvider = ({ children }) => {
     beaconActive: true
   });
 
-  const [studentAttendanceRecord, setStudentAttendanceRecord] = useState([
-    { id: '1', subject: 'Operating Systems Lab', code: 'OS42', date: 'Today, 02:15 PM', status: 'Present', verifiedVia: 'BLE Proximity (0.8m) + PIN' },
-    { id: '2', subject: 'Computer Networks', code: 'CN81', date: '21 Aug 2026', status: 'Present', verifiedVia: 'BLE + Passcode' },
-    { id: '3', subject: 'Cloud Computing', code: 'CC19', date: '20 Aug 2026', status: 'Present', verifiedVia: 'BLE + Passcode' },
-    { id: '4', subject: 'Web Technologies', code: 'WT33', date: '19 Aug 2026', status: 'Present', verifiedVia: 'BLE + Passcode' }
+  // Calendar Attendance Records
+  const [calendarAttendance, setCalendarAttendance] = useState([
+    { date: '2026-08-03', subject: 'Operating Systems Lab', status: 'Present' },
+    { date: '2026-08-03', subject: 'Computer Networks', status: 'Present' },
+    { date: '2026-08-04', subject: 'Cloud Computing Architecture', status: 'Present' },
+    { date: '2026-08-04', subject: 'Software Engineering', status: 'Present' },
+    { date: '2026-08-05', subject: 'Operating Systems Lab', status: 'Present' },
+    { date: '2026-08-06', subject: 'Design & Analysis of Algorithms', status: 'Present' },
+    { date: '2026-08-07', subject: 'Computer Networks', status: 'Present' },
+    { date: '2026-08-10', subject: 'Operating Systems Lab', status: 'Present' },
+    { date: '2026-08-11', subject: 'Cloud Computing Architecture', status: 'Absent' },
+    { date: '2026-08-12', subject: 'Software Engineering', status: 'Present' },
+    { date: '2026-08-13', subject: 'Design & Analysis of Algorithms', status: 'Present' },
+    { date: '2026-08-14', subject: 'Computer Networks', status: 'Present' },
+    { date: '2026-08-17', subject: 'Operating Systems Lab', status: 'Present' },
+    { date: '2026-08-18', subject: 'Cloud Computing Architecture', status: 'Late / Exempt' },
+    { date: '2026-08-19', subject: 'Software Engineering', status: 'Present' },
+    { date: '2026-08-20', subject: 'Operating Systems Lab', status: 'Present' },
+    { date: '2026-08-21', subject: 'Computer Networks', status: 'Present' },
+    { date: '2026-08-22', subject: 'Cloud Computing Architecture', status: 'Present' },
+    { date: '2026-08-23', subject: 'Operating Systems Lab', status: 'Present' }
   ]);
 
-  // Broadcast helper function to notify all other open tabs across channels
+  // Broadcast helper function across channels
   const broadcastSync = (type, payload) => {
     const message = { type, payload, timestamp: Date.now() };
     if (syncChannel) {
@@ -424,7 +466,59 @@ export const DataProvider = ({ children }) => {
       if (!type) return;
 
       switch (type) {
+        case 'FACULTY_REGISTERED':
+          if (payload) {
+            setFacultyDirectory(prev => {
+              const exists = prev.some(f => f.id === payload.id || f.email === payload.email);
+              if (exists) {
+                return prev.map(f => (f.id === payload.id || f.email === payload.email) ? { ...f, ...payload } : f);
+              }
+              return [payload, ...prev];
+            });
+          }
+          break;
+
+        case 'DIRECT_MESSAGE_SENT':
+          if (payload) {
+            setDirectMessages(prev => {
+              if (prev.some(m => m.id === payload.id)) return prev;
+              return [...prev, payload];
+            });
+
+            // Play incoming WhatsApp sound & show toast on recipient tab
+            sounds.playMessageReceived();
+            setIncomingChatToast({
+              id: payload.id,
+              senderId: payload.senderId,
+              senderName: payload.senderName,
+              senderRole: payload.senderRole,
+              senderAvatar: payload.senderAvatar,
+              message: payload.message,
+              time: 'Just now'
+            });
+          }
+          break;
+
+        case 'DIRECT_MESSAGE_DELETED':
+          setDirectMessages(prev => prev.filter(m => m.id !== payload.id));
+          break;
+
+        case 'ATTENDANCE_BATCH_SAVED':
+          if (payload && Array.isArray(payload.records)) {
+            const dateStr = payload.date;
+            setCalendarAttendance(prev => {
+              const newEntries = payload.records.map(r => ({
+                date: dateStr,
+                subject: payload.subject,
+                status: r.status
+              }));
+              return [...prev, ...newEntries];
+            });
+          }
+          break;
+
         case 'ATTENDANCE_VERIFIED':
+          sounds.playSuccessFanfare();
           setStudentsRoster(prev => {
             const exists = prev.some(s => s.roll === payload.studentEnrollment || s.name === payload.studentName);
             if (exists) {
@@ -479,23 +573,32 @@ export const DataProvider = ({ children }) => {
           })));
           break;
 
-        case 'GRIEVANCE_CREATED':
-          setGrievances(prev => {
-            if (prev.some(g => g.id === payload.id)) return prev;
-            return [payload, ...prev];
-          });
+        case 'TIMETABLE_PUBLISHED':
+          if (payload) {
+            setTimetables(prev => {
+              const idx = prev.findIndex(t => t.university === payload.university && t.section === payload.section);
+              if (idx !== -1) {
+                const next = [...prev];
+                next[idx] = payload;
+                return next;
+              }
+              return [payload, ...prev];
+            });
+          }
           break;
 
-        case 'GRIEVANCE_STATUS_UPDATED':
-          setGrievances(prev => prev.map(g => g.id === payload.id ? {
-            ...g,
-            status: payload.status,
-            resolutionNotes: payload.resolutionNotes || g.resolutionNotes
-          } : g));
-          break;
-
-        case 'GRIEVANCE_DELETED':
-          setGrievances(prev => prev.filter(g => g.id !== payload.id));
+        case 'SYLLABUS_PROGRESS_UPDATED':
+          if (payload) {
+            setSyllabusProgress(prev => {
+              const idx = prev.findIndex(p => p.subject_code === payload.subject_code && p.faculty_id === payload.faculty_id);
+              if (idx !== -1) {
+                const next = [...prev];
+                next[idx] = payload;
+                return next;
+              }
+              return [payload, ...prev];
+            });
+          }
           break;
 
         case 'NOTE_ADDED':
@@ -520,72 +623,19 @@ export const DataProvider = ({ children }) => {
           setBroadcasts(prev => prev.filter(b => b.id !== payload.id));
           break;
 
-        case 'SUBSTITUTION_ASSIGNED':
-          setSubstitutions(prev => prev.map(s => s.id === payload.subId ? {
-            ...s,
-            status: 'Assigned',
-            assignedTo: payload.facultyName
-          } : s));
+        case 'GRIEVANCE_CREATED':
+          setGrievances(prev => {
+            if (prev.some(g => g.id === payload.id)) return prev;
+            return [payload, ...prev];
+          });
           break;
 
-        case 'APPROVAL_SIGNED':
-          setApprovals(prev => prev.map(a => a.id === payload.appId ? {
-            ...a,
-            status: 'Approved',
-            signatureHash: payload.signatureHash,
-            signedAt: payload.signedAt,
-            signedBy: payload.signedBy
-          } : a));
-          break;
-
-        case 'APPROVAL_ACKNOWLEDGED':
-          setApprovals(prev => prev.map(a => a.id === payload.appId ? {
-            ...a,
-            status: 'Acknowledged (Under Review)'
-          } : a));
-          break;
-
-        case 'APPROVAL_REJECTED':
-          setApprovals(prev => prev.map(a => a.id === payload.appId ? {
-            ...a,
-            status: 'Rejected',
-            rejectionReason: payload.reason
-          } : a));
-          break;
-
-        case 'FACULTY_REGISTERED':
-          if (payload) {
-            setFacultyDirectory(prev => {
-              if (prev.some(f => f.id === payload.id || f.email === payload.email)) {
-                return prev.map(f => (f.id === payload.id || f.email === payload.email) ? { ...f, ...payload } : f);
-              }
-              return [payload, ...prev];
-            });
-          }
-          break;
-
-        case 'DIRECT_MESSAGE_SENT':
-          if (payload) {
-            setDirectMessages(prev => {
-              if (prev.some(m => m.id === payload.id)) return prev;
-              return [...prev, payload];
-            });
-
-            // Show floating WhatsApp notification toast on recipient tab
-            setIncomingChatToast({
-              id: payload.id,
-              senderId: payload.senderId,
-              senderName: payload.senderName,
-              senderRole: payload.senderRole,
-              senderAvatar: payload.senderAvatar,
-              message: payload.message,
-              time: 'Just now'
-            });
-          }
-          break;
-
-        case 'DIRECT_MESSAGE_DELETED':
-          setDirectMessages(prev => prev.filter(m => m.id !== payload.id));
+        case 'GRIEVANCE_STATUS_UPDATED':
+          setGrievances(prev => prev.map(g => g.id === payload.id ? {
+            ...g,
+            status: payload.status,
+            resolutionNotes: payload.resolutionNotes || g.resolutionNotes
+          } : g));
           break;
 
         default:
@@ -631,44 +681,35 @@ export const DataProvider = ({ children }) => {
           setBroadcasts(bcData.broadcasts);
         }
 
-        // Fetch registered faculty & staff from DB
-        const usersRes = await fetch(`${API_BASE}/users?role=teacher`);
-        const usersData = await usersRes.json();
-        if (usersData.success && Array.isArray(usersData.users) && usersData.users.length > 0) {
-          const mappedFaculty = usersData.users.map(u => ({
-            id: u.id,
-            name: u.name,
-            designation: u.designation || 'Faculty Member',
-            department: u.department || 'Computer Science',
-            subject: u.subjects || 'Core Academic Curriculum',
-            email: u.email,
-            avatar: u.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
-            cabin: u.cabin || 'Faculty Desk'
-          }));
-
-          // Merge with initial directory without duplicating
-          setFacultyDirectory(prev => {
-            const combined = [...prev];
-            mappedFaculty.forEach(mf => {
-              const idx = combined.findIndex(c => c.id === mf.id || c.email === mf.email);
-              if (idx !== -1) {
-                combined[idx] = { ...combined[idx], ...mf };
-              } else {
-                combined.unshift(mf);
-              }
-            });
-            return combined;
-          });
+        // Fetch faculty directory from dedicated endpoint /api/users/faculty
+        const facultyRes = await fetch(`${API_BASE}/users/faculty`);
+        const facultyData = await facultyRes.json();
+        if (facultyData.success && Array.isArray(facultyData.faculty) && facultyData.faculty.length > 0) {
+          setFacultyDirectory(facultyData.faculty);
         }
 
-        // Fetch direct messages
-        const msgRes = await fetch(`${API_BASE}/messages`);
-        const msgData = await msgRes.json();
-        if (msgData.success && Array.isArray(msgData.messages) && msgData.messages.length > 0) {
-          setDirectMessages(msgData.messages);
+        // Fetch timetables
+        const ttRes = await fetch(`${API_BASE}/timetables`);
+        const ttData = await ttRes.json();
+        if (ttData.success && Array.isArray(ttData.timetables) && ttData.timetables.length > 0) {
+          setTimetables(ttData.timetables);
+        }
+
+        // Fetch syllabus progress
+        const sylRes = await fetch(`${API_BASE}/syllabus/progress`);
+        const sylData = await sylRes.json();
+        if (sylData.success && Array.isArray(sylData.progress) && sylData.progress.length > 0) {
+          setSyllabusProgress(sylData.progress);
+        }
+
+        // Fetch attendance records
+        const attRes = await fetch(`${API_BASE}/attendance/records`);
+        const attData = await attRes.json();
+        if (attData.success && Array.isArray(attData.records) && attData.records.length > 0) {
+          setCalendarAttendance(attData.records);
         }
       } catch (e) {
-        // Backend offline fallback - keeping local state intact
+        // Backend offline fallback - keeping state intact
       }
     };
 
@@ -677,334 +718,19 @@ export const DataProvider = ({ children }) => {
     return () => clearInterval(pollInterval);
   }, []);
 
-  // --- ACTIONS & MUTATIONS WITH INSTANT BROADCAST ---
+  // --- ACTIONS & MUTATIONS WITH INSTANT MULTI-TAB BROADCAST ---
 
-  // A. Grievance Handlers
-  const addGrievance = async (newGrievance) => {
-    setGrievances(prev => [newGrievance, ...prev]);
-    broadcastSync('GRIEVANCE_CREATED', newGrievance);
-
-    try {
-      await fetch(`${API_BASE}/grievances`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newGrievance)
-      });
-    } catch (e) {
-      console.warn('Grievance API sync error:', e);
-    }
-  };
-
-  const updateGrievanceStatus = async (id, newStatus, resolutionNotes = '') => {
-    setGrievances(prev => prev.map(g => g.id === id ? {
-      ...g,
-      status: newStatus,
-      resolutionNotes: resolutionNotes || g.resolutionNotes
-    } : g));
-
-    broadcastSync('GRIEVANCE_STATUS_UPDATED', { id, status: newStatus, resolutionNotes });
-
-    try {
-      await fetch(`${API_BASE}/grievances/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, resolutionNotes })
-      });
-    } catch (e) {
-      console.warn('Grievance status API sync error:', e);
-    }
-  };
-
-  const deleteGrievance = async (id) => {
-    setGrievances(prev => prev.filter(g => g.id !== id));
-    broadcastSync('GRIEVANCE_DELETED', { id });
-
-    try {
-      await fetch(`${API_BASE}/grievances/${id}`, { method: 'DELETE' });
-    } catch (e) {
-      console.warn('Grievance delete API error:', e);
-    }
-  };
-
-  // B. Notes Vault Handlers
-  const addNote = async (newNote) => {
-    setNotes(prev => [newNote, ...prev]);
-    broadcastSync('NOTE_ADDED', newNote);
-
-    try {
-      await fetch(`${API_BASE}/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newNote)
-      });
-    } catch (e) {
-      console.warn('Notes API sync error:', e);
-    }
-  };
-
-  const deleteNote = async (id) => {
-    setNotes(prev => prev.filter(n => n.id !== id));
-    broadcastSync('NOTE_DELETED', { id });
-
-    try {
-      await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
-    } catch (e) {
-      console.warn('Note delete API error:', e);
-    }
-  };
-
-  // C. Broadcast Handlers
-  const addBroadcast = async (newBroadcast) => {
-    setBroadcasts(prev => [newBroadcast, ...prev]);
-    broadcastSync('BROADCAST_CREATED', newBroadcast);
-
-    try {
-      await fetch(`${API_BASE}/broadcasts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBroadcast)
-      });
-    } catch (e) {
-      console.warn('Broadcast API sync error:', e);
-    }
-  };
-
-  const deleteBroadcast = async (id) => {
-    setBroadcasts(prev => prev.filter(b => b.id !== id));
-    broadcastSync('BROADCAST_DELETED', { id });
-
-    try {
-      await fetch(`${API_BASE}/broadcasts/${id}`, { method: 'DELETE' });
-    } catch (e) {
-      console.warn('Broadcast delete API error:', e);
-    }
-  };
-
-  // D. Substitution Engine Handlers
-  const assignSubstitution = (subId, facultyName) => {
-    setSubstitutions(prev => prev.map(s => s.id === subId ? {
-      ...s,
-      status: 'Assigned',
-      assignedTo: facultyName
-    } : s));
-
-    broadcastSync('SUBSTITUTION_ASSIGNED', { subId, facultyName });
-  };
-
-  // E. Digital Approvals Handlers
-  const acknowledgeApproval = (appId) => {
-    setApprovals(prev => prev.map(a => a.id === appId ? {
-      ...a,
-      status: 'Acknowledged (Under Review)'
-    } : a));
-
-    broadcastSync('APPROVAL_ACKNOWLEDGED', { appId });
-  };
-
-  const signApproval = (appId, signerName = 'Prof. S. K. Naitik (HOD)') => {
-    const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase();
-    const signatureHash = `RSA-HOD-CSE-0x${randomHex}89A`;
-    const now = new Date();
-    const timeString = `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-    setApprovals(prev => prev.map(app => app.id === appId ? {
-      ...app,
-      status: 'Approved',
-      signatureHash,
-      signedAt: timeString,
-      signedBy: signerName
-    } : app));
-
-    broadcastSync('APPROVAL_SIGNED', { appId, signatureHash, signedAt: timeString, signedBy: signerName });
-    return { signatureHash, signedAt: timeString };
-  };
-
-  const rejectApproval = (appId, reason = 'Insufficient documentation or budget exceeded') => {
-    setApprovals(prev => prev.map(app => app.id === appId ? {
-      ...app,
-      status: 'Rejected',
-      rejectionReason: reason
-    } : app));
-
-    broadcastSync('APPROVAL_REJECTED', { appId, reason });
-  };
-
-  // F. Teacher Classroom & Attendance Studio Handlers
-  const updateStudentRosterStatus = (studentId, nextStatus) => {
-    let computedStatus = '';
-    setStudentsRoster(prev => prev.map(s => {
-      if (s.id === studentId || s.roll === studentId) {
-        computedStatus = nextStatus || (s.status === 'present' ? 'absent' : s.status === 'absent' ? 'leave' : 'present');
-        return {
-          ...s,
-          status: computedStatus,
-          verifiedAt: computedStatus === 'present' ? 'Teacher Override' : '-'
-        };
-      }
-      return s;
-    }));
-
-    broadcastSync('ROSTER_OVERRIDE', { studentId, nextStatus: computedStatus || nextStatus });
-  };
-
-  const markAllStudents = (statusToSet = 'present') => {
-    setStudentsRoster(prev => prev.map(s => ({
-      ...s,
-      status: statusToSet,
-      verifiedAt: statusToSet === 'present' ? 'Quick Override (All)' : '-'
-    })));
-
-    broadcastSync('MARK_ALL_ROSTER', { status: statusToSet });
-  };
-
-  const deleteAttendanceLog = async (id) => {
-    try {
-      await fetch(`${API_BASE}/attendance/logs/${id}`, { method: 'DELETE' });
-    } catch (e) {}
-  };
-
-  const purgeAllAttendanceLogs = async () => {
-    setStudentsRoster(prev => prev.map(s => ({
-      ...s,
-      status: 'absent',
-      verifiedAt: '-'
-    })));
-    try {
-      await fetch(`${API_BASE}/attendance/logs`, { method: 'DELETE' });
-    } catch (e) {}
-  };
-
-  const generateNewPasscode = async () => {
-    const codePrefixes = ['OS', 'CS', 'AI', 'NET', 'ED'];
-    const randomPrefix = codePrefixes[Math.floor(Math.random() * codePrefixes.length)];
-    const randomDigits = Math.floor(10 + Math.random() * 90);
-    const newCode = `${randomPrefix}${randomDigits}`;
-
-    const updated = {
-      ...activeSession,
-      code: newCode,
-      expiresInSeconds: 600
-    };
-
-    setActiveSession(updated);
-    broadcastSync('SESSION_UPDATED', updated);
-
-    try {
-      await fetch(`${API_BASE}/attendance/session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated)
-      });
-    } catch (e) {
-      console.warn('Session API sync error:', e);
-    }
-
-    return newCode;
-  };
-
-  const toggleBeaconActive = () => {
-    const updated = {
-      ...activeSession,
-      beaconActive: activeSession.beaconActive === false ? true : false
-    };
-    setActiveSession(updated);
-    broadcastSync('SESSION_UPDATED', updated);
-  };
-
-  // G. Student Attendance Handshake Handler (STUDENT ➔ TEACHER LIVE SYNC)
-  const markStudentAttendance = async (codeEntered, studentInfo = null) => {
-    const entered = codeEntered.trim().toUpperCase();
-    const expected = activeSession.code.trim().toUpperCase();
-
-    if (entered === expected) {
-      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const studentName = studentInfo?.name || 'Krrish Kumar Tanti';
-      const studentRoll = studentInfo?.enrollment || '04214802722';
-
-      // 1. Update Student Local Attendance Log History
-      setStudentAttendanceRecord(prev => [
-        {
-          id: `REC-${Date.now()}`,
-          subject: activeSession.subject,
-          code: activeSession.code,
-          date: `Today, ${nowTime}`,
-          status: 'Present',
-          verifiedVia: 'BLE Proximity (0.8m) + PIN'
-        },
-        ...prev.filter(r => r.code !== activeSession.code)
-      ]);
-
-      // 2. Update Teacher's Live Roster in Current Tab
-      setStudentsRoster(prev => {
-        const matchIndex = prev.findIndex(s => s.roll === studentRoll || s.name === studentName);
-        if (matchIndex !== -1) {
-          return prev.map((s, idx) => idx === matchIndex ? {
-            ...s,
-            status: 'present',
-            bleRssi: '-38 dBm (0.8m in-range)',
-            verifiedAt: `Live ${nowTime}`,
-            device: 'BLE Validated Smartphone'
-          } : s);
-        } else {
-          return [
-            {
-              id: `STU-${Date.now()}`,
-              roll: studentRoll,
-              name: studentName,
-              status: 'present',
-              bleRssi: '-40 dBm (0.8m)',
-              device: 'BLE Validated Smartphone',
-              verifiedAt: `Live ${nowTime}`
-            },
-            ...prev
-          ];
-        }
-      });
-
-      // 3. BROADCAST INSTANTLY ACROSS ALL OPEN BROWSER TABS (<50ms)
-      broadcastSync('ATTENDANCE_VERIFIED', {
-        studentEnrollment: studentRoll,
-        studentName,
-        verifiedAt: `Live ${nowTime}`,
-        device: 'BLE Validated Smartphone',
-        subject: activeSession.subject
-      });
-
-      // 4. Save to Backend SQLite
-      try {
-        fetch(`${API_BASE}/attendance/verify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            studentEnrollment: studentRoll,
-            studentName,
-            passcode: entered,
-            verifiedVia: 'Dual-Factor BLE Proximity (0.8m) + PIN'
-          })
-        }).catch(err => console.warn('Attendance backend verification error:', err));
-      } catch (e) {}
-
-      return { 
-        success: true, 
-        message: `Presence validated for ${activeSession.subject}! Marked Present in live roster.` 
-      };
-    } else {
-      return { 
-        success: false, 
-        message: `Invalid room passcode "${codeEntered}". Please check the teacher's display board.` 
-      };
-    }
-  };
-
-  // H. Direct WhatsApp-Style 1-on-1 Messaging Handlers
-  const sendDirectMessage = async (messageText, currentUser, targetPartner) => {
-    if (!messageText.trim() || !targetPartner) return;
+  // Direct WhatsApp 1-on-1 Message Sender
+  const sendDirectMessage = async (messageText, currentUser, targetPartner, attachmentFile = null) => {
+    if ((!messageText.trim() && !attachmentFile) || !targetPartner) return;
 
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msgId = `MSG-${Date.now().toString().slice(-6)}`;
+
     const newMsg = {
-      id: `MSG-${Date.now().toString().slice(-6)}`,
+      id: msgId,
       senderId: currentUser?.id || currentUser?.enrollment || 'STU-001',
-      senderName: currentUser?.name || 'Anonymous Member',
+      senderName: currentUser?.name || 'Student Scholar',
       senderRole: currentUser?.role || 'student',
       senderAvatar: currentUser?.avatar,
       receiverId: targetPartner.id || targetPartner.enrollment || 'FAC-1092',
@@ -1012,18 +738,41 @@ export const DataProvider = ({ children }) => {
       receiverRole: targetPartner.role || 'teacher',
       message: messageText.trim(),
       timestamp: `Today, ${nowTime}`,
-      readReceipt: 0
+      readReceipt: 0,
+      fileUrl: attachmentFile?.url || null,
+      fileName: attachmentFile?.name || null
     };
+
+    // Play message sent audio chime
+    sounds.playMessageSent();
 
     setDirectMessages(prev => [...prev, newMsg]);
     broadcastSync('DIRECT_MESSAGE_SENT', newMsg);
 
     try {
-      await fetch(`${API_BASE}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMsg)
-      });
+      if (attachmentFile?.file) {
+        const formData = new FormData();
+        formData.append('attachment', attachmentFile.file);
+        formData.append('senderId', newMsg.senderId);
+        formData.append('senderName', newMsg.senderName);
+        formData.append('senderRole', newMsg.senderRole);
+        formData.append('senderAvatar', newMsg.senderAvatar || '');
+        formData.append('receiverId', newMsg.receiverId);
+        formData.append('receiverName', newMsg.receiverName);
+        formData.append('receiverRole', newMsg.receiverRole);
+        formData.append('message', newMsg.message);
+
+        await fetch(`${API_BASE}/messages`, {
+          method: 'POST',
+          body: formData
+        });
+      } else {
+        await fetch(`${API_BASE}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newMsg)
+        });
+      }
     } catch (e) {
       console.warn('Direct message API sync error:', e);
     }
@@ -1054,6 +803,373 @@ export const DataProvider = ({ children }) => {
     setIncomingChatToast(null);
   };
 
+  // Calendar Attendance Batch Saver (Faculty Suite)
+  const saveBatchAttendance = async (date, subject, section, markedBy, records) => {
+    const payload = { date, subject, section, markedBy, records };
+    
+    // Update local state
+    setCalendarAttendance(prev => {
+      const newEntries = records.map(r => ({
+        id: `ATT-${date}-${r.enrollment}-${subject}`,
+        date,
+        subject,
+        section,
+        status: r.status,
+        enrollment: r.enrollment || r.roll,
+        student_name: r.name,
+        marked_by: markedBy
+      }));
+      return [...prev, ...newEntries];
+    });
+
+    broadcastSync('ATTENDANCE_BATCH_SAVED', payload);
+
+    try {
+      const res = await fetch(`${API_BASE}/attendance/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    } catch (e) {
+      console.warn('Batch attendance sync error:', e);
+      return { success: true, message: 'Saved to local session' };
+    }
+  };
+
+  // Student Attendance Handshake Handler
+  const markStudentAttendance = async (codeEntered, studentInfo = null) => {
+    const entered = codeEntered.trim().toUpperCase();
+    const expected = activeSession.code.trim().toUpperCase();
+
+    if (entered === expected) {
+      const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const studentName = studentInfo?.name || 'Krrish Kumar Tanti';
+      const studentRoll = studentInfo?.enrollment || '04214802722';
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      sounds.playSuccessFanfare();
+
+      // Update Student Calendar Record
+      setCalendarAttendance(prev => [
+        {
+          id: `REC-${Date.now()}`,
+          date: todayStr,
+          subject: activeSession.subject,
+          status: 'Present',
+          enrollment: studentRoll,
+          student_name: studentName,
+          verifiedVia: 'Dual-Factor BLE Proximity (0.8m) + PIN'
+        },
+        ...prev
+      ]);
+
+      // Update Teacher's Live Roster in Current Tab
+      setStudentsRoster(prev => {
+        const matchIndex = prev.findIndex(s => s.roll === studentRoll || s.name === studentName);
+        if (matchIndex !== -1) {
+          return prev.map((s, idx) => idx === matchIndex ? {
+            ...s,
+            status: 'present',
+            bleRssi: '-38 dBm (0.8m in-range)',
+            verifiedAt: `Live ${nowTime}`,
+            device: 'BLE Validated Smartphone'
+          } : s);
+        } else {
+          return [
+            {
+              id: `STU-${Date.now()}`,
+              roll: studentRoll,
+              name: studentName,
+              status: 'present',
+              bleRssi: '-40 dBm (0.8m)',
+              device: 'BLE Validated Smartphone',
+              verifiedAt: `Live ${nowTime}`
+            },
+            ...prev
+          ];
+        }
+      });
+
+      // Broadcast Instantly across tabs
+      broadcastSync('ATTENDANCE_VERIFIED', {
+        studentEnrollment: studentRoll,
+        studentName,
+        verifiedAt: `Live ${nowTime}`,
+        device: 'BLE Validated Smartphone',
+        subject: activeSession.subject
+      });
+
+      // Save to SQLite
+      try {
+        fetch(`${API_BASE}/attendance/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentEnrollment: studentRoll,
+            studentName,
+            passcode: entered,
+            verifiedVia: 'Dual-Factor BLE Proximity (0.8m) + PIN'
+          })
+        }).catch(err => console.warn('Attendance backend verification error:', err));
+      } catch (e) {}
+
+      return { 
+        success: true, 
+        message: `Presence validated for ${activeSession.subject}! Marked Present in live roster.` 
+      };
+    } else {
+      return { 
+        success: false, 
+        message: `Invalid room passcode "${codeEntered}". Please check the teacher's display board.` 
+      };
+    }
+  };
+
+  // Timetable Master Publisher (HOD Console)
+  const publishTimetable = async (timetableData) => {
+    setTimetables(prev => {
+      const idx = prev.findIndex(t => t.university === timetableData.university && t.section === timetableData.section);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = timetableData;
+        return next;
+      }
+      return [timetableData, ...prev];
+    });
+
+    broadcastSync('TIMETABLE_PUBLISHED', timetableData);
+
+    try {
+      const res = await fetch(`${API_BASE}/timetables`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(timetableData)
+      });
+      return await res.json();
+    } catch (e) {
+      console.warn('Timetable API error:', e);
+      return { success: true };
+    }
+  };
+
+  // Syllabus Progress Updater (Teacher Portal)
+  const updateSyllabusProgress = async (progressData) => {
+    setSyllabusProgress(prev => {
+      const idx = prev.findIndex(p => p.subject_code === progressData.subject_code && p.faculty_id === progressData.faculty_id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = progressData;
+        return next;
+      }
+      return [progressData, ...prev];
+    });
+
+    broadcastSync('SYLLABUS_PROGRESS_UPDATED', progressData);
+
+    try {
+      await fetch(`${API_BASE}/syllabus/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(progressData)
+      });
+    } catch (e) {
+      console.warn('Syllabus progress API error:', e);
+    }
+  };
+
+  // Passcode Generator
+  const generateNewPasscode = async () => {
+    const codePrefixes = ['OS', 'CS', 'AI', 'NET', 'ED', 'SE', 'DA'];
+    const randomPrefix = codePrefixes[Math.floor(Math.random() * codePrefixes.length)];
+    const randomDigits = Math.floor(10 + Math.random() * 90);
+    const newCode = `${randomPrefix}${randomDigits}`;
+
+    const updated = {
+      ...activeSession,
+      code: newCode,
+      expiresInSeconds: 600
+    };
+
+    setActiveSession(updated);
+    broadcastSync('SESSION_UPDATED', updated);
+
+    try {
+      await fetch(`${API_BASE}/attendance/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (e) {}
+
+    return newCode;
+  };
+
+  const toggleBeaconActive = () => {
+    const updated = {
+      ...activeSession,
+      beaconActive: activeSession.beaconActive === false ? true : false
+    };
+    setActiveSession(updated);
+    broadcastSync('SESSION_UPDATED', updated);
+  };
+
+  const updateStudentRosterStatus = (studentId, nextStatus) => {
+    let computedStatus = '';
+    setStudentsRoster(prev => prev.map(s => {
+      if (s.id === studentId || s.roll === studentId) {
+        computedStatus = nextStatus || (s.status === 'present' ? 'absent' : s.status === 'absent' ? 'leave' : 'present');
+        return {
+          ...s,
+          status: computedStatus,
+          verifiedAt: computedStatus === 'present' ? 'Teacher Override' : '-'
+        };
+      }
+      return s;
+    }));
+
+    broadcastSync('ROSTER_OVERRIDE', { studentId, nextStatus: computedStatus || nextStatus });
+  };
+
+  const markAllStudents = (statusToSet = 'present') => {
+    setStudentsRoster(prev => prev.map(s => ({
+      ...s,
+      status: statusToSet,
+      verifiedAt: statusToSet === 'present' ? 'Quick Override (All)' : '-'
+    })));
+
+    broadcastSync('MARK_ALL_ROSTER', { status: statusToSet });
+  };
+
+  // Notes Vault Handlers
+  const addNote = async (newNote) => {
+    setNotes(prev => [newNote, ...prev]);
+    broadcastSync('NOTE_ADDED', newNote);
+
+    try {
+      await fetch(`${API_BASE}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newNote)
+      });
+    } catch (e) {}
+  };
+
+  const deleteNote = async (id) => {
+    setNotes(prev => prev.filter(n => n.id !== id));
+    broadcastSync('NOTE_DELETED', { id });
+
+    try {
+      await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
+  // Grievance Handlers
+  const addGrievance = async (newGrievance) => {
+    setGrievances(prev => [newGrievance, ...prev]);
+    broadcastSync('GRIEVANCE_CREATED', newGrievance);
+
+    try {
+      await fetch(`${API_BASE}/grievances`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGrievance)
+      });
+    } catch (e) {}
+  };
+
+  const updateGrievanceStatus = async (id, newStatus, resolutionNotes = '') => {
+    setGrievances(prev => prev.map(g => g.id === id ? {
+      ...g,
+      status: newStatus,
+      resolutionNotes: resolutionNotes || g.resolutionNotes
+    } : g));
+
+    broadcastSync('GRIEVANCE_STATUS_UPDATED', { id, status: newStatus, resolutionNotes });
+
+    try {
+      await fetch(`${API_BASE}/grievances/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, resolutionNotes })
+      });
+    } catch (e) {}
+  };
+
+  const deleteGrievance = async (id) => {
+    setGrievances(prev => prev.filter(g => g.id !== id));
+    broadcastSync('GRIEVANCE_DELETED', { id });
+
+    try {
+      await fetch(`${API_BASE}/grievances/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
+  // Broadcast Handlers
+  const addBroadcast = async (newBroadcast) => {
+    setBroadcasts(prev => [newBroadcast, ...prev]);
+    broadcastSync('BROADCAST_CREATED', newBroadcast);
+
+    try {
+      await fetch(`${API_BASE}/broadcasts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBroadcast)
+      });
+    } catch (e) {}
+  };
+
+  const deleteBroadcast = async (id) => {
+    setBroadcasts(prev => prev.filter(b => b.id !== id));
+    broadcastSync('BROADCAST_DELETED', { id });
+
+    try {
+      await fetch(`${API_BASE}/broadcasts/${id}`, { method: 'DELETE' });
+    } catch (e) {}
+  };
+
+  // Substitution Handlers
+  const assignSubstitution = (subId, facultyName) => {
+    setSubstitutions(prev => prev.map(s => s.id === subId ? {
+      ...s,
+      status: 'Assigned',
+      assignedTo: facultyName
+    } : s));
+  };
+
+  // Digital Approval Handlers
+  const signApproval = (appId, signerName = 'Prof. S. K. Naitik (HOD)') => {
+    const randomHex = Math.random().toString(16).substring(2, 8).toUpperCase();
+    const signatureHash = `RSA-HOD-CSE-0x${randomHex}89A`;
+    const now = new Date();
+    const timeString = `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    setApprovals(prev => prev.map(app => app.id === appId ? {
+      ...app,
+      status: 'Approved',
+      signatureHash,
+      signedAt: timeString,
+      signedBy: signerName
+    } : app));
+
+    return { signatureHash, signedAt: timeString };
+  };
+
+  const rejectApproval = (appId, reason = 'Insufficient documentation or budget exceeded') => {
+    setApprovals(prev => prev.map(app => app.id === appId ? {
+      ...app,
+      status: 'Rejected',
+      rejectionReason: reason
+    } : app));
+  };
+
+  const acknowledgeApproval = (appId) => {
+    setApprovals(prev => prev.map(a => a.id === appId ? {
+      ...a,
+      status: 'Acknowledged (Under Review)'
+    } : a));
+  };
+
   return (
     <DataContext.Provider value={{
       grievances,
@@ -1076,16 +1192,19 @@ export const DataProvider = ({ children }) => {
       setStudentsRoster,
       updateStudentRosterStatus,
       markAllStudents,
-      deleteAttendanceLog,
-      purgeAllAttendanceLogs,
       generateNewPasscode,
       toggleBeaconActive,
       facultyDirectory,
       setFacultyDirectory,
       activeSession,
       setActiveSession,
-      studentAttendanceRecord,
+      calendarAttendance,
       markStudentAttendance,
+      saveBatchAttendance,
+      timetables,
+      publishTimetable,
+      syllabusProgress,
+      updateSyllabusProgress,
       // Direct Messaging
       directMessages,
       activeChatPartner,
@@ -1103,5 +1222,3 @@ export const DataProvider = ({ children }) => {
 };
 
 export const useData = () => useContext(DataContext);
-
-

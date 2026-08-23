@@ -8,11 +8,11 @@ const __dirname = path.dirname(__filename);
 const dbPath = path.join(__dirname, 'edusphere.db');
 const db = new Database(dbPath);
 
-// Enable WAL mode & foreign keys
+// Enable WAL mode & foreign keys for high performance
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
-// Initialize Database Tables
+// Initialize Database Tables & Migrations
 export function initDB() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -39,6 +39,7 @@ export function initDB() {
       adminCode TEXT,
       badgeId TEXT,
       digitalSignature TEXT,
+      university TEXT DEFAULT 'GGSIPU',
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -66,13 +67,15 @@ export function initDB() {
 
     CREATE TABLE IF NOT EXISTS attendance_records (
       id TEXT PRIMARY KEY,
-      userId TEXT NOT NULL,
+      student_id TEXT NOT NULL,
+      student_name TEXT NOT NULL,
+      enrollment TEXT NOT NULL,
       subject TEXT NOT NULL,
+      section TEXT DEFAULT 'CSE-A',
       date TEXT NOT NULL,
       status TEXT NOT NULL,
-      verifiedVia TEXT NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (userId) REFERENCES users(id)
+      marked_by TEXT,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS grievances (
@@ -96,12 +99,18 @@ export function initDB() {
 
     CREATE TABLE IF NOT EXISTS notes (
       id TEXT PRIMARY KEY,
-      subject TEXT NOT NULL,
       title TEXT NOT NULL,
-      faculty TEXT NOT NULL,
-      fileSize TEXT NOT NULL,
+      subject TEXT NOT NULL,
       semester TEXT NOT NULL,
-      fileUrl TEXT,
+      faculty_name TEXT NOT NULL,
+      faculty_id TEXT,
+      file_url TEXT,
+      file_size TEXT NOT NULL,
+      file_type TEXT DEFAULT 'PDF',
+      upload_date TEXT DEFAULT 'Today',
+      downloads_count INTEGER DEFAULT 0,
+      unit TEXT DEFAULT 'Unit 1',
+      university TEXT DEFAULT 'GGSIPU',
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -138,16 +147,49 @@ export function initDB() {
       receiverRole TEXT NOT NULL,
       message TEXT NOT NULL,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      readReceipt INTEGER DEFAULT 0
+      readReceipt INTEGER DEFAULT 0,
+      fileUrl TEXT,
+      fileName TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS timetables (
+      id TEXT PRIMARY KEY,
+      university TEXT NOT NULL,
+      department TEXT NOT NULL,
+      semester TEXT NOT NULL,
+      section TEXT NOT NULL,
+      schedule_json TEXT NOT NULL,
+      published_by TEXT,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS syllabus_progress (
+      id TEXT PRIMARY KEY,
+      faculty_id TEXT NOT NULL,
+      university TEXT NOT NULL,
+      department TEXT NOT NULL,
+      subject_code TEXT NOT NULL,
+      subject_name TEXT NOT NULL,
+      progress_json TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
+  // Safe migrations for table columns
+  const migrateTable = (table, cols) => {
+    try {
+      const existing = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+      for (const col of cols) {
+        if (!existing.includes(col.name)) {
+          try {
+            db.prepare(`ALTER TABLE ${table} ADD COLUMN ${col.name} ${col.type}`).run();
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+  };
 
-  // Migration column additions in case table already exists
-  const userTableInfo = db.prepare("PRAGMA table_info(users)").all();
-  const userCols = userTableInfo.map(c => c.name);
-
-  const newCols = [
+  migrateTable('users', [
     { name: 'designation', type: 'TEXT' },
     { name: 'subjects', type: 'TEXT' },
     { name: 'cabin', type: 'TEXT' },
@@ -156,47 +198,52 @@ export function initDB() {
     { name: 'adminCode', type: 'TEXT' },
     { name: 'badgeId', type: 'TEXT' },
     { name: 'digitalSignature', type: 'TEXT' },
-  ];
+    { name: 'university', type: 'TEXT DEFAULT "GGSIPU"' }
+  ]);
 
-  for (const col of newCols) {
-    if (!userCols.includes(col.name)) {
-      try {
-        db.prepare(`ALTER TABLE users ADD COLUMN ${col.name} ${col.type}`).run();
-      } catch (e) {
-        // column may exist
-      }
-    }
-  }
+  migrateTable('attendance_records', [
+    { name: 'section', type: 'TEXT DEFAULT "CSE-A"' },
+    { name: 'student_id', type: 'TEXT' },
+    { name: 'student_name', type: 'TEXT' },
+    { name: 'marked_by', type: 'TEXT' }
+  ]);
 
-  const grvTableInfo = db.prepare("PRAGMA table_info(grievances)").all();
-  const grvCols = grvTableInfo.map(c => c.name);
-  if (!grvCols.includes('resolutionNotes')) {
-    try {
-      db.prepare(`ALTER TABLE grievances ADD COLUMN resolutionNotes TEXT`).run();
-    } catch (e) {}
-  }
+  migrateTable('notes', [
+    { name: 'faculty', type: 'TEXT DEFAULT "Dr. Manish Verma"' },
+    { name: 'faculty_name', type: 'TEXT DEFAULT "Dr. Manish Verma"' },
+    { name: 'faculty_id', type: 'TEXT' },
+    { name: 'file_url', type: 'TEXT' },
+    { name: 'file_size', type: 'TEXT DEFAULT "4.2 MB"' },
+    { name: 'file_type', type: 'TEXT DEFAULT "PDF"' },
+    { name: 'upload_date', type: 'TEXT DEFAULT "Today"' },
+    { name: 'downloads_count', type: 'INTEGER DEFAULT 0' },
+    { name: 'unit', type: 'TEXT DEFAULT "Unit 1"' },
+    { name: 'university', type: 'TEXT DEFAULT "GGSIPU"' }
+  ]);
 
-  const bcTableInfo = db.prepare("PRAGMA table_info(broadcasts)").all();
-  const bcCols = bcTableInfo.map(c => c.name);
-  if (!bcCols.includes('targetAudience')) {
-    try {
-      db.prepare(`ALTER TABLE broadcasts ADD COLUMN targetAudience TEXT DEFAULT 'All Campus'`).run();
-    } catch (e) {}
-  }
+  migrateTable('direct_messages', [
+    { name: 'fileUrl', type: 'TEXT' },
+    { name: 'fileName', type: 'TEXT' }
+  ]);
 
-  // Seed default users if empty
-  const userCount = db.prepare('SELECT count(*) as count FROM users').get().count;
-  if (userCount === 0) {
-    const insertUser = db.prepare(`
-      INSERT INTO users (
-        id, name, email, role, enrollment, college, department, semester, section, 
-        bloodGroup, validUpto, avatar, password, cgpa, attendanceOverall,
-        designation, subjects, cabin, assignedUnit, supervisorLevel, adminCode, badgeId, digitalSignature
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+  // Safe index creation
+  try {
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_att_date_sub_sec ON attendance_records(date, subject, section)').run();
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_att_enrollment_date ON attendance_records(enrollment, date)').run();
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_pair ON direct_messages(senderId, receiverId)').run();
+  } catch (e) {}
 
-    // Student
+  // Seed default users if missing
+  const insertUser = db.prepare(`
+    INSERT OR REPLACE INTO users (
+      id, name, email, role, enrollment, college, department, semester, section, 
+      bloodGroup, validUpto, avatar, password, cgpa, attendanceOverall,
+      designation, subjects, cabin, assignedUnit, supervisorLevel, adminCode, badgeId, digitalSignature, university
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+    // Student 1 (Default Student)
     insertUser.run(
       'STU-2026-8842',
       'Krrish Kumar Tanti',
@@ -220,10 +267,11 @@ export function initDB() {
       null,
       null,
       null,
-      null
+      null,
+      'GGSIPU'
     );
 
-    // Faculty
+    // Faculty 1: Dr. Manish Verma (CSE Associate Prof)
     insertUser.run(
       'FAC-1092',
       'Dr. Manish Verma',
@@ -241,16 +289,269 @@ export function initDB() {
       'N/A',
       100,
       'Associate Professor',
-      'Operating Systems, Cloud Computing, Computer Networks',
+      'Operating Systems Lab, Cloud Computing Architecture, Computer Networks',
       'Room 304, Academic Block A',
       null,
       null,
       null,
       'FAC-1092',
-      null
+      null,
+      'GGSIPU'
     );
 
-    // HOD
+    // Faculty 2: Dr. Aditi Zear (DTU/GGSIPU OOPS)
+    insertUser.run(
+      'FAC-2031',
+      'Dr. Aditi Zear',
+      'aditi.zear@campus.edu',
+      'teacher',
+      'FAC-2031',
+      'Delhi Technological University (DTU)',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-A4',
+      'A+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=250',
+      'aditi@2026',
+      'N/A',
+      100,
+      'Assistant Professor',
+      'TH-CS203 Object Oriented Design, Lab CS203 OOD',
+      'Room AB4-305, Academic Block 4',
+      null,
+      null,
+      null,
+      'FAC-2031',
+      null,
+      'DTU'
+    );
+
+    // Faculty 3: Dr. Nipun Bansal (DTU OS)
+    insertUser.run(
+      'FAC-2072',
+      'Dr. Nipun Bansal',
+      'nipun.bansal@campus.edu',
+      'teacher',
+      'FAC-2072',
+      'Delhi Technological University (DTU)',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-A4',
+      'O+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
+      'nipun@2026',
+      'N/A',
+      100,
+      'Associate Professor',
+      'TH-CS207 OS Design, Lab CS207 Operating System',
+      'Room AB4-208, Academic Block 4',
+      null,
+      null,
+      null,
+      'FAC-2072',
+      null,
+      'DTU'
+    );
+
+    // Faculty 4: Dr. Ravin Ahuja (DTU Software Engineering)
+    insertUser.run(
+      'FAC-2073',
+      'Dr. Ravin Ahuja',
+      'ravin.ahuja@campus.edu',
+      'teacher',
+      'FAC-2073',
+      'Delhi Technological University (DTU)',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-A4',
+      'B+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
+      'ravin@2026',
+      'N/A',
+      100,
+      'Professor',
+      'TH-CS207 Software Engineering',
+      'Room AB4-303, Academic Block 4',
+      null,
+      null,
+      null,
+      'FAC-2073',
+      null,
+      'DTU'
+    );
+
+    // Faculty 5: Dr. N Anand (DTU DAA)
+    insertUser.run(
+      'FAC-2051',
+      'Dr. N Anand',
+      'n.anand@campus.edu',
+      'teacher',
+      'FAC-2051',
+      'Delhi Technological University (DTU)',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-A4',
+      'AB+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250',
+      'anand@2026',
+      'N/A',
+      100,
+      'Associate Professor',
+      'TH-CS205 Design & Analysis of Algorithm, Lab CS205 DAA',
+      'Room AB4-203, Academic Block 4',
+      null,
+      null,
+      null,
+      'FAC-2051',
+      null,
+      'DTU'
+    );
+
+    // Faculty 6: Ms. Poonam (GGSIPU Data Structure)
+    insertUser.run(
+      'FAC-3011',
+      'Ms. Poonam',
+      'poonam.cse@campus.edu',
+      'teacher',
+      'FAC-3011',
+      'Apex Institute of Technology & Management',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-S2',
+      'A+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=250',
+      'poonam@2026',
+      'N/A',
+      100,
+      'Assistant Professor',
+      'Data Structure (DS), DS Lab (Lab 5/6)',
+      'Room 4202, Shastri Park Block',
+      null,
+      null,
+      null,
+      'FAC-3011',
+      null,
+      'GGSIPU'
+    );
+
+    // Faculty 7: Mr. Yogesh (GGSIPU Computational Methods)
+    insertUser.run(
+      'FAC-3091',
+      'Mr. Yogesh',
+      'yogesh.math@campus.edu',
+      'teacher',
+      'FAC-3091',
+      'Apex Institute of Technology & Management',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-S2',
+      'O+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=250',
+      'yogesh@2026',
+      'N/A',
+      100,
+      'Assistant Professor',
+      'Computational Methods (CM), CM Lab (Lab 3/4)',
+      'Room 4202, Shastri Park Block',
+      null,
+      null,
+      null,
+      'FAC-3091',
+      null,
+      'GGSIPU'
+    );
+
+    // Faculty 8: Dr. Swati Juneja (GGSIPU DLCD Lab)
+    insertUser.run(
+      'FAC-3052',
+      'Dr. Swati Juneja',
+      'swati.juneja@campus.edu',
+      'teacher',
+      'FAC-3052',
+      'Apex Institute of Technology & Management',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-S2',
+      'B+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250',
+      'swati@2026',
+      'N/A',
+      100,
+      'Associate Professor',
+      'DLCD Lab (Room No 5202), Digital Logic Circuits',
+      'Room 5202, Shastri Park Block',
+      null,
+      null,
+      null,
+      'FAC-3052',
+      null,
+      'GGSIPU'
+    );
+
+    // Faculty 9: Ms. Ruchita Sareen (GGSIPU Discrete Mathematics)
+    insertUser.run(
+      'FAC-3071',
+      'Ms. Ruchita Sareen',
+      'ruchita.sareen@campus.edu',
+      'teacher',
+      'FAC-3071',
+      'Apex Institute of Technology & Management',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-S2',
+      'O+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=250',
+      'ruchita@2026',
+      'N/A',
+      100,
+      'Assistant Professor',
+      'Discrete Mathematics (DM)',
+      'Room 4202, Shastri Park Block',
+      null,
+      null,
+      null,
+      'FAC-3071',
+      null,
+      'GGSIPU'
+    );
+
+    // Faculty 10: Ms. Shipra (GGSIPU DLCD Theory)
+    insertUser.run(
+      'FAC-3051',
+      'Ms. Shipra',
+      'shipra.ece@campus.edu',
+      'teacher',
+      'FAC-3051',
+      'Apex Institute of Technology & Management',
+      'Computer Science & Engineering (CSE)',
+      'Faculty',
+      'Section-S2',
+      'A+ positive',
+      'Permanent',
+      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=250',
+      'shipra@2026',
+      'N/A',
+      100,
+      'Assistant Professor',
+      'Digital Logic & Circuit Design (DLCD)',
+      'Room 4202, Shastri Park Block',
+      null,
+      null,
+      null,
+      'FAC-3051',
+      null,
+      'GGSIPU'
+    );
+
+    // HOD 1: Prof. S. K. Naitik (Executive Console)
     insertUser.run(
       'HOD-001',
       'Prof. S. K. Naitik',
@@ -268,16 +569,17 @@ export function initDB() {
       'N/A',
       100,
       'Head of Department & Professor',
-      'Cloud Architecture, Advanced AI',
+      'Cloud Architecture, Advanced AI Systems',
       'Room 101, Executive Wing',
       null,
       null,
       'HOD-001',
       'HOD-CSE-CHAIR',
-      'RSA-SEAL-HOD-CSE-VALID'
+      'RSA-SEAL-HOD-CSE-VALID',
+      'GGSIPU'
     );
 
-    // Ground Staff
+    // Staff: Rajesh Sharma
     insertUser.run(
       'STF-504',
       'Rajesh Sharma',
@@ -297,16 +599,17 @@ export function initDB() {
       'Facilities Lead Supervisor',
       null,
       'Operations Control Room 04',
-      'Maintenance, Electrical & Sanitation',
+      'Campus Infrastructure & Maintenance',
       'Lead Operations Supervisor',
       null,
       'STF-504',
-      null
+      null,
+      'GGSIPU'
     );
 
     // Initial Active Attendance Session
     const insertSession = db.prepare(`
-      INSERT INTO attendance_sessions (id, subject, code, room, beaconId, faculty, status)
+      INSERT OR REPLACE INTO attendance_sessions (id, subject, code, room, beaconId, faculty, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
     insertSession.run(
@@ -319,102 +622,117 @@ export function initDB() {
       'active'
     );
 
-    // Initial attendance logs
-    const insertAtt = db.prepare(`
-      INSERT INTO attendance_records (id, userId, subject, date, status, verifiedVia)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-
-    insertAtt.run('ATT-01', 'STU-2026-8842', 'Operating Systems Lab', 'Today, 02:15 PM', 'Present', 'BLE Beacon + Passcode');
-    insertAtt.run('ATT-02', 'STU-2026-8842', 'Computer Networks', 'Yesterday, 11:30 AM', 'Present', 'BLE Proximity');
-    insertAtt.run('ATT-03', 'STU-2026-8842', 'Cloud Computing Architecture', '20 Aug 2026', 'Present', 'Dynamic PIN');
-    insertAtt.run('ATT-04', 'STU-2026-8842', 'Software Engineering Seminar', '19 Aug 2026', 'Present', 'BLE Beacon');
-
-    // Initial Grievances
-    const insertGrv = db.prepare(`
-      INSERT INTO grievances (id, userId, studentName, studentEnrollment, isAnonymous, title, category, destination, priority, description, imageUrl, status, assignedTo, timestamp, resolutionNotes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    insertGrv.run(
-      'GRV-8491',
-      'STU-2026-8842',
-      'Krrish Kumar Tanti',
-      '04214802722',
-      0,
-      'Lab 204 Air Conditioner Not Functioning',
-      'Maintenance & Infrastructure',
-      'staff',
-      'High',
-      'The central AC unit in CSE Lab 204 has been tripping the circuit breaker during heavy GPU workloads.',
-      null,
-      'In-Progress',
-      'Facilities Team (Rajesh Sharma)',
-      'Today, 10:30 AM',
-      null
-    );
-
-    insertGrv.run(
-      'GRV-9204',
-      'STU-2026-8842',
-      'Anonymous Scholar',
-      'REDACTED-PRIVACY-SHIELD',
-      1,
-      'Mid-Term Exam Evaluation Transparency',
-      'Academic Concern & Syllabus Pace',
-      'hod',
-      'Urgent',
-      'Requesting re-moderation of question 4 in Cloud Computing unit test for section CSE-A.',
-      null,
-      'Under Review',
-      'HOD Academic Office (Prof. S. K. Naitik)',
-      'Yesterday, 04:12 PM',
-      null
-    );
-
     // Initial Notes
     const insertNote = db.prepare(`
-      INSERT INTO notes (id, subject, title, faculty, fileSize, semester, fileUrl)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO notes (id, title, subject, semester, faculty, faculty_name, faculty_id, file_url, file_size, file_type, upload_date, downloads_count, unit, university)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    insertNote.run('NOTE-01', 'Operating Systems', 'Unit 3: Virtual Memory & Page Replacement Algorithms.pdf', 'Dr. Manish Verma', '4.2 MB', '6th Semester', '#');
-    insertNote.run('NOTE-02', 'Computer Networks', 'Module 4: TCP Congestion Control & Sliding Window Protocol.pdf', 'Prof. Priya Nair', '3.1 MB', '6th Semester', '#');
-    insertNote.run('NOTE-03', 'Cloud Computing', 'Lab Manual: AWS Lambda & Docker Containerization Walkthrough.pdf', 'Dr. Manish Verma', '8.5 MB', '6th Semester', '#');
-    insertNote.run('NOTE-04', 'Software Engineering', 'Agile Scrum Sprint Planning & Design Patterns Reference.pdf', 'Prof. Arun Kumar', '2.8 MB', '6th Semester', '#');
+    insertNote.run('NOTE-01', 'Unit 3: Virtual Memory & Page Replacement Algorithms.pdf', 'Operating Systems (CSE-301)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '4.2 MB', 'PDF', '21 Aug 2026', 142, 'Unit 3', 'GGSIPU');
+    insertNote.run('NOTE-02', 'Module 4: TCP Congestion Control & Sliding Window Protocol.pdf', 'Computer Networks (CSE-303)', '6th Semester', 'Prof. Priya Nair', 'Prof. Priya Nair', 'FAC-1092', null, '3.1 MB', 'PDF', '20 Aug 2026', 98, 'Unit 4', 'GGSIPU');
+    insertNote.run('NOTE-03', 'Lab Manual: AWS Lambda & Docker Containerization Walkthrough.pdf', 'Cloud Computing (CSE-305)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '8.5 MB', 'PDF', '19 Aug 2026', 215, 'Unit 2', 'GGSIPU');
+    insertNote.run('NOTE-04', 'TH-CS207 OS: Process Scheduling & Deadlock Prevention.pdf', 'Operating System Design (TH-CS207)', '3rd Semester', 'Dr. Nipun Bansal', 'Dr. Nipun Bansal', 'FAC-2072', null, '5.1 MB', 'PDF', '18 Aug 2026', 188, 'Unit 2', 'DTU');
+    insertNote.run('NOTE-05', 'TH-CS203 OOD: GoF Design Patterns & UML Class Diagrams.pdf', 'Object Oriented Design (TH-CS203)', '3rd Semester', 'Dr. Aditi Zear', 'Dr. Aditi Zear', 'FAC-2031', null, '6.4 MB', 'PDF', '17 Aug 2026', 204, 'Unit 3', 'DTU');
 
     // Initial Broadcasts
     const insertBc = db.prepare(`
-      INSERT INTO broadcasts (id, sender, role, title, message, time, isUrgent, targetAudience)
+      INSERT OR REPLACE INTO broadcasts (id, sender, role, title, message, time, isUrgent, targetAudience)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
+    insertBc.run('BC-01', 'Prof. S. K. Naitik (HOD CSE)', 'HOD', '🚨 Mid-Term Practical Exam Schedule Released', 'All 6th-semester and 3rd-semester students must carry their digital Virtual ID cards for entry starting Monday. Zero physical paperwork required.', '25 mins ago', 1, 'CSE Department (All Semesters)');
+    insertBc.run('BC-02', 'Ground Security & Operations', 'Staff', '📡 BLE Beacon Mesh Network Active', 'Proximity beacons in Labs 201-205 calibrated to smart ultra-low latency mesh.', '2 hours ago', 0, 'All Campus Students');
 
-    insertBc.run('BC-01', 'Prof. S. K. Naitik (HOD CSE)', 'HOD', '🚨 Mid-Term Practical Exam Schedule Released', 'All 6th-semester students must carry their digital Virtual ID cards for entry starting Monday. Zero physical paperwork required.', '25 mins ago', 1, 'CSE Department (All Semesters)');
-    insertBc.run('BC-02', 'Ground Security & Operations', 'Staff', '📡 BLE Beacon Calibration at Block 3', 'Proximity beacons in Labs 301-305 upgraded to smart ultra-low latency mesh.', '2 hours ago', 0, 'All Campus Students');
-  }
-
-  // Seed Colleges if empty
-  const collegeCount = db.prepare('SELECT count(*) as count FROM colleges').get().count;
-  if (collegeCount === 0) {
-    const insertCollege = db.prepare(`
-      INSERT INTO colleges (id, code, name, location, programs, grade)
-      VALUES (?, ?, ?, ?, ?, ?)
+    // Seed August 2026 Calendar Attendance Ledger for Student
+    const insertAttRecord = db.prepare(`
+      INSERT OR REPLACE INTO attendance_records (id, student_id, student_name, enrollment, subject, section, date, status, marked_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
+    const pastDates = [
+      { date: '2026-08-03', subject: 'Operating Systems Lab', status: 'Present' },
+      { date: '2026-08-03', subject: 'Computer Networks', status: 'Present' },
+      { date: '2026-08-04', subject: 'Cloud Computing Architecture', status: 'Present' },
+      { date: '2026-08-04', subject: 'Software Engineering', status: 'Present' },
+      { date: '2026-08-05', subject: 'Operating Systems Lab', status: 'Present' },
+      { date: '2026-08-06', subject: 'Design & Analysis of Algorithms', status: 'Present' },
+      { date: '2026-08-07', subject: 'Computer Networks', status: 'Present' },
+      { date: '2026-08-10', subject: 'Operating Systems Lab', status: 'Present' },
+      { date: '2026-08-11', subject: 'Cloud Computing Architecture', status: 'Absent' },
+      { date: '2026-08-12', subject: 'Software Engineering', status: 'Present' },
+      { date: '2026-08-13', subject: 'Design & Analysis of Algorithms', status: 'Present' },
+      { date: '2026-08-14', subject: 'Computer Networks', status: 'Present' },
+      { date: '2026-08-17', subject: 'Operating Systems Lab', status: 'Present' },
+      { date: '2026-08-18', subject: 'Cloud Computing Architecture', status: 'Late / Exempt' },
+      { date: '2026-08-19', subject: 'Software Engineering', status: 'Present' },
+      { date: '2026-08-20', subject: 'Operating Systems Lab', status: 'Present' },
+      { date: '2026-08-21', subject: 'Computer Networks', status: 'Present' },
+      { date: '2026-08-22', subject: 'Cloud Computing Architecture', status: 'Present' },
+      { date: '2026-08-23', subject: 'Operating Systems Lab', status: 'Present' }
+    ];
+
+    pastDates.forEach((rec, idx) => {
+      insertAttRecord.run(
+        `ATT-REC-${idx + 1}`,
+        'STU-2026-8842',
+        'Krrish Kumar Tanti',
+        '04214802722',
+        rec.subject,
+        'CSE-A',
+        rec.date,
+        rec.status,
+        'Dr. Manish Verma'
+      );
+    });
+
+    // Seed Direct Messages
+    const insertMsg = db.prepare(`
+      INSERT OR REPLACE INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    `);
+
+    insertMsg.run(
+      'MSG-001',
+      'STU-2026-8842',
+      'Krrish Kumar Tanti',
+      'student',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+      'FAC-1092',
+      'Dr. Manish Verma',
+      'teacher',
+      'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose memory benchmarks pre-configured?'
+    );
+
+    insertMsg.run(
+      'MSG-002',
+      'FAC-1092',
+      'Dr. Manish Verma',
+      'teacher',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
+      'STU-2026-8842',
+      'Krrish Kumar Tanti',
+      'student',
+      'Hello Krrish! Yes, please have the memory management container ready. We will benchmark Banker’s algorithm live in Lab 204.'
+    );
+
+  // Seed standard colleges
+  const insertCollege = db.prepare(`
+    INSERT OR REPLACE INTO colleges (id, code, name, location, affiliation, programs, grade)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+
     const standardColleges = [
-      ['1', '101', 'Apex Institute of Technology & Management (AITM)', 'Academic City, Main Campus', 'B.Tech, M.Tech, MBA, MCA', 'NAAC A++'],
-      ['2', '102', 'Metro College of Engineering & Research', 'Sector 18, Innovation Hub', 'B.Tech, MBA, BCA', 'NAAC A+'],
-      ['3', '103', 'National Institute of Technical Sciences (NITS)', 'Knowledge Boulevard, Block 4', 'B.Tech, M.Tech, PhD', 'NAAC A++'],
-      ['4', '104', 'City University School of Computing & Robotics', 'Campus Central Avenue', 'B.Tech/M.Tech Integrated, MCA', 'NAAC A+'],
-      ['5', '105', 'Royal Academy of Engineering & Technology', 'Hill View Campus', 'B.Tech, BBA, BCA', 'NAAC A'],
-      ['6', '106', 'Premier Institute of Professional Studies', 'University Enclave', 'BCA, MCA, BBA, MBA', 'NAAC A+'],
-      ['7', '107', 'Federal Engineering & Technological Campus', 'Tech City Phase 2', 'B.Tech, Artificial Intelligence', 'NAAC A++']
+      ['1', '101', 'Apex Institute of Technology & Management (AITM)', 'Academic City, Main Campus', 'GGSIPU', 'B.Tech, M.Tech, MCA', 'NAAC A++'],
+      ['2', '102', 'Delhi Technological University (DTU Main Campus)', 'Bawana Road, Shahbad Daulatpur', 'State University (Autonomous)', 'B.Tech, M.Tech, PhD', 'NAAC A++'],
+      ['3', '103', 'Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)', 'FC-26, Shastri Park, New Delhi', 'GGSIPU', 'B.Tech, MBA, MCA', 'NAAC A+'],
+      ['4', '104', 'Maharaja Agrasen Institute of Technology (MAIT)', 'PSP Area, Sector 22, Rohini', 'GGSIPU', 'B.Tech, MBA', 'NAAC A++'],
+      ['5', '105', 'Maharaja Surajmal Institute of Technology (MSIT)', 'C-4, Janakpuri Campus', 'GGSIPU', 'B.Tech, BCA', 'NAAC A+'],
+      ['6', '106', 'Bharati Vidyapeeth College of Engineering (BVCOE)', 'A-4, Paschim Vihar', 'GGSIPU', 'B.Tech', 'NAAC A'],
+      ['7', '107', 'Bhagwan Parshuram Institute of Technology (BPIT)', 'PSP-4, Sector 17, Rohini', 'GGSIPU', 'B.Tech, MBA', 'NAAC A+']
     ];
 
     for (const col of standardColleges) {
       insertCollege.run(...col);
     }
-  }
 }
 
 export default db;

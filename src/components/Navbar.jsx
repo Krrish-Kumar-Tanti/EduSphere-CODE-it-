@@ -10,12 +10,13 @@ import {
   LogOut, 
   Sparkles, 
   X,
-  Building2
+  Building2,
+  MessageCircle
 } from 'lucide-react';
 
 export default function Navbar() {
   const { currentUser, logout } = useAuth();
-  const { broadcasts } = useData();
+  const { broadcasts, openDirectChat, facultyDirectory, directMessages } = useData();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const getRoleBadge = (role) => {
@@ -36,8 +37,13 @@ export default function Navbar() {
   const badge = getRoleBadge(currentUser?.role);
   const RoleIcon = badge.icon;
 
+  const handleOpenMessenger = () => {
+    const defaultPartner = facultyDirectory.find(f => f.id !== (currentUser?.id || currentUser?.enrollment)) || facultyDirectory[0];
+    openDirectChat(defaultPartner);
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-all shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-xl transition-all shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand Logo */}
@@ -66,11 +72,11 @@ export default function Navbar() {
 
         {/* Center: Authenticated User Identity Pill */}
         {currentUser && (
-          <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 shadow-sm">
+          <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 shadow-2xs">
             <img 
               src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'} 
               alt={currentUser.name} 
-              className="w-7 h-7 rounded-full object-cover ring-2 ring-white shadow-xs"
+              className="w-7 h-7 rounded-full object-cover ring-2 ring-white shadow-2xs"
             />
             <div className="flex flex-col">
               <span className="text-xs font-bold text-slate-800 leading-tight">
@@ -81,7 +87,7 @@ export default function Navbar() {
                 {currentUser.department?.split('(')[0]?.trim() || currentUser.college?.split('(')[0]?.trim() || 'Campus'}
               </span>
             </div>
-            <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge.badgeBg} border shadow-xs ml-1`}>
+            <div className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${badge.badgeBg} border shadow-2xs ml-1`}>
               <RoleIcon className="w-3 h-3" />
               <span>{badge.label}</span>
             </div>
@@ -92,11 +98,24 @@ export default function Navbar() {
         {/* Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
+          {/* Direct WhatsApp-Style Chat Launcher */}
+          {currentUser && (
+            <button
+              onClick={handleOpenMessenger}
+              className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 transition shadow-2xs flex items-center gap-1.5 text-xs font-bold"
+              title="1-on-1 Direct Chat"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <span className="hidden sm:inline">Direct Chat</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            </button>
+          )}
+
           {/* Notifications Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition shadow-sm"
+              className="relative p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 transition shadow-2xs"
               title="Campus Broadcasts & Alerts"
             >
               <Bell className="w-4 h-4" />
@@ -114,7 +133,6 @@ export default function Navbar() {
                       {broadcasts.length} Live
                     </span>
                   </div>
-                  {/* Explicit X close button */}
                   <button 
                     onClick={() => setShowNotifications(false)}
                     className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
@@ -153,7 +171,7 @@ export default function Navbar() {
           {currentUser && (
             <button
               onClick={logout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-2xs"
               title="Log Out of Smart Campus OS"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -166,4 +184,3 @@ export default function Navbar() {
     </header>
   );
 }
-

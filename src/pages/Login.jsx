@@ -6,11 +6,12 @@ import {
   DEPARTMENTS, 
   BLOOD_GROUPS, 
   SEMESTERS, 
-  SECTIONS,
-  DESIGNATIONS,
-  STAFF_UNITS,
-  SUPERVISOR_LEVELS
+  SECTIONS, 
+  DESIGNATIONS, 
+  STAFF_UNITS, 
+  SUPERVISOR_LEVELS 
 } from '../data/ggsipuData';
+import { UNIVERSITIES } from '../data/syllabusData';
 import { 
   GraduationCap, 
   Sparkles, 
@@ -35,7 +36,8 @@ import {
   Briefcase,
   Layers,
   Award,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 
 export default function Login() {
@@ -47,14 +49,15 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
-  // Login Form states
-  const [identifier, setIdentifier] = useState('04214802722');
-  const [password, setPassword] = useState('krrish@2026');
+  // Clean Zero-Pollution Login Form states (EMPTY BY DEFAULT)
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
   // Universal Registration States
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
+  const [regUniversity, setRegUniversity] = useState('GGSIPU');
   const [regCollege, setRegCollege] = useState('Apex Institute of Technology & Management (AITM)');
   const [regDepartment, setRegDepartment] = useState('Computer Science & Engineering (CSE)');
   const [regPassword, setRegPassword] = useState('');
@@ -72,7 +75,7 @@ export default function Login() {
   // Faculty
   const [regFacultyId, setRegFacultyId] = useState('');
   const [regDesignation, setRegDesignation] = useState('Associate Professor');
-  const [regSubjects, setRegSubjects] = useState('Operating Systems, Cloud Computing');
+  const [regSubjects, setRegSubjects] = useState('Operating Systems Lab, Cloud Computing');
   const [regCabin, setRegCabin] = useState('Room 304, Academic Block A');
 
   // HOD
@@ -89,20 +92,20 @@ export default function Login() {
     student: {
       id: 'student',
       title: 'Student Scholar Portal',
-      subtitle: 'Dynamic BLE Presence, Rotating QR Badge, Vault & Grievance Dispatch',
+      subtitle: 'Dynamic BLE Presence, 3D Holographic Pass & Notes Vault',
       icon: GraduationCap,
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50',
       borderColor: 'border-indigo-200',
       primaryBtn: 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/25',
       idLabel: 'University Enrollment / Roll Number',
-      idPlaceholder: 'e.g. 04214802722 or email',
-      demoHint: 'Standard Scholar: 04214802722 / krrish@2026'
+      idPlaceholder: 'e.g. 04214802722 or student email',
+      demoCreds: { id: '04214802722', pass: 'krrish@2026' }
     },
     teacher: {
       id: 'teacher',
       title: 'Faculty Member Portal',
-      subtitle: 'Dynamic PIN Attendance Session, Real-time Roster & Syllabus Vault',
+      subtitle: 'Attendance Studio, DTU/GGSIPU Syllabus Tracker & Timetable View',
       icon: UserCheck,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
@@ -110,12 +113,12 @@ export default function Login() {
       primaryBtn: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25',
       idLabel: 'Faculty Employee Code / University Email',
       idPlaceholder: 'e.g. FAC-1092 or manish.verma@campus.edu',
-      demoHint: 'Standard Faculty: FAC-1092 / faculty@2026'
+      demoCreds: { id: 'FAC-1092', pass: 'faculty@2026' }
     },
     hod: {
       id: 'hod',
       title: 'HOD Executive Console',
-      subtitle: 'Double-Triage Academic Stream, Substitution Matrix & Urgent Broadcasts',
+      subtitle: 'Master Timetable Command Center, Digital Signatures & Approvals',
       icon: ShieldCheck,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
@@ -123,12 +126,12 @@ export default function Login() {
       primaryBtn: 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/25',
       idLabel: 'HOD Admin Code / University Email',
       idPlaceholder: 'e.g. HOD-001 or hod.cse@campus.edu',
-      demoHint: 'Standard HOD: HOD-001 / hod@admin2026'
+      demoCreds: { id: 'HOD-001', pass: 'hod@admin2026' }
     },
     staff: {
       id: 'staff',
       title: 'Operations & Facilities Portal',
-      subtitle: 'Live Ticket Inbox, Maintenance, Sanitation & Emergency Medical Dispatch',
+      subtitle: 'Live Ticket Inbox, Maintenance & Emergency Medical Dispatch',
       icon: Wrench,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
@@ -136,7 +139,7 @@ export default function Login() {
       primaryBtn: 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/25',
       idLabel: 'Staff Badge ID / Service Unit PIN',
       idPlaceholder: 'e.g. STF-504 or rajesh.facilities@campus.edu',
-      demoHint: 'Standard Staff: STF-504 / staff@ops2026'
+      demoCreds: { id: 'STF-504', pass: 'staff@ops2026' }
     }
   };
 
@@ -146,19 +149,14 @@ export default function Login() {
   const handleRoleSwitch = (roleId) => {
     setSelectedRole(roleId);
     setAuthError(null);
-    if (roleId === 'student') {
-      setIdentifier('04214802722');
-      setPassword('krrish@2026');
-    } else if (roleId === 'teacher') {
-      setIdentifier('FAC-1092');
-      setPassword('faculty@2026');
-    } else if (roleId === 'hod') {
-      setIdentifier('HOD-001');
-      setPassword('hod@admin2026');
-    } else if (roleId === 'staff') {
-      setIdentifier('STF-504');
-      setPassword('staff@ops2026');
-    }
+  };
+
+  const handleQuickDemoFill = (roleId) => {
+    const cfg = roleConfigs[roleId];
+    setSelectedRole(roleId);
+    setIdentifier(cfg.demoCreds.id);
+    setPassword(cfg.demoCreds.pass);
+    setAuthError(null);
   };
 
   const handlePhotoSelect = async (e) => {
@@ -172,6 +170,11 @@ export default function Login() {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    if (!identifier.trim() || !password.trim()) {
+      setAuthError('Please enter your enrollment/ID and password.');
+      return;
+    }
+
     setIsLoading(true);
     setAuthError(null);
 
@@ -189,12 +192,18 @@ export default function Login() {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    if (!regName.trim() || !regPassword.trim()) {
+      setAuthError('Full name and password are required.');
+      return;
+    }
+
     setIsLoading(true);
     setAuthError(null);
 
     let userData = {
-      name: regName,
-      email: regEmail,
+      name: regName.trim(),
+      email: regEmail.trim(),
+      university: regUniversity,
       college: regCollege,
       department: regDepartment,
       avatar: regAvatar,
@@ -205,7 +214,7 @@ export default function Login() {
     if (regRole === 'student') {
       userData = {
         ...userData,
-        enrollment: regEnrollment || `0421480${Math.floor(1000 + Math.random() * 9000)}`,
+        enrollment: regEnrollment.trim() || `0421480${Math.floor(1000 + Math.random() * 9000)}`,
         semester: regSemester,
         section: regSection,
         bloodGroup: regBloodGroup,
@@ -214,8 +223,8 @@ export default function Login() {
     } else if (regRole === 'teacher') {
       userData = {
         ...userData,
-        enrollment: regFacultyId || `FAC-${Math.floor(1000 + Math.random() * 9000)}`,
-        badgeId: regFacultyId || `FAC-${Math.floor(1000 + Math.random() * 9000)}`,
+        enrollment: regFacultyId.trim() || `FAC-${Math.floor(1000 + Math.random() * 9000)}`,
+        badgeId: regFacultyId.trim() || `FAC-${Math.floor(1000 + Math.random() * 9000)}`,
         designation: regDesignation,
         subjects: regSubjects,
         cabin: regCabin,
@@ -225,8 +234,8 @@ export default function Login() {
     } else if (regRole === 'hod') {
       userData = {
         ...userData,
-        enrollment: regAdminCode || `HOD-${Math.floor(100 + Math.random() * 900)}`,
-        adminCode: regAdminCode || `HOD-${Math.floor(100 + Math.random() * 900)}`,
+        enrollment: regAdminCode.trim() || `HOD-${Math.floor(100 + Math.random() * 900)}`,
+        adminCode: regAdminCode.trim() || `HOD-${Math.floor(100 + Math.random() * 900)}`,
         cabin: regHodCabin,
         digitalSignature: regSignature || 'RSA-SEAL-HOD-VERIFIED',
         designation: 'Head of Department & Professor',
@@ -236,8 +245,8 @@ export default function Login() {
     } else if (regRole === 'staff') {
       userData = {
         ...userData,
-        enrollment: regStaffBadge || `STF-${Math.floor(100 + Math.random() * 900)}`,
-        badgeId: regStaffBadge || `STF-${Math.floor(100 + Math.random() * 900)}`,
+        enrollment: regStaffBadge.trim() || `STF-${Math.floor(100 + Math.random() * 900)}`,
+        badgeId: regStaffBadge.trim() || `STF-${Math.floor(100 + Math.random() * 900)}`,
         assignedUnit: regAssignedUnit,
         supervisorLevel: regSupervisorLevel,
         designation: regSupervisorLevel,
@@ -256,8 +265,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col justify-center items-center px-4 py-10 relative overflow-hidden">
       
-      {/* Soft Ambient Radial Accents */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-tr from-indigo-100/60 via-sky-100/60 to-purple-100/60 rounded-full blur-3xl pointer-events-none" />
+      {/* Ambient Radial Background Accents */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[750px] bg-gradient-to-tr from-indigo-100/70 via-sky-100/60 to-purple-100/60 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-80 h-80 bg-sky-100/50 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-10 right-10 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl pointer-events-none" />
 
@@ -266,18 +275,21 @@ export default function Login() {
         
         {/* Header Branding */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/90 border border-slate-200 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Central Smart Campus Operating System
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/90 border border-slate-200 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3 shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Smart Campus Operating System
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900">
             EduSphere
           </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+            Unified next-gen academic OS with DTU & GGSIPU curriculum intelligence, 3D holographic virtual IDs, and live attendance mesh.
+          </p>
         </div>
 
         {/* Mode Switcher Tabs (Sign In vs Register 4-Role Digital ID) */}
         <div className="flex justify-center mb-5">
-          <div className="inline-flex p-1.5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <div className="inline-flex p-1.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
             <button
               onClick={() => { setAuthMode('login'); setAuthError(null); }}
               className={`px-6 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
@@ -302,6 +314,31 @@ export default function Login() {
             </button>
           </div>
         </div>
+
+        {/* Quick Demo Fill Bar */}
+        {authMode === 'login' && (
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-2 p-2.5 rounded-2xl bg-white/80 border border-slate-200/90 shadow-2xs backdrop-blur-sm">
+            <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              Quick Demo Fill:
+            </span>
+            {[
+              { id: 'student', label: 'Student (Krrish)', color: 'hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200' },
+              { id: 'teacher', label: 'Faculty (Dr. Manish)', color: 'hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200' },
+              { id: 'hod', label: 'HOD (Prof. Naitik)', color: 'hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200' },
+              { id: 'staff', label: 'Staff (Rajesh)', color: 'hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200' }
+            ].map(pill => (
+              <button
+                key={pill.id}
+                type="button"
+                onClick={() => handleQuickDemoFill(pill.id)}
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200 transition ${pill.color}`}
+              >
+                {pill.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Auth Error Banner if any */}
         {authError && (
@@ -362,10 +399,6 @@ export default function Login() {
                       {currentConfig.subtitle}
                     </p>
                   </div>
-                </div>
-
-                <div className="text-[11px] text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                  {currentConfig.demoHint}
                 </div>
               </div>
 
@@ -430,7 +463,7 @@ export default function Login() {
                       onChange={(e) => setRememberMe(e.target.checked)}
                       className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <span>Keep me authenticated on this device</span>
+                    <span>Remember my session on this browser</span>
                   </label>
 
                   <span className="text-slate-500 font-medium">
@@ -471,7 +504,7 @@ export default function Login() {
                 Issue New Digital Identity Pass & Register
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Select your target role to load the dedicated identity credentials form. Your registered details will be stored in the permanent database and printed on your dynamic QR pass.
+                Select your role to load the dedicated credentials form. Registered details are persisted into SQLite and printed on your 3D holographic virtual pass.
               </p>
             </div>
 
@@ -492,7 +525,7 @@ export default function Login() {
                     onClick={() => setRegRole(item.id)}
                     className={`p-3 rounded-2xl border flex items-center gap-2.5 transition text-left ${
                       isSelected 
-                        ? `${item.color} font-bold ring-2 ring-indigo-600/20 shadow-sm` 
+                        ? `${item.color} font-bold ring-2 ring-indigo-600/20 shadow-xs` 
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                     }`}
                   >
@@ -521,13 +554,37 @@ export default function Login() {
                 <div>
                   <h4 className="text-xs font-bold text-slate-800">Upload Digital Badge Photo</h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Upload your picture (JPG, PNG). This will be printed on your {regRole.toUpperCase()} Virtual ID Pass with dynamic rotating security QR code.
+                    Upload your picture (JPG, PNG). This will be printed on your {regRole.toUpperCase()} Holographic Virtual ID Pass with dynamic rotating security QR code.
                   </p>
-                  <label className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-indigo-700 font-semibold cursor-pointer hover:bg-indigo-50 shadow-sm transition">
+                  <label className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-indigo-700 font-semibold cursor-pointer hover:bg-indigo-50 shadow-xs transition">
                     <Upload className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Choose Picture File</span>
                     <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
                   </label>
+                </div>
+              </div>
+
+              {/* University Affiliation Choice (DTU vs GGSIPU) */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-1.5">
+                  Target Curriculum & University Framework *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {UNIVERSITIES.map(uni => (
+                    <button
+                      key={uni.id}
+                      type="button"
+                      onClick={() => setRegUniversity(uni.id)}
+                      className={`p-3 rounded-2xl border text-left transition ${
+                        regUniversity === uni.id
+                          ? 'border-indigo-600 bg-indigo-50/70 font-bold ring-2 ring-indigo-500/20'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="font-black text-slate-900 block text-xs">{uni.shortName}</span>
+                      <span className="text-[10px] text-slate-500 block mt-0.5 line-clamp-1">{uni.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -543,7 +600,7 @@ export default function Login() {
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="e.g. Dr. Manish Verma or Krrish Kumar Tanti"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-xs"
                   />
                 </div>
 
@@ -556,7 +613,7 @@ export default function Login() {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="e.g. name@campus.edu"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-xs"
                   />
                 </div>
               </div>
@@ -564,7 +621,7 @@ export default function Login() {
               {/* Universal Row 2: College & Academic Department */}
               <div className="space-y-4">
                 <SearchableSelect
-                  label="Select Affiliated Higher Education College / Institute *"
+                  label="Select Affiliated College / Institute *"
                   options={UNIVERSAL_COLLEGES}
                   value={regCollege}
                   onChange={setRegCollege}
@@ -599,7 +656,7 @@ export default function Login() {
                         value={regEnrollment}
                         onChange={(e) => setRegEnrollment(e.target.value)}
                         placeholder="e.g. 04214802722"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none font-mono shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none font-mono shadow-xs"
                       />
                     </div>
 
@@ -610,7 +667,7 @@ export default function Login() {
                         value={regValidUpto}
                         onChange={(e) => setRegValidUpto(e.target.value)}
                         placeholder="June 2026"
-                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-xs"
                       />
                     </div>
                   </div>
@@ -660,7 +717,7 @@ export default function Login() {
                         value={regFacultyId}
                         onChange={(e) => setRegFacultyId(e.target.value)}
                         placeholder="e.g. FAC-1092"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none font-mono shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none font-mono shadow-xs"
                       />
                     </div>
 
@@ -683,8 +740,8 @@ export default function Login() {
                         type="text"
                         value={regSubjects}
                         onChange={(e) => setRegSubjects(e.target.value)}
-                        placeholder="e.g. Operating Systems, Cloud Computing"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none shadow-sm"
+                        placeholder="e.g. Operating Systems Lab, Cloud Computing"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none shadow-xs"
                       />
                     </div>
 
@@ -697,7 +754,7 @@ export default function Login() {
                         value={regCabin}
                         onChange={(e) => setRegCabin(e.target.value)}
                         placeholder="e.g. Room 304, Academic Block A"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none shadow-xs"
                       />
                     </div>
                   </div>
@@ -718,7 +775,7 @@ export default function Login() {
                         value={regAdminCode}
                         onChange={(e) => setRegAdminCode(e.target.value)}
                         placeholder="e.g. HOD-001"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none font-mono shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none font-mono shadow-xs"
                       />
                     </div>
 
@@ -731,7 +788,7 @@ export default function Login() {
                         value={regHodCabin}
                         onChange={(e) => setRegHodCabin(e.target.value)}
                         placeholder="e.g. Room 101, Executive Wing"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none shadow-xs"
                       />
                     </div>
                   </div>
@@ -745,7 +802,7 @@ export default function Login() {
                       value={regSignature}
                       onChange={(e) => setRegSignature(e.target.value)}
                       placeholder="e.g. RSA-SEAL-HOD-CSE-CHAIR"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none font-mono shadow-sm"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-purple-600 focus:outline-none font-mono shadow-xs"
                     />
                   </div>
                 </div>
@@ -765,7 +822,7 @@ export default function Login() {
                         value={regStaffBadge}
                         onChange={(e) => setRegStaffBadge(e.target.value)}
                         placeholder="e.g. STF-504"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-amber-600 focus:outline-none font-mono shadow-sm"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-amber-600 focus:outline-none font-mono shadow-xs"
                       />
                     </div>
 
@@ -801,7 +858,7 @@ export default function Login() {
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   placeholder="Set your secure account password"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-indigo-600 focus:outline-none shadow-xs"
                 />
               </div>
 
@@ -835,4 +892,3 @@ export default function Login() {
     </div>
   );
 }
-

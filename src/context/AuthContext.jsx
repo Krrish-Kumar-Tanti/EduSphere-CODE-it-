@@ -10,7 +10,7 @@ export const INITIAL_USER_ACCOUNTS = {
     role: 'student',
     email: 'krrish.tanti@campus.edu',
     enrollment: '04214802722',
-    college: 'Apex Institute of Technology & Management',
+    college: 'Apex Institute of Technology & Management (AITM)',
     department: 'Computer Science & Engineering (CSE)',
     semester: '6th Semester (Year 3)',
     section: 'CSE-A',
@@ -19,7 +19,8 @@ export const INITIAL_USER_ACCOUNTS = {
     validUpto: 'June 2026',
     attendanceOverall: 88.4,
     cgpa: '8.92',
-    designation: 'Student Scholar'
+    designation: 'Student Scholar',
+    university: 'GGSIPU'
   },
   teacher: {
     id: 'FAC-1092',
@@ -27,7 +28,7 @@ export const INITIAL_USER_ACCOUNTS = {
     role: 'teacher',
     email: 'manish.verma@campus.edu',
     enrollment: 'FAC-1092',
-    college: 'Apex Institute of Technology & Management',
+    college: 'Apex Institute of Technology & Management (AITM)',
     department: 'Computer Science & Engineering (CSE)',
     designation: 'Associate Professor',
     semester: 'Faculty',
@@ -35,8 +36,9 @@ export const INITIAL_USER_ACCOUNTS = {
     bloodGroup: 'B+ positive',
     validUpto: 'Permanent',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
-    subjects: 'Operating Systems, Cloud Computing, Computer Networks',
-    cabin: 'Room 304, Academic Block A'
+    subjects: 'Operating Systems Lab, Cloud Computing Architecture, Computer Networks',
+    cabin: 'Room 304, Academic Block A',
+    university: 'GGSIPU'
   },
   hod: {
     id: 'HOD-001',
@@ -44,7 +46,7 @@ export const INITIAL_USER_ACCOUNTS = {
     role: 'hod',
     email: 'hod.cse@campus.edu',
     enrollment: 'HOD-001',
-    college: 'Apex Institute of Technology & Management',
+    college: 'Apex Institute of Technology & Management (AITM)',
     department: 'Department of Computer Science & Engineering',
     designation: 'Head of Department & Professor',
     semester: 'HOD Office',
@@ -54,7 +56,8 @@ export const INITIAL_USER_ACCOUNTS = {
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
     cabin: 'Room 101, Executive Wing',
     adminCode: 'HOD-001',
-    digitalSignature: 'RSA-SEAL-HOD-CSE-VALID'
+    digitalSignature: 'RSA-SEAL-HOD-CSE-VALID',
+    university: 'GGSIPU'
   },
   staff: {
     id: 'STF-504',
@@ -62,9 +65,9 @@ export const INITIAL_USER_ACCOUNTS = {
     role: 'staff',
     email: 'rajesh.facilities@campus.edu',
     enrollment: 'STF-504',
-    college: 'Apex Institute of Technology & Management',
+    college: 'Apex Institute of Technology & Management (AITM)',
     department: 'Ground Operations & Maintenance',
-    assignedUnit: 'Campus Infrastructure & Cleanliness',
+    assignedUnit: 'Campus Infrastructure & Maintenance',
     supervisorLevel: 'Lead Operations Supervisor',
     semester: 'Staff',
     section: 'Campus Wide',
@@ -72,24 +75,31 @@ export const INITIAL_USER_ACCOUNTS = {
     validUpto: 'Permanent',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250',
     badgeLevel: 'Lead Supervisor',
-    badgeId: 'STF-504'
+    badgeId: 'STF-504',
+    university: 'GGSIPU'
   }
 };
 
 export const AuthProvider = ({ children }) => {
+  // Clean zero-pollution initial state: null by default unless valid localStorage session exists
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('edusphere_auth_user');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('edusphere_auth_user');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
     }
     return null;
   });
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const saved = localStorage.getItem('edusphere_auth_user');
-    return !!saved;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('edusphere_auth_user');
+      return !!saved;
+    }
+    return false;
   });
 
   useEffect(() => {
@@ -102,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [currentUser]);
 
-  // Login method with backend API sync & credentials validation
+  // Login method with backend API sync & fallback validation
   const login = async (role = 'student', credentials = null) => {
     try {
       if (credentials) {
@@ -177,7 +187,6 @@ export const AuthProvider = ({ children }) => {
       console.warn('Backend register offline, creating local profile:', e);
     }
 
-
     const randomSuffix = Date.now().toString().slice(-4);
     let idPrefix = 'USR';
     if (userData.role === 'student') idPrefix = 'STU';
@@ -191,7 +200,7 @@ export const AuthProvider = ({ children }) => {
       email: userData.email || `${userData.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@campus.edu`,
       role: userData.role || 'student',
       enrollment: userData.enrollment || (userData.role === 'student' ? `0421480${randomSuffix}` : `${idPrefix}-${randomSuffix}`),
-      college: userData.college || 'Apex Institute of Technology & Management',
+      college: userData.college || 'Apex Institute of Technology & Management (AITM)',
       department: userData.department || 'Computer Science & Engineering (CSE)',
       semester: userData.semester || (userData.role === 'student' ? '6th Semester (Year 3)' : 'Permanent'),
       section: userData.section || (userData.role === 'student' ? 'CSE-A' : 'Campus'),
@@ -207,11 +216,22 @@ export const AuthProvider = ({ children }) => {
       supervisorLevel: userData.supervisorLevel || null,
       adminCode: userData.adminCode || null,
       badgeId: userData.badgeId || null,
-      digitalSignature: userData.digitalSignature || null
+      digitalSignature: userData.digitalSignature || null,
+      university: userData.university || 'GGSIPU'
     };
 
     setCurrentUser(localUser);
     setIsAuthenticated(true);
+
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      try {
+        const bc = new BroadcastChannel('edusphere_channel');
+        if (localUser.role === 'teacher') {
+          bc.postMessage({ type: 'FACULTY_REGISTERED', payload: localUser, timestamp: Date.now() });
+        }
+      } catch (e) {}
+    }
+
     return { success: true, user: localUser };
   };
 
@@ -260,7 +280,7 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // Genuine logout that clears all auth state
+  // Clean logout that clears auth state & localStorage completely
   const logout = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
@@ -283,4 +303,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
