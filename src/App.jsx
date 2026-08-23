@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { DataProvider } from './context/DataContext';
+import { DataProvider, useData } from './context/DataContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
