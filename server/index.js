@@ -32,9 +32,30 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix);
   }
 });
+// Whitelist allowed MIME types and enforce safe file validation
+const fileFilter = (req, file, cb) => {
+  const allowedMimes = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'application/pdf',
+    'text/plain',
+    'application/zip',
+    'application/x-zip-compressed'
+  ];
+
+  if (allowedMimes.includes(file.mimetype) || file.originalname.match(/\.(jpg|jpeg|png|webp|gif|pdf|txt|zip)$/i)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Unsupported file type "${file.mimetype}". Allowed: JPG, PNG, WEBP, PDF, TXT, ZIP.`), false);
+  }
+};
+
 const upload = multer({ 
   storage,
-  limits: { fileSize: 30 * 1024 * 1024 } // 30MB
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB ceiling
+  fileFilter
 });
 
 app.use(cors());
@@ -575,6 +596,24 @@ app.post('/api/attendance/verify', (req, res) => {
     const sub = active?.subject || 'Operating Systems Lab (CSE-301)';
     const via = verifiedVia || 'Dual-Factor BLE Proximity (0.8m) + PIN';
     const todayStr = new Date().toISOString().slice(0, 10);
+
+    // Check if already verified for this active session to prevent duplicates
+    const existingLog = db.prepare(`
+      SELECT * FROM attendance_logs 
+      WHERE studentEnrollment = ? AND sessionId = ?
+    `).get(enr, sessId);
+
+    if (existingLog) {
+      return res.json({
+        success: true,
+        alreadyMarked: true,
+        message: `Attendance was already recorded as Present for this session!`,
+        subject: sub,
+        studentName: name,
+        studentEnrollment: enr,
+        verifiedAt: existingLog.timestamp || 'Recorded'
+      });
+    }
 
     // Insert into live logs
     db.prepare(`
@@ -1189,6 +1228,19 @@ app.delete('/api/broadcasts/:id', (req, res) => {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
+});
+
+// Global error handling middleware for Multer & unhandled API errors
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ success: false, error: 'File size exceeds maximum allowed limit (15MB).' });
+    }
+    return res.status(400).json({ success: false, error: `Upload error: ${err.message}` });
+  } else if (err) {
+    return res.status(400).json({ success: false, error: err.message || 'An unexpected request error occurred.' });
+  }
+  next();
 });
 
 app.listen(PORT, () => {

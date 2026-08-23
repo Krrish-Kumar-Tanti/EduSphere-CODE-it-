@@ -7,21 +7,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Node dependencies & build artifacts
+node_modules/
+dist/
+dist-ssr/
 *.local
 
-# Database & Uploads
-*.db*
+# Environment variables & secrets
+.env
+.env.*
+*.env
+
+# SQLite Database & Write-Ahead Logs
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 server/*.db*
+server/*.db-wal
+server/*.db-shm
+
+# Media & Uploads
 uploads/*
 !uploads/.gitkeep
 
-# Editor directories and files
+# Editor & OS files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
