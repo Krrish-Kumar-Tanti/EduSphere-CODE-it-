@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import TakeAttendance from './TakeAttendance';
 import NotesPublisher from './NotesPublisher';
 import VirtualIDCard from '../student/VirtualIDCard';
-import { getCurriculumForUniversity, getSubjectsList } from '../../data/syllabusData';
+import { getSubjectsList, SEMESTER_LIST } from '../../data/syllabusData';
 import { 
   UserCheck, 
   Radio, 
@@ -22,41 +22,45 @@ import {
   CreditCard,
   Building2,
   Sliders,
-  Check
+  Check,
+  GraduationCap
 } from 'lucide-react';
 
 export default function TeacherDashboard() {
   const { currentUser } = useAuth();
   const { activeSession, notes, studentsRoster, timetables, syllabusProgress, updateSyllabusProgress } = useData();
   const [activeTab, setActiveTab] = useState('attendance'); // 'attendance' | 'notes' | 'syllabus' | 'schedule' | 'pass'
-  const [selectedUni, setSelectedUni] = useState(currentUser?.university || 'GGSIPU');
-  const [selectedBranch, setSelectedBranch] = useState('Computer Science & Engineering (CSE)');
-  const [selectedSem, setSelectedSem] = useState('3rd Semester');
+  const [selectedSem, setSelectedSem] = useState('3rd Semester (Year 2)');
 
   const tabs = [
-    { id: 'attendance', label: 'Attendance Studio', icon: Radio, badge: 'Live BLE Radar', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { id: 'attendance', label: 'Attendance Studio', icon: Radio, badge: 'Matrix & BLE', color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { id: 'notes', label: 'Notes Vault', icon: BookOpen, badge: `${notes.length} Active Files`, color: 'text-cyan-600', bg: 'bg-cyan-50' },
-    { id: 'syllabus', label: 'Syllabus Tracker', icon: Sliders, badge: `${selectedUni} Units`, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { id: 'schedule', label: 'Faculty Timetable', icon: Calendar, badge: 'Weekly Schedule', color: 'text-purple-600', bg: 'bg-purple-50' },
+    { id: 'syllabus', label: 'Syllabus Tracker', icon: Sliders, badge: 'Unit Modules', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { id: 'schedule', label: 'Faculty Timetable', icon: Calendar, badge: 'Weekly Load', color: 'text-purple-600', bg: 'bg-purple-50' },
     { id: 'pass', label: 'Faculty Digital Pass', icon: CreditCard, badge: 'Scannable Badge', color: 'text-amber-600', bg: 'bg-amber-50' }
   ];
 
   const presentCount = studentsRoster.filter(s => s.status === 'present').length;
   const attendanceRate = studentsRoster.length > 0 ? Math.round((presentCount / studentsRoster.length) * 100) : 0;
 
-  // Course modules for selected curriculum
-  const courseModules = getSubjectsList(selectedUni, selectedBranch, selectedSem);
+  // Course modules for teacher's department and selected semester
+  const teacherDepartment = currentUser?.department || 'Computer Science & Engineering (CSE)';
+  const courseModules = getSubjectsList(teacherDepartment, selectedSem);
 
-  // Unit completion toggle
+  // Unit completion state
   const [unitProgress, setUnitProgress] = useState({
     'CSE-301-U1': 100,
     'CSE-301-U2': 85,
     'CSE-301-U3': 60,
     'CSE-301-U4': 30,
-    'TH-CS207-U1': 100,
-    'TH-CS207-U2': 75,
-    'TH-CS207-U3': 40,
-    'TH-CS207-U4': 10
+    'CSE-303-U1': 100,
+    'CSE-303-U2': 75,
+    'CSE-303-U3': 40,
+    'CSE-303-U4': 10,
+    'MATH-101-U1': 100,
+    'MATH-101-U2': 90,
+    'MATH-101-U3': 50,
+    'MATH-101-U4': 20
   });
 
   const handleUnitProgressChange = (key, val) => {
@@ -64,8 +68,8 @@ export default function TeacherDashboard() {
     setUnitProgress(next);
     updateSyllabusProgress({
       faculty_id: currentUser?.id || 'FAC-1092',
-      university: selectedUni,
-      department: selectedBranch,
+      college: currentUser?.college || 'Apex Institute of Technology & Management',
+      department: teacherDepartment,
       subject_code: key.split('-')[0],
       subject_name: 'Core Module',
       progress: next
@@ -91,7 +95,7 @@ export default function TeacherDashboard() {
               subject: period.subject,
               room: period.room,
               section: tt.section,
-              university: tt.university
+              college: tt.college || currentUser?.college
             });
           }
         });
@@ -119,9 +123,9 @@ export default function TeacherDashboard() {
                   <UserCheck className="w-3 h-3" />
                   Faculty Member
                 </span>
-                <span className="text-xs text-slate-500 font-semibold">{currentUser?.designation}</span>
+                <span className="text-xs text-slate-500 font-semibold">{currentUser?.designation || 'Associate Professor'}</span>
                 <span className="text-xs text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full font-bold border border-indigo-200">
-                  {currentUser?.university || selectedUni} Framework
+                  {currentUser?.college || 'College Affiliation'}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
@@ -203,7 +207,7 @@ export default function TeacherDashboard() {
         {activeTab === 'notes' && <NotesPublisher />}
         {activeTab === 'pass' && <VirtualIDCard />}
 
-        {/* DTU vs GGSIPU Syllabus Progress Tracker */}
+        {/* Universal Syllabus Coverage Tracker */}
         {activeTab === 'syllabus' && (
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             
@@ -211,28 +215,24 @@ export default function TeacherDashboard() {
               <div>
                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                   <Sliders className="w-5 h-5 text-indigo-600" />
-                  Dual-Curriculum Syllabus Coverage Tracker (DTU & GGSIPU)
+                  Department Syllabus Coverage Tracker
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Update unit-by-unit lecture progress. Changes persist into the database and sync to student dashboards.
+                  {teacherDepartment} • Update unit lecture coverage to sync with student portals.
                 </p>
               </div>
 
-              {/* University Selector */}
+              {/* Semester Selector */}
               <div className="flex items-center gap-2">
-                {['GGSIPU', 'DTU'].map(uni => (
-                  <button
-                    key={uni}
-                    onClick={() => setSelectedUni(uni)}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition ${
-                      selectedUni === uni 
-                        ? 'bg-indigo-600 text-white shadow-xs' 
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {uni} Curriculum
-                  </button>
-                ))}
+                <select
+                  value={selectedSem}
+                  onChange={(e) => setSelectedSem(e.target.value)}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none"
+                >
+                  {SEMESTER_LIST.map(sem => (
+                    <option key={sem} value={sem}>{sem}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -309,9 +309,9 @@ export default function TeacherDashboard() {
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 inline-block mt-2">Section CSE-6A</span>
                     </div>
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
-                      <span className="font-bold text-slate-900 block">TH-CS207 Operating System Design</span>
-                      <span className="text-slate-500 text-[11px] block">Tue & Thu • 10:00 AM - 11:00 AM • Room AB4-205</span>
-                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 inline-block mt-2">Section A4 (DTU)</span>
+                      <span className="font-bold text-slate-900 block">Object Oriented Software Design (CSE-303)</span>
+                      <span className="text-slate-500 text-[11px] block">Tue & Thu • 10:00 AM - 11:00 AM • Room 4202</span>
+                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200 inline-block mt-2">Section S2</span>
                     </div>
                   </div>
                 </div>
@@ -325,7 +325,7 @@ export default function TeacherDashboard() {
                       </span>
                     </div>
                     <h4 className="font-bold text-slate-900 text-sm">{slot.subject}</h4>
-                    <p className="text-slate-500 text-[11px]">{slot.room} • {slot.university}</p>
+                    <p className="text-slate-500 text-[11px]">{slot.room} • {slot.college}</p>
                     <button
                       onClick={() => setActiveTab('attendance')}
                       className="mt-2 w-full py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-2xs"

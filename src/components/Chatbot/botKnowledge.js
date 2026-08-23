@@ -1,7 +1,7 @@
 export const BOT_RESPONSES = [
   {
     triggers: ['attendance', 'ble', 'beacon', 'proxy', 'mark attendance', 'code', 'room code'],
-    response: 'EduSphere uses DTU-style BLE Proximity Validation. Your phone automatically scans for the classroom Bluetooth beacon. Once within range (0.8m), enter the dynamic room code displayed by your professor (e.g., EDUS-8492) to record attendance with zero chance of remote proxy fraud!'
+    response: 'EduSphere uses Universal Hardware BLE Proximity Validation. Your phone automatically scans for the classroom Bluetooth beacon. Once within range (0.8m), enter the dynamic room code displayed by your professor (e.g., EDUS-8492) to record attendance with zero chance of remote proxy fraud!'
   },
   {
     triggers: ['teacher', 'faculty', 'take attendance', 'roster', 'publish note'],

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth, INITIAL_USER_ACCOUNTS } from '../context/AuthContext';
 import SearchableSelect from '../components/SearchableSelect';
 import { 
+  ALL_DELHI_COLLEGES, 
   UNIVERSAL_COLLEGES, 
   DEPARTMENTS, 
   BLOOD_GROUPS, 
@@ -11,7 +12,6 @@ import {
   STAFF_UNITS, 
   SUPERVISOR_LEVELS 
 } from '../data/ggsipuData';
-import { UNIVERSITIES } from '../data/syllabusData';
 import { 
   GraduationCap, 
   Sparkles, 
@@ -57,7 +57,6 @@ export default function Login() {
   // Universal Registration States
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
-  const [regUniversity, setRegUniversity] = useState('GGSIPU');
   const [regCollege, setRegCollege] = useState('Apex Institute of Technology & Management (AITM)');
   const [regDepartment, setRegDepartment] = useState('Computer Science & Engineering (CSE)');
   const [regPassword, setRegPassword] = useState('');
@@ -75,7 +74,7 @@ export default function Login() {
   // Faculty
   const [regFacultyId, setRegFacultyId] = useState('');
   const [regDesignation, setRegDesignation] = useState('Associate Professor');
-  const [regSubjects, setRegSubjects] = useState('Operating Systems Lab, Cloud Computing');
+  const [regSubjects, setRegSubjects] = useState('Operating Systems Lab, Cloud Computing Architecture');
   const [regCabin, setRegCabin] = useState('Room 304, Academic Block A');
 
   // HOD
@@ -105,13 +104,13 @@ export default function Login() {
     teacher: {
       id: 'teacher',
       title: 'Faculty Member Portal',
-      subtitle: 'Attendance Studio, DTU/GGSIPU Syllabus Tracker & Timetable View',
+      subtitle: 'Attendance Studio, Universal Syllabus Tracker & Timetable View',
       icon: UserCheck,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
       borderColor: 'border-emerald-200',
       primaryBtn: 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25',
-      idLabel: 'Faculty Employee Code / University Email',
+      idLabel: 'Faculty Employee Code / College Email',
       idPlaceholder: 'e.g. FAC-1092 or manish.verma@campus.edu',
       demoCreds: { id: 'FAC-1092', pass: 'faculty@2026' }
     },
@@ -124,14 +123,14 @@ export default function Login() {
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-200',
       primaryBtn: 'bg-purple-600 hover:bg-purple-700 shadow-purple-600/25',
-      idLabel: 'HOD Admin Code / University Email',
+      idLabel: 'HOD Admin Code / College Email',
       idPlaceholder: 'e.g. HOD-001 or hod.cse@campus.edu',
       demoCreds: { id: 'HOD-001', pass: 'hod@admin2026' }
     },
     staff: {
       id: 'staff',
       title: 'Operations & Facilities Portal',
-      subtitle: 'Live Ticket Inbox, Maintenance & Emergency Medical Dispatch',
+      subtitle: 'Live Ticket Inbox, Work Orders & Emergency Medical Dispatch',
       icon: Wrench,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
@@ -203,7 +202,6 @@ export default function Login() {
     let userData = {
       name: regName.trim(),
       email: regEmail.trim(),
-      university: regUniversity,
       college: regCollege,
       department: regDepartment,
       avatar: regAvatar,
@@ -283,7 +281,7 @@ export default function Login() {
             EduSphere
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
-            Unified next-gen academic OS with DTU & GGSIPU curriculum intelligence, 3D holographic virtual IDs, and live attendance mesh.
+            Unified next-gen academic OS with Universal Delhi NCR College Affiliation, 3D holographic virtual IDs, and live attendance mesh.
           </p>
         </div>
 
@@ -385,7 +383,6 @@ export default function Login() {
             {/* Form Body for Selected Role */}
             <div className="p-6 sm:p-8">
               
-              {/* Header info for currently active role */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-5 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                   <div className={`p-3 rounded-2xl ${currentConfig.bgColor} ${currentConfig.color} border ${currentConfig.borderColor}`}>
@@ -504,7 +501,7 @@ export default function Login() {
                 Issue New Digital Identity Pass & Register
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Select your role to load the dedicated credentials form. Registered details are persisted into SQLite and printed on your 3D holographic virtual pass.
+                Select your institution from premier Delhi universities and affiliated technical colleges. Registered details persist into SQLite.
               </p>
             </div>
 
@@ -554,37 +551,13 @@ export default function Login() {
                 <div>
                   <h4 className="text-xs font-bold text-slate-800">Upload Digital Badge Photo</h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Upload your picture (JPG, PNG). This will be printed on your {regRole.toUpperCase()} Holographic Virtual ID Pass with dynamic rotating security QR code.
+                    Upload your photo (JPG, PNG). This will be printed on your {regRole.toUpperCase()} Holographic Virtual ID Pass with dynamic rotating security QR code.
                   </p>
                   <label className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-indigo-700 font-semibold cursor-pointer hover:bg-indigo-50 shadow-xs transition">
                     <Upload className="w-3.5 h-3.5 text-indigo-600" />
                     <span>Choose Picture File</span>
                     <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
                   </label>
-                </div>
-              </div>
-
-              {/* University Affiliation Choice (DTU vs GGSIPU) */}
-              <div>
-                <label className="block font-bold text-slate-700 mb-1.5">
-                  Target Curriculum & University Framework *
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {UNIVERSITIES.map(uni => (
-                    <button
-                      key={uni.id}
-                      type="button"
-                      onClick={() => setRegUniversity(uni.id)}
-                      className={`p-3 rounded-2xl border text-left transition ${
-                        regUniversity === uni.id
-                          ? 'border-indigo-600 bg-indigo-50/70 font-bold ring-2 ring-indigo-500/20'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="font-black text-slate-900 block text-xs">{uni.shortName}</span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5 line-clamp-1">{uni.name}</span>
-                    </button>
-                  ))}
                 </div>
               </div>
 
@@ -606,7 +579,7 @@ export default function Login() {
 
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Official / University Email (Optional)
+                    Official College / University Email (Optional)
                   </label>
                   <input
                     type="email"
@@ -618,14 +591,14 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Universal Row 2: College & Academic Department */}
+              {/* Universal Row 2: Universal Delhi College Affiliation & Academic Department */}
               <div className="space-y-4">
                 <SearchableSelect
-                  label="Select Affiliated College / Institute *"
-                  options={UNIVERSAL_COLLEGES}
+                  label="Select College Affiliation / Institution *"
+                  options={ALL_DELHI_COLLEGES}
                   value={regCollege}
                   onChange={setRegCollege}
-                  placeholder="Search College / Institute..."
+                  placeholder="Search Premier Delhi Universities & Colleges (IIT, DTU, NSUT, IIIT, MAIT, MSIT, BPIT, ADGITM)..."
                   icon={Building2}
                   isCollegeList={true}
                 />
@@ -734,13 +707,13 @@ export default function Login() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block font-bold text-slate-700 mb-1">
-                        Subjects Taught
+                        Primary Subjects Taught
                       </label>
                       <input
                         type="text"
                         value={regSubjects}
                         onChange={(e) => setRegSubjects(e.target.value)}
-                        placeholder="e.g. Operating Systems Lab, Cloud Computing"
+                        placeholder="e.g. Operating Systems Lab, Cloud Computing Architecture"
                         className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 font-semibold text-xs focus:border-emerald-600 focus:outline-none shadow-xs"
                       />
                     </div>

@@ -1,79 +1,8 @@
-export const UNIVERSAL_COLLEGES = [
-  {
-    code: '101',
-    name: 'Apex Institute of Technology & Management (AITM)',
-    location: 'Academic City Campus',
-    type: 'Affiliated Technical Institute'
-  },
-  {
-    code: '102',
-    name: 'Metro College of Engineering & Research',
-    location: 'Innovation District, Sector 18',
-    type: 'Affiliated Engineering College'
-  },
-  {
-    code: '103',
-    name: 'National Institute of Technical Sciences (NITS)',
-    location: 'Knowledge Park, Central Avenue',
-    type: 'Autonomous Institute'
-  },
-  {
-    code: '104',
-    name: 'City University School of Computing & Robotics',
-    location: 'University Enclave Phase 1',
-    type: 'University Department'
-  },
-  {
-    code: '105',
-    name: 'Royal Academy of Engineering & Technology',
-    location: 'Tech Corridor, South Hub',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '106',
-    name: 'Premier Institute of Professional Studies',
-    location: 'Outer Ring Campus',
-    type: 'Affiliated College'
-  },
-  {
-    code: '107',
-    name: 'Federal Engineering & Technological Campus',
-    location: 'Institutional Area, Sector 22',
-    type: 'State Technical Campus'
-  },
-  {
-    code: '108',
-    name: 'Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)',
-    location: 'Shastri Park, FC-26, New Delhi',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '109',
-    name: 'Maharaja Agrasen Institute of Technology (MAIT)',
-    location: 'PSP Area, Sector 22, Rohini',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '110',
-    name: 'Maharaja Surajmal Institute of Technology (MSIT)',
-    location: 'C-4, Janakpuri Campus',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '111',
-    name: 'Bharati Vidyapeeth College of Engineering (BVCOE)',
-    location: 'A-4, Paschim Vihar',
-    type: 'Affiliated Institute'
-  },
-  {
-    code: '112',
-    name: 'Bhagwan Parshuram Institute of Technology (BPIT)',
-    location: 'PSP-4, Sector 17, Rohini',
-    type: 'Affiliated Institute'
-  }
-];
+import { ALL_DELHI_COLLEGES } from './collegesData';
 
-export const GGSIPU_COLLEGES = UNIVERSAL_COLLEGES;
+export const UNIVERSAL_COLLEGES = ALL_DELHI_COLLEGES;
+export { ALL_DELHI_COLLEGES };
+export const GGSIPU_COLLEGES = ALL_DELHI_COLLEGES;
 
 export const ACADEMIC_DISCIPLINES = [
   'Computer Science & Engineering (CSE)',

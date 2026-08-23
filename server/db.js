@@ -721,13 +721,23 @@ export function initDB() {
   `);
 
     const standardColleges = [
-      ['1', '101', 'Apex Institute of Technology & Management (AITM)', 'Academic City, Main Campus', 'GGSIPU', 'B.Tech, M.Tech, MCA', 'NAAC A++'],
-      ['2', '102', 'Delhi Technological University (DTU Main Campus)', 'Bawana Road, Shahbad Daulatpur', 'State University (Autonomous)', 'B.Tech, M.Tech, PhD', 'NAAC A++'],
-      ['3', '103', 'Dr. Akhilesh Das Gupta Institute of Technology & Management (ADGITM)', 'FC-26, Shastri Park, New Delhi', 'GGSIPU', 'B.Tech, MBA, MCA', 'NAAC A+'],
-      ['4', '104', 'Maharaja Agrasen Institute of Technology (MAIT)', 'PSP Area, Sector 22, Rohini', 'GGSIPU', 'B.Tech, MBA', 'NAAC A++'],
-      ['5', '105', 'Maharaja Surajmal Institute of Technology (MSIT)', 'C-4, Janakpuri Campus', 'GGSIPU', 'B.Tech, BCA', 'NAAC A+'],
-      ['6', '106', 'Bharati Vidyapeeth College of Engineering (BVCOE)', 'A-4, Paschim Vihar', 'GGSIPU', 'B.Tech', 'NAAC A'],
-      ['7', '107', 'Bhagwan Parshuram Institute of Technology (BPIT)', 'PSP-4, Sector 17, Rohini', 'GGSIPU', 'B.Tech, MBA', 'NAAC A+']
+      ['1', 'IITD', 'Indian Institute of Technology Delhi (IIT Delhi)', 'Hauz Khas, New Delhi', 'Institute of National Importance', 'B.Tech, M.Tech, PhD', 'NIRF Top 2'],
+      ['2', 'DTU', 'Delhi Technological University (DTU Main Campus)', 'Bawana Road, Shahbad Daulatpur', 'State Technical University', 'B.Tech, M.Tech, PhD', 'NAAC A++'],
+      ['3', 'NSUT-MAIN', 'Netaji Subhas University of Technology (NSUT Main)', 'Sector 3, Dwarka, New Delhi', 'State Technical University', 'B.Tech, M.Tech, PhD', 'NAAC A+'],
+      ['4', 'IIITD', 'Indraprastha Institute of Information Technology (IIIT-Delhi)', 'Okhla Phase III, New Delhi', 'State Autonomous Institute', 'B.Tech, M.Tech, PhD', 'NAAC A'],
+      ['5', 'IGDTUW', 'Indira Gandhi Delhi Technical University for Women', 'Kashmere Gate, Old Delhi', 'State Technical University', 'B.Tech, M.Tech, MCA', 'NAAC A+'],
+      ['6', 'JMI-FET', 'Jamia Millia Islamia (Faculty of Engg & Tech)', 'Jamia Nagar, Okhla, New Delhi', 'Central University', 'B.Tech, M.Tech, PhD', 'NAAC A++'],
+      ['7', 'DU-CIC', 'Cluster Innovation Centre, DU (CIC)', 'University Enclave, North Campus', 'Central University Centre', 'B.Tech IT & Mathematical Innovation', 'NAAC A++'],
+      ['8', 'USICT', 'University School of Information & Comm Tech (USICT)', 'Sector 16C, Dwarka, New Delhi', 'University Teaching Department', 'B.Tech, M.Tech, MCA', 'NAAC A++'],
+      ['9', 'MAIT', 'Maharaja Agrasen Institute of Technology (MAIT)', 'PSP Area, Sector 22, Rohini', 'Affiliated Technical Institution', 'B.Tech, MBA', 'NAAC A++'],
+      ['10', 'MSIT', 'Maharaja Surajmal Institute of Technology (MSIT)', 'C-4, Janakpuri Campus', 'Affiliated Technical Institution', 'B.Tech, BCA', 'NAAC A+'],
+      ['11', 'BVCOE', "Bharati Vidyapeeth's College of Engineering (BVCOE)", 'A-4, Paschim Vihar', 'Affiliated Technical Institution', 'B.Tech', 'NAAC A'],
+      ['12', 'BPIT', 'Bhagwan Parshuram Institute of Technology (BPIT)', 'PSP-4, Sector 17, Rohini', 'Affiliated Technical Institution', 'B.Tech, MBA', 'NAAC A+'],
+      ['13', 'ADGITM', 'Dr. Akhilesh Das Gupta Institute of Tech & Mgmt', 'FC-26, Shastri Park, New Delhi', 'Affiliated Technical Institution', 'B.Tech, MBA, MCA', 'NAAC A+'],
+      ['14', 'VIPS-TC', 'Vivekananda Institute of Professional Studies (VIPS)', 'AU Block, Pitampura, New Delhi', 'Affiliated Technical Institution', 'B.Tech, BCA, MCA', 'NAAC A++'],
+      ['15', 'GTBIT', 'Guru Tegh Bahadur Institute of Technology (GTBIT)', 'Rajouri Garden, New Delhi', 'Affiliated Technical Institution', 'B.Tech', 'NAAC A'],
+      ['16', 'AITM', 'Apex Institute of Technology & Management (AITM)', 'Academic City, Main Campus', 'Premier Technical Campus', 'B.Tech, M.Tech, MCA', 'NAAC A++'],
+      ['17', 'JEMTEC', 'JIMS Engineering Management Technical Campus', 'Knowledge Park III, Greater Noida', 'Affiliated Technical Institution', 'B.Tech, BBA, BCA', 'NAAC A']
     ];
 
     for (const col of standardColleges) {

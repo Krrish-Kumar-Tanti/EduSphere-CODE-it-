@@ -1,326 +1,284 @@
-// Comprehensive DTU & GGSIPU B.Tech Curriculum Dataset and University Timetable Engine
+// Universal Higher Education Technical Curriculum & Department Timetable Engine
 
-export const UNIVERSITIES = [
-  {
-    id: 'GGSIPU',
-    name: 'Guru Gobind Singh Indraprastha University (GGSIPU)',
-    shortName: 'GGSIPU',
-    location: 'Dwarka / FC-26 Shastri Park, New Delhi',
-    tagline: 'State Technical University Network',
-    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200'
-  },
-  {
-    id: 'DTU',
-    name: 'Delhi Technological University (DTU - Formerly DCE)',
-    shortName: 'DTU',
-    location: 'Bawana Road, Shahbad Daulatpur, Delhi-110042',
-    tagline: 'Premier Technological University',
-    badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200'
-  }
+export const ACADEMIC_DEPARTMENTS = [
+  'Computer Science & Engineering (CSE)',
+  'Information Technology (IT)',
+  'Artificial Intelligence & Data Science (AI & DS)',
+  'Software Engineering (SE)',
+  'Electronics & Communication Engineering (ECE)',
+  'Electrical Engineering (EE)',
+  'Mechanical & Automation Engineering (MAE)',
+  'Civil & Environmental Engineering (CEE)'
 ];
 
-// DTU B.Tech Course Catalog
-export const DTU_CURRICULUM = {
-  'Computer Science & Engineering (CSE)': {
-    '1st Semester': [
-      { code: 'BS101', name: 'Mathematics - I (Calculus & Linear Algebra)', credits: '4 (3-1-0)', units: ['Calculus & Mean Value', 'Linear Algebra & Matrices', 'Multivariable Functions', 'Vector Calculus'] },
-      { code: 'AP102', name: 'Applied Physics', credits: '4 (3-0-2)', units: ['Relativity & Optics', 'Quantum Mechanics Foundations', 'Semiconductor Physics', 'Laser & Fiber Optics'] },
-      { code: 'EE103', name: 'Basic Electrical Engineering', credits: '4 (3-0-2)', units: ['DC Circuits & Theorems', 'AC Single & Polyphase', 'Transformers & Machines', 'Electrical Installations'] },
-      { code: 'CO104', name: 'Programming Fundamentals in C/C++', credits: '4 (3-0-2)', units: ['Control Flow & Functions', 'Arrays & Pointers', 'Structures & Unions', 'File I/O & Dynamic Memory'] }
-    ],
-    '2nd Semester': [
-      { code: 'BS105', name: 'Mathematics - II (Differential Equations & Complex Analysis)', credits: '4 (3-1-0)', units: ['Ordinary Diff Equations', 'Partial Diff Equations', 'Complex Variables', 'Laplace & Fourier Transforms'] },
-      { code: 'AC106', name: 'Applied Chemistry', credits: '4 (3-0-2)', units: ['Thermodynamics & Kinetics', 'Polymers & Composites', 'Corrosion Science', 'Spectroscopy & Instrumental Analysis'] },
-      { code: 'CO107', name: 'Data Structures', credits: '4 (3-0-2)', units: ['Stacks, Queues, Linked Lists', 'Trees & Binary Search Trees', 'Graphs & Traversals', 'Sorting, Searching & Hashing'] },
-      { code: 'ME108', name: 'Engineering Graphics & Design', credits: '3 (1-0-4)', units: ['Orthographic Projections', 'Isometric Views', 'Section of Solids', 'AutoCAD 2D/3D Modeling'] }
-    ],
-    '3rd Semester': [
-      { code: 'TH-CS207', name: 'Operating System Design (OS)', credits: '4 (3-1-0)', units: ['Process Management & Threads', 'CPU Scheduling & Synchronization', 'Deadlocks & Prevention', 'Virtual Memory & Page Replacement'] },
-      { code: 'TH-CS203', name: 'Object Oriented Design (OOPS)', credits: '4 (3-1-0)', units: ['Core OOP & UML Diagrams', 'Inheritance & Polymorphism', 'Design Patterns (GoF)', 'Exception Handling & Modern C++/Java'] },
-      { code: 'TH-CS205', name: 'Design & Analysis of Algorithm (DAA)', credits: '4 (3-1-0)', units: ['Asymptotic Analysis & Recurrences', 'Divide & Conquer, Greedy Strategies', 'Dynamic Programming Paradigms', 'Graph Algorithms & NP-Completeness'] },
-      { code: 'TH-CS207-SE', name: 'Software Engineering (SE)', credits: '4 (3-1-0)', units: ['Agile, Scrum & SDLC Models', 'Requirements Engineering & SRS', 'Software Architectural Patterns', 'Testing Strategies & CI/CD Pipelines'] },
-      { code: 'TH-EC201', name: 'Digital Logic Design', credits: '4 (3-0-2)', units: ['Boolean Algebra & Karnaugh Maps', 'Combinational Circuit Design', 'Sequential Circuits & Flip-Flops', 'Registers, Counters & FSM Design'] }
-    ],
-    '4th Semester': [
-      { code: 'CO202', name: 'Database Management Systems (DBMS)', credits: '4 (3-0-2)', units: ['ER Modeling & Relational Algebra', 'SQL, Joins & Normalization (1NF-BCNF)', 'Transaction Management & ACID', 'Indexing, B-Trees & Concurrency Control'] },
-      { code: 'CO204', name: 'Computer System Architecture (CSA)', credits: '4 (3-1-0)', units: ['Instruction Set Architectures (RISC/CISC)', 'Pipelining & Hazard Resolution', 'Memory Hierarchy & Cache Coherence', 'I/O Interfacing & Multiprocessors'] },
-      { code: 'CO206', name: 'Theory of Computation', credits: '4 (3-1-0)', units: ['Finite Automata & Regular Expressions', 'Context-Free Grammars & Pushdown Automata', 'Turing Machines & Decidability', 'Computational Complexity Classes'] },
-      { code: 'CO208', name: 'Microprocessors and Interfacing', credits: '4 (3-0-2)', units: ['8086 Architecture & Pinouts', 'Assembly Language Programming', 'Interrupt Controller 8259', 'Peripheral Interface 8255 & DMA 8237'] }
-    ],
-    '5th Semester': [
-      { code: 'CO301', name: 'Computer Networks', credits: '4 (3-0-2)', units: ['OSI & TCP/IP Protocol Stacks', 'Data Link Protocols & Ethernet', 'IP Addressing, Subnetting & Routing', 'TCP Congestion Control & Sockets'] },
-      { code: 'CO303', name: 'Compiler Design', credits: '4 (3-0-2)', units: ['Lexical Analysis & Lex Tools', 'Syntax Analysis (LL/LR Parsers)', 'Intermediate Code Generation', 'Code Optimization & Register Allocation'] },
-      { code: 'CO305', name: 'Artificial Intelligence', credits: '4 (3-1-0)', units: ['State Space Search & A* Search', 'Knowledge Representation & Logic', 'Game Playing & Minimax Alpha-Beta', 'Machine Learning Foundations'] },
-      { code: 'CO307', name: 'Cloud Computing & Distributed Systems', credits: '4 (3-0-2)', units: ['Virtualization & Hypervisors', 'IaaS, PaaS, SaaS Architectures', 'Docker Containers & Kubernetes', 'AWS / Azure Serverless Computing'] }
-    ],
-    '6th Semester': [
-      { code: 'CO302', name: 'Machine Learning', credits: '4 (3-0-2)', units: ['Supervised Learning & Regression', 'SVMs, Decision Trees & Ensembles', 'Unsupervised Clustering & PCA', 'Neural Networks & Gradient Descent'] },
-      { code: 'CO304', name: 'Information & Network Security', credits: '4 (3-1-0)', units: ['Classical & Modern Cryptography', 'RSA, AES, SHA-256 Algorithms', 'Authentication Protocols & PKI', 'Firewalls, IDS & Zero-Trust Architecture'] },
-      { code: 'CO306', name: 'Big Data Analytics', credits: '4 (3-0-2)', units: ['Hadoop Ecosystem & HDFS', 'MapReduce Programming Paradigm', 'Apache Spark RDDs & DataFrames', 'NoSQL Databases (MongoDB/Cassandra)'] }
-    ],
-    '7th Semester': [
-      { code: 'CO401', name: 'Deep Learning & Neural Architectures', credits: '4 (3-0-2)', units: ['CNNs & Computer Vision', 'RNNs, LSTMs & Sequence Models', 'Transformers & Attention Mechanisms', 'Generative Adversarial Networks (GANs)'] },
-      { code: 'CO403', name: 'Distributed Systems & Blockchain', credits: '4 (3-0-2)', units: ['Consensus Algorithms (Raft/Paxos)', 'Distributed Hash Tables & P2P', 'Ethereum, Smart Contracts & Solidity', 'DeFi & Web3 Architectures'] }
-    ],
-    '8th Semester': [
-      { code: 'CO402', name: 'Natural Language Processing & LLMs', credits: '4 (3-0-2)', units: ['Tokenization & Embeddings (Word2Vec)', 'BERT, GPT & Large Language Models', 'Retrieval-Augmented Generation (RAG)', 'Fine-Tuning & Alignment (RLHF)'] },
-      { code: 'CO404', name: 'Major Capstone Project Phase-II', credits: '8 (0-0-16)', units: ['Full System Implementation', 'Benchmarking & Performance Evaluation', 'Research Paper Publishing', 'Final Viva Voce'] }
-    ]
-  },
-  'Software Engineering (SE)': {
-    '3rd Semester': [
-      { code: 'SE201', name: 'Data Structures & Algorithms', credits: '4 (3-0-2)', units: ['Linear Data Structures', 'Trees & Balanced BSTs', 'Graph Algorithms', 'Hashing Techniques'] },
-      { code: 'SE203', name: 'Object Oriented Programming', credits: '4 (3-1-0)', units: ['OOP Paradigms', 'Classes & Object Lifetime', 'Templates & Generics', 'Design Patterns'] },
-      { code: 'SE205', name: 'Software Engineering Principles', credits: '4 (3-1-0)', units: ['SDLC Methodologies', 'SRS Documentation', 'Software Design', 'Verification & Validation'] },
-      { code: 'SE207', name: 'Discrete Mathematical Structures', credits: '4 (3-1-0)', units: ['Set Theory & Relations', 'Propositional Logic', 'Combinatorics', 'Graph Theory'] }
-    ]
-  }
-};
+export const SEMESTER_LIST = [
+  '1st Semester (Year 1)',
+  '2nd Semester (Year 1)',
+  '3rd Semester (Year 2)',
+  '4th Semester (Year 2)',
+  '5th Semester (Year 3)',
+  '6th Semester (Year 3)',
+  '7th Semester (Year 4)',
+  '8th Semester (Year 4)'
+];
 
-// GGSIPU B.Tech Course Catalog (Matches Shastri Park CSE Syllabus)
-export const GGSIPU_CURRICULUM = {
+export const DEPARTMENT_CURRICULUM = {
   'Computer Science & Engineering (CSE)': {
     '1st Semester': [
-      { code: 'BS-101', name: 'Applied Mathematics - I', credits: '4 (3-1-0)', units: ['Successive Differentiation & Leibniz', 'Partial Differentiation', 'Curvature & Curve Tracing', 'Infinite Series & Convergence'] },
-      { code: 'BS-103', name: 'Applied Physics - I', credits: '3 (2-1-0)', units: ['Interference of Light', 'Diffraction & Polarization', 'Special Theory of Relativity', 'Fiber Optics & Ultrasonics'] },
-      { code: 'ES-105', name: 'Electrical Science & Circuits', credits: '3 (3-0-0)', units: ['DC Network Theorems', 'AC Circuits & Resonance', 'Magnetic Circuits', 'Transformers & Motors'] },
-      { code: 'ES-107', name: 'Fundamentals of Computing (C Lang)', credits: '3 (3-0-0)', units: ['Flowcharts & Algorithms', 'C Basics & Control Flow', 'Arrays & Pointer Arithmetic', 'Structures & File Handling'] }
+      { code: 'MATH-101', name: 'Applied Mathematics - I (Calculus & Linear Algebra)', credits: '4 (3-1-0)', units: ['Calculus & Mean Value', 'Linear Algebra & Matrices', 'Multivariable Functions', 'Vector Calculus'] },
+      { code: 'PHYS-102', name: 'Applied Physics & Quantum Mechanics', credits: '4 (3-0-2)', units: ['Relativity & Optics', 'Quantum Mechanics Foundations', 'Semiconductor Physics', 'Laser & Fiber Optics'] },
+      { code: 'ELEC-103', name: 'Basic Electrical & Electronics Engineering', credits: '4 (3-0-2)', units: ['DC Circuits & Theorems', 'AC Single & Polyphase', 'Diodes & BJT Basics', 'Digital Logic Foundations'] },
+      { code: 'PROG-104', name: 'Programming Fundamentals in C/C++', credits: '4 (3-0-2)', units: ['Control Flow & Functions', 'Arrays & Pointers', 'Structures & Unions', 'File I/O & Dynamic Memory'] }
     ],
     '2nd Semester': [
-      { code: 'BS-102', name: 'Applied Mathematics - II', credits: '4 (3-1-0)', units: ['Linear Algebra & Matrices', 'Ordinary Differential Equations', 'Integral Calculus & Beta-Gamma', 'Vector Differentiation & Integration'] },
-      { code: 'BS-104', name: 'Applied Physics - II', credits: '3 (2-1-0)', units: ['Quantum Mechanics Wave Mechanics', 'Statistical Physics', 'Solid State Physics & Band Theory', 'Superconductivity & Nanomaterials'] },
-      { code: 'ES-106', name: 'Data Structures in C++', credits: '3 (3-0-0)', units: ['Abstract Data Types & Arrays', 'Stacks & Queues Applications', 'Linked Lists & Doubly Linked Lists', 'Non-linear Trees & Graphs'] },
-      { code: 'HS-108', name: 'Communication Skills & Ethics', credits: '2 (2-0-0)', units: ['Verbal & Non-Verbal Skills', 'Technical Writing & Proposals', 'Presentation Dynamics', 'Professional Ethics'] }
+      { code: 'MATH-105', name: 'Applied Mathematics - II (Differential Equations)', credits: '4 (3-1-0)', units: ['Ordinary Diff Equations', 'Partial Diff Equations', 'Complex Variables', 'Laplace & Fourier Transforms'] },
+      { code: 'CHEM-106', name: 'Applied Chemistry & Materials Science', credits: '4 (3-0-2)', units: ['Thermodynamics & Kinetics', 'Polymers & Nanomaterials', 'Corrosion Science', 'Spectroscopy & Instrumental Analysis'] },
+      { code: 'DS-107', name: 'Data Structures & Algorithms', credits: '4 (3-0-2)', units: ['Stacks, Queues, Linked Lists', 'Trees & Binary Search Trees', 'Graphs & Traversals', 'Sorting, Searching & Hashing'] },
+      { code: 'ENGG-108', name: 'Engineering Graphics & CAD Modeling', credits: '3 (1-0-4)', units: ['Orthographic Projections', 'Isometric Views', 'Section of Solids', 'AutoCAD 2D/3D Modeling'] }
     ],
     '3rd Semester': [
-      { code: 'CSE-201', name: 'Data Structure (DS)', credits: '4 (3-1-0)', units: ['Linear Structures, Stacks & Queues', 'Trees, AVL, B-Trees & Heaps', 'Graph Traversals (BFS/DFS/Dijkstra)', 'Sorting & Dynamic Hashing'] },
-      { code: 'CSE-203', name: 'Object Oriented Programming Systems (OOPS)', credits: '4 (3-1-0)', units: ['OOP Concepts & Classes/Objects', 'Operator Overloading & Inheritance', 'Virtual Functions & Polymorphism', 'Templates & Exception Handling in C++'] },
-      { code: 'CSE-205', name: 'Digital Logic & Circuit Design (DLCD)', credits: '4 (3-1-0)', units: ['Number Systems & Boolean Algebra', 'K-Maps & Logic Minimization', 'Combinational Arithmetic Circuits', 'Sequential Counters & State Machines'] },
-      { code: 'CSE-207', name: 'Discrete Mathematics (DM)', credits: '4 (3-1-0)', units: ['Sets, Relations & Functions', 'Propositional & Predicate Calculus', 'Recurrence Relations & Generating Functions', 'Group Theory, Lattices & Graph Theory'] },
-      { code: 'CSE-209', name: 'Computational Methods (CM)', credits: '4 (3-1-0)', units: ['Roots of Equations (Newton-Raphson)', 'System of Linear Equations (Gauss-Seidel)', 'Interpolation (Newton/Lagrange)', 'Numerical Integration & Diff Equations (RK4)'] }
+      { code: 'CSE-301', name: 'Operating System Design (OS)', credits: '4 (3-1-0)', units: ['Process Management & Threads', 'CPU Scheduling & Synchronization', 'Deadlocks & Prevention', 'Virtual Memory & Page Replacement'] },
+      { code: 'CSE-303', name: 'Object Oriented Software Design (OOPS)', credits: '4 (3-1-0)', units: ['Core OOP & UML Diagrams', 'Inheritance & Polymorphism', 'Design Patterns (GoF)', 'Exception Handling & Modern C++/Java'] },
+      { code: 'CSE-305', name: 'Design & Analysis of Algorithms (DAA)', credits: '4 (3-1-0)', units: ['Asymptotic Analysis & Recurrences', 'Divide & Conquer, Greedy Strategies', 'Dynamic Programming Paradigms', 'Graph Algorithms & NP-Completeness'] },
+      { code: 'CSE-307', name: 'Software Engineering & Agile Methodologies', credits: '4 (3-1-0)', units: ['Agile, Scrum & SDLC Models', 'Requirements Engineering & SRS', 'Software Architectural Patterns', 'Testing Strategies & CI/CD Pipelines'] },
+      { code: 'ECE-309', name: 'Digital Logic & Circuit Design (DLCD)', credits: '4 (3-0-2)', units: ['Boolean Algebra & Karnaugh Maps', 'Combinational Circuit Design', 'Sequential Circuits & Flip-Flops', 'Registers, Counters & FSM Design'] },
+      { code: 'MATH-311', name: 'Discrete Mathematics (DM)', credits: '4 (3-1-0)', units: ['Set Theory & Relations', 'Propositional & Predicate Logic', 'Combinatorics & Recurrences', 'Graph Theory & Trees'] }
     ],
     '4th Semester': [
-      { code: 'CSE-202', name: 'Applied Mathematics - IV', credits: '4 (3-1-0)', units: ['Probability & Probability Distributions', 'Sampling Theory & Hypothesis Testing', 'Markov Chains & Queuing Models', 'Fuzzy Logic & Transforms'] },
-      { code: 'CSE-204', name: 'Computer Organization & Architecture', credits: '4 (3-1-0)', units: ['Register Transfer & Micro-operations', 'CPU Control Unit (Hardwired/Microprogrammed)', 'Computer Arithmetic & Floating Point', 'Memory Organization & DMA I/O'] },
-      { code: 'CSE-206', name: 'Database Management Systems', credits: '4 (3-0-2)', units: ['Database Concepts & ER Modeling', 'Relational Model & Tuple Calculus', 'SQL & Normal Forms (1NF-5NF)', 'Concurrency, Recovery & ACID'] },
-      { code: 'CSE-208', name: 'Theory of Computation', credits: '4 (3-1-0)', units: ['DFA/NFA & Regular Languages', 'Context-Free Grammars & Normal Forms', 'Pushdown Automata (PDA)', 'Turing Machines & Chomsky Hierarchy'] }
+      { code: 'CSE-401', name: 'Database Management Systems (DBMS)', credits: '4 (3-0-2)', units: ['ER Modeling & Relational Algebra', 'SQL, Joins & Normalization (1NF-BCNF)', 'Transaction Management & ACID', 'Indexing, B-Trees & Concurrency Control'] },
+      { code: 'CSE-403', name: 'Computer System Architecture (CSA)', credits: '4 (3-1-0)', units: ['Instruction Set Architectures (RISC/CISC)', 'Pipelining & Hazard Resolution', 'Memory Hierarchy & Cache Coherence', 'I/O Interfacing & Multiprocessors'] },
+      { code: 'CSE-405', name: 'Theory of Computation & Automata', credits: '4 (3-1-0)', units: ['Finite Automata & Regular Expressions', 'Context-Free Grammars & Pushdown Automata', 'Turing Machines & Decidability', 'Computational Complexity Classes'] },
+      { code: 'CSE-407', name: 'Microprocessors & Embedded Systems', credits: '4 (3-0-2)', units: ['8086/ARM Architecture & Pinouts', 'Assembly Language Programming', 'Interrupt Controllers', 'Peripheral Interfacing & Timers'] }
     ],
     '5th Semester': [
-      { code: 'CSE-301', name: 'Algorithms Design and Analysis (DAA)', credits: '4 (3-1-0)', units: ['Growth of Functions & Master Theorem', 'Divide and Conquer & Greedy Paradigms', 'Dynamic Programming (0/1 Knapsack, LCS)', 'String Matching & NP-Complete Proofs'] },
-      { code: 'CSE-303', name: 'Software Engineering', credits: '4 (3-1-0)', units: ['Software Process Models & Agile', 'Software Requirements Engineering', 'Software Architecture & Modular Design', 'Software Testing & Metrics (COCOMO)'] },
-      { code: 'CSE-305', name: 'Java Programming', credits: '4 (3-0-2)', units: ['Java Core, Packages & Interfaces', 'Multithreading & Concurrency', 'Java Collections Framework', 'JDBC, Servlets & GUI Event Handling'] },
-      { code: 'CSE-307', name: 'Microprocessors and Microcontrollers', credits: '4 (3-0-2)', units: ['8085/8086 Internal Architecture', 'Assembly Instructions & Addressing', '8255 PPI & Interfacing ADC/DAC', '8051 Microcontroller Programming'] }
+      { code: 'CSE-501', name: 'Computer Networks & Internet Protocols', credits: '4 (3-0-2)', units: ['OSI & TCP/IP Protocol Stacks', 'Data Link Protocols & Ethernet', 'IP Addressing, Subnetting & Routing', 'TCP Congestion Control & Sockets'] },
+      { code: 'CSE-503', name: 'Compiler Design & Construction', credits: '4 (3-0-2)', units: ['Lexical Analysis & Lex Tools', 'Syntax Analysis (LL/LR Parsers)', 'Intermediate Code Generation', 'Code Optimization & Register Allocation'] },
+      { code: 'CSE-505', name: 'Artificial Intelligence & Expert Systems', credits: '4 (3-1-0)', units: ['State Space Search & A* Search', 'Knowledge Representation & Logic', 'Game Playing & Minimax Alpha-Beta', 'Machine Learning Foundations'] },
+      { code: 'CSE-507', name: 'Cloud Computing & Distributed Systems', credits: '4 (3-0-2)', units: ['Virtualization & Hypervisors', 'IaaS, PaaS, SaaS Architectures', 'Docker Containers & Kubernetes', 'AWS / Azure Serverless Computing'] }
     ],
     '6th Semester': [
-      { code: 'CSE-302', name: 'Operating Systems & Linux Systems', credits: '4 (3-1-0)', units: ['OS Architecture & Dual-Mode Operations', 'Process Scheduling Algorithms', 'Memory Management & Paging', 'File Systems & Linux Shell Scripting'] },
-      { code: 'CSE-304', name: 'Computer Networks', credits: '4 (3-1-0)', units: ['Physical & Data Link Layers', 'Medium Access Control (CSMA/CD)', 'Network Layer & Distance Vector/OSPF', 'Transport Layer (TCP/UDP) & Application Protocols'] },
-      { code: 'CSE-306', name: 'Cloud Computing Architecture', credits: '4 (3-0-2)', units: ['Cloud Service Models (IaaS/PaaS/SaaS)', 'Virtualization & Hypervisor Types', 'Cloud Storage & Distributed DBs', 'Cloud Security & Docker Containers'] },
-      { code: 'CSE-308', name: 'Artificial Intelligence & Machine Learning', credits: '4 (3-1-0)', units: ['Problem Solving by Search (DFS/BFS/A*)', 'Knowledge Representation & First-Order Logic', 'Probabilistic Reasoning & Bayesian Nets', 'Decision Tree & Neural Network Basics'] }
+      { code: 'CSE-601', name: 'Machine Learning & Statistical Pattern Recognition', credits: '4 (3-0-2)', units: ['Supervised Learning & Regression', 'SVMs, Decision Trees & Ensembles', 'Unsupervised Clustering & PCA', 'Neural Networks & Gradient Descent'] },
+      { code: 'CSE-603', name: 'Information & Network Security Cryptography', credits: '4 (3-1-0)', units: ['Classical & Modern Cryptography', 'RSA, AES, SHA-256 Algorithms', 'Authentication Protocols & PKI', 'Firewalls, IDS & Zero-Trust Architecture'] },
+      { code: 'CSE-605', name: 'Big Data Analytics & Distributed Compute', credits: '4 (3-0-2)', units: ['Hadoop Ecosystem & HDFS', 'MapReduce Programming Paradigm', 'Apache Spark RDDs & DataFrames', 'NoSQL Databases (MongoDB/Cassandra)'] }
     ],
     '7th Semester': [
-      { code: 'CSE-401', name: 'Information Security & Cryptography', credits: '4 (3-1-0)', units: ['Symmetric Key (DES/AES)', 'Public Key Cryptosystems (RSA/ECC)', 'Hash Functions & Digital Signatures', 'Network Security & Firewalls'] },
-      { code: 'CSE-403', name: 'Compiler Design', credits: '4 (3-1-0)', units: ['Phases of Compiler & Lexing', 'Top-Down & Bottom-Up Parsing', 'Syntax Directed Translation', 'Code Generation & Peep-Hole Optimization'] }
+      { code: 'CSE-701', name: 'Deep Learning & Neural Architectures', credits: '4 (3-0-2)', units: ['CNNs & Computer Vision', 'RNNs, LSTMs & Sequence Models', 'Transformers & Attention Mechanisms', 'Generative Adversarial Networks (GANs)'] },
+      { code: 'CSE-703', name: 'Distributed Ledger & Blockchain Engineering', credits: '4 (3-0-2)', units: ['Consensus Algorithms (Raft/Paxos)', 'Distributed Hash Tables & P2P', 'Smart Contracts & Solidity', 'DeFi & Web3 Architectures'] }
     ],
     '8th Semester': [
-      { code: 'CSE-402', name: 'Deep Learning & Neural Networks', credits: '4 (3-0-2)', units: ['Feedforward Networks & Backprop', 'CNN Architectures (ResNet/VGG)', 'Recurrent Networks (RNN/LSTM)', 'Autoencoders & Generative Models'] },
-      { code: 'CSE-404', name: 'Major Capstone Industry Project', credits: '8 (0-0-16)', units: ['System Implementation', 'Deployment & Validation', 'Project Dissertation & Defense'] }
+      { code: 'CSE-801', name: 'Natural Language Processing & Large Language Models', credits: '4 (3-0-2)', units: ['Tokenization & Embeddings (Word2Vec)', 'BERT, GPT & LLM Architectures', 'Retrieval-Augmented Generation (RAG)', 'Fine-Tuning & Alignment (RLHF)'] },
+      { code: 'CSE-803', name: 'Major Engineering Capstone Project Phase-II', credits: '8 (0-0-16)', units: ['Full System Implementation', 'Benchmarking & Performance Evaluation', 'Research Paper Publishing', 'Final Viva Voce'] }
     ]
   },
   'Information Technology (IT)': {
     '3rd Semester': [
-      { code: 'IT-201', name: 'Data Structures in Python', credits: '4 (3-0-2)', units: ['Arrays & Linked Lists', 'Stacks, Queues & Recursion', 'Trees & BSTs', 'Graph Algorithms'] },
-      { code: 'IT-203', name: 'Digital Systems & Logic Design', credits: '4 (3-1-0)', units: ['Logic Gates & Boolean Algebra', 'Combinational Design', 'Flip-Flops & Counters', 'Memory & Programmable Logic'] },
-      { code: 'IT-205', name: 'Object Oriented Programming in C++', credits: '4 (3-1-0)', units: ['C++ Classes & Constructors', 'Inheritance & Encapsulation', 'Polymorphism & Templates', 'File Handling'] }
+      { code: 'IT-301', name: 'Data Structures & Algorithms', credits: '4 (3-0-2)', units: ['Linear Structures', 'Non-linear Trees', 'Graph Algorithms', 'Hashing Techniques'] },
+      { code: 'IT-303', name: 'Object Oriented Programming with Java', credits: '4 (3-0-2)', units: ['Java Core Concepts', 'Multithreading & Concurrency', 'Collections Framework', 'GUI & Event Handling'] },
+      { code: 'IT-305', name: 'Digital Electronics & Microprocessors', credits: '4 (3-0-2)', units: ['Combinational Logic', 'Sequential Circuits', 'Microprocessor Architecture', 'Memory Interfacing'] },
+      { code: 'IT-307', name: 'Principles of Communication Systems', credits: '4 (3-1-0)', units: ['Analog Modulation', 'Digital Modulation', 'Information Theory', 'Wireless Channels'] }
+    ]
+  },
+  'Artificial Intelligence & Data Science (AI & DS)': {
+    '3rd Semester': [
+      { code: 'AI-301', name: 'Foundations of Data Science & Python', credits: '4 (3-0-2)', units: ['NumPy & Pandas Processing', 'Statistical Distributions', 'Data Visualization', 'Exploratory Data Analysis'] },
+      { code: 'AI-303', name: 'Data Structures with Python & C++', credits: '4 (3-0-2)', units: ['Abstract Data Types', 'Trees & Balanced BSTs', 'Graph Algorithms', 'Spatial Indexing'] },
+      { code: 'AI-305', name: 'Linear Algebra & Optimization for ML', credits: '4 (3-1-0)', units: ['Matrix Decompositions (SVD)', 'Eigenvalues & Eigenvectors', 'Convex Optimization', 'Gradient Descent Methods'] }
     ]
   }
 };
 
-// ==========================================
-// PRESET REAL-WORLD UNIVERSITY TIMETABLES
-// ==========================================
+// Universal Subject Getter
+export function getSubjectsList(department = 'Computer Science & Engineering (CSE)', semester = '3rd Semester (Year 2)') {
+  const normDept = department.includes('CSE') || department.includes('Computer Science')
+    ? 'Computer Science & Engineering (CSE)'
+    : department.includes('Information') || department.includes('IT')
+    ? 'Information Technology (IT)'
+    : department.includes('AI') || department.includes('Data')
+    ? 'Artificial Intelligence & Data Science (AI & DS)'
+    : 'Computer Science & Engineering (CSE)';
 
-// Preset 1: GGSIPU Shastri Park CSE S2 Room 4202 (from Uploaded Image 1)
-export const PRESET_GGSIPU_S2_TIMETABLE = {
-  university: 'GGSIPU',
+  const cleanSem = semester.includes('1st') ? '1st Semester' :
+                   semester.includes('2nd') ? '2nd Semester' :
+                   semester.includes('3rd') ? '3rd Semester' :
+                   semester.includes('4th') ? '4th Semester' :
+                   semester.includes('5th') ? '5th Semester' :
+                   semester.includes('6th') ? '6th Semester' :
+                   semester.includes('7th') ? '7th Semester' :
+                   semester.includes('8th') ? '8th Semester' : '3rd Semester';
+
+  const deptData = DEPARTMENT_CURRICULUM[normDept] || DEPARTMENT_CURRICULUM['Computer Science & Engineering (CSE)'];
+  return deptData[cleanSem] || deptData['3rd Semester'] || [];
+}
+
+// Preset Timetable Blueprints
+export const PRESET_SECTION_S2_TIMETABLE = {
+  id: 'TT-SEC-S2',
+  college: 'Apex Institute of Technology & Management (AITM)',
   department: 'Computer Science & Engineering (CSE)',
-  semester: '3rd Semester',
+  semester: '3rd Semester (Year 2)',
   section: 'Section-S2',
-  roomNo: 'Room no- 4202',
-  effectiveDate: 'w.e.f. Aug 2026',
-  campus: 'FC-26, Shastri Park, Shahdara, New Delhi-110053',
-  hodName: 'Dr. Megha Gupta (HOD, CSE)',
-  timeTableIncharge: 'Ms Pratibha Dabas',
+  roomNo: 'Room 4202, Academic Block 4',
+  campus: 'Main Academic Campus',
+  effectiveDate: 'w.e.f. August 2026',
+  timeTableIncharge: 'Ms. Pratibha Dabas',
+  hodName: 'Prof. S. K. Naitik (HOD CSE)',
   timeSlots: [
-    '8:15-9:10',
-    '9:10-10:05',
-    '10:05-11:00',
-    '11:00-11:30', // LUNCH
-    '11:30-12:25',
-    '12:25-1:20',
-    '1:20-2:15',
-    '2:15-3:10'
+    '09:00 - 10:00 AM',
+    '10:00 - 11:00 AM',
+    '11:00 - 12:00 PM',
+    '12:00 - 01:00 PM',
+    '01:00 - 02:00 PM',
+    '02:00 - 03:00 PM',
+    '03:00 - 04:00 PM',
+    '04:00 - 05:00 PM'
   ],
-  days: ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri'],
+  days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
   schedule: {
-    'Mon': [
-      { slot: '8:15-9:10', subject: 'DLCD', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
-      { slot: '9:10-10:05', subject: 'OOPs-grp(a) / CM-grp(b)', faculty: 'NF-2 / Mr. Yogesh', room: 'Lab 5 / Lab 3', type: 'lab' },
-      { slot: '10:05-11:00', subject: 'OOPs-grp(a) / CM-grp(b)', faculty: 'NF-2 / Mr. Yogesh', room: 'Lab 5 / Lab 3', type: 'lab' },
-      { slot: '11:00-11:30', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '11:30-12:25', subject: 'CM', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
-      { slot: '12:25-1:20', subject: 'OOPs', faculty: 'NF-2', room: 'Room 4202', type: 'lecture' },
-      { slot: '1:20-2:15', subject: 'DM', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
-      { slot: '2:15-3:10', subject: 'Library / Mentoring', faculty: 'Mentor', room: 'Room 4202', type: 'tutorial' }
+    'Monday': [
+      { slot: '09:00 - 10:00 AM', subject: 'Data Structure (DS)', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'Computational Methods (CM)', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'Discrete Mathematics (DM)', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Digital Logic Circuits (DLCD)', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '02:00 - 03:00 PM', subject: 'DS Lab (Group G1)', faculty: 'Ms. Poonam', room: 'Lab 5', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'DS Lab (Group G1)', faculty: 'Ms. Poonam', room: 'Lab 5', type: 'lab' },
+      { slot: '04:00 - 05:00 PM', subject: 'Mentoring & Library Hour', faculty: 'Ms. Pratibha Dabas', room: 'Room 4202', type: 'lecture' }
     ],
-    'Tues': [
-      { slot: '8:15-9:10', subject: 'Free / Remedial', faculty: '', room: '', type: 'free' },
-      { slot: '9:10-10:05', subject: 'CM', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
-      { slot: '10:05-11:00', subject: 'OOPs', faculty: 'NF-2', room: 'Room 4202', type: 'lecture' },
-      { slot: '11:00-11:30', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '11:30-12:25', subject: 'CM', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
-      { slot: '12:25-1:20', subject: 'DS', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
-      { slot: '1:20-2:15', subject: 'DLCD-grp(a) / DS-grp(b)', faculty: 'Dr. Swati Juneja / Ms. Poonam', room: 'Room 5202 / Lab 6', type: 'lab' },
-      { slot: '2:15-3:10', subject: 'DLCD-grp(a) / DS-grp(b)', faculty: 'Dr. Swati Juneja / Ms. Poonam', room: 'Room 5202 / Lab 6', type: 'lab' }
+    'Tuesday': [
+      { slot: '09:00 - 10:00 AM', subject: 'Object Oriented Programming (OOPS)', faculty: 'Dr. Aditi Zear', room: 'Room 4202', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'Digital Logic Circuits (DLCD)', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'Data Structure (DS)', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Computational Methods (CM)', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '02:00 - 03:00 PM', subject: 'DLCD Lab (Room 5202)', faculty: 'Dr. Swati Juneja', room: 'Lab 5202', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'DLCD Lab (Room 5202)', faculty: 'Dr. Swati Juneja', room: 'Lab 5202', type: 'lab' },
+      { slot: '04:00 - 05:00 PM', subject: 'Technical Seminar Session', faculty: 'Dr. Swati Juneja', room: 'Room 4202', type: 'lecture' }
     ],
-    'Wed': [
-      { slot: '8:15-9:10', subject: 'CM', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
-      { slot: '9:10-10:05', subject: 'DS', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
-      { slot: '10:05-11:00', subject: 'DLCD', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
-      { slot: '11:00-11:30', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '11:30-12:25', subject: 'OOPs-grp(b) / CM-grp(a)', faculty: 'NF-2 / Mr. Yogesh', room: 'Lab 2 / Lab 3', type: 'lab' },
-      { slot: '12:25-1:20', subject: 'OOPs-grp(b) / CM-grp(a)', faculty: 'NF-2 / Mr. Yogesh', room: 'Lab 2 / Lab 3', type: 'lab' },
-      { slot: '1:20-2:15', subject: 'DM', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
-      { slot: '2:15-3:10', subject: 'Sports / Technical Club', faculty: 'Club Lead', room: 'Sports Complex', type: 'activity' }
+    'Wednesday': [
+      { slot: '09:00 - 10:00 AM', subject: 'Discrete Mathematics (DM)', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'Data Structure (DS)', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'Object Oriented Programming (OOPS)', faculty: 'Dr. Aditi Zear', room: 'Room 4202', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Computational Methods (CM)', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '02:00 - 03:00 PM', subject: 'OOPS Practical Lab', faculty: 'Dr. Aditi Zear', room: 'Lab 6', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'OOPS Practical Lab', faculty: 'Dr. Aditi Zear', room: 'Lab 6', type: 'lab' },
+      { slot: '04:00 - 05:00 PM', subject: 'Remedial Doubt Solving', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' }
     ],
-    'Thurs': [
-      { slot: '8:15-9:10', subject: 'DLCD', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
-      { slot: '9:10-10:05', subject: 'DLCD-grp(b) / DS-grp(a)', faculty: 'Dr. Swati Juneja / Ms. Poonam', room: 'Room 5202 / Lab 5', type: 'lab' },
-      { slot: '10:05-11:00', subject: 'DLCD-grp(b) / DS-grp(a)', faculty: 'Dr. Swati Juneja / Ms. Poonam', room: 'Room 5202 / Lab 5', type: 'lab' },
-      { slot: '11:00-11:30', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '11:30-12:25', subject: 'DS', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
-      { slot: '12:25-1:20', subject: 'DM', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
-      { slot: '1:20-2:15', subject: 'Self Study / Seminar', faculty: 'Ms. Pratibha Dabas', room: 'Room 4202', type: 'tutorial' },
-      { slot: '2:15-3:10', subject: 'Mentoring Class', faculty: 'Mentor', room: 'Room 4202', type: 'tutorial' }
+    'Thursday': [
+      { slot: '09:00 - 10:00 AM', subject: 'Digital Logic Circuits (DLCD)', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'Discrete Mathematics (DM)', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'Data Structure (DS)', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Object Oriented Programming (OOPS)', faculty: 'Dr. Aditi Zear', room: 'Room 4202', type: 'lecture' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '02:00 - 03:00 PM', subject: 'CM Practical Lab (Lab 3)', faculty: 'Mr. Yogesh', room: 'Lab 3', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'CM Practical Lab (Lab 3)', faculty: 'Mr. Yogesh', room: 'Lab 3', type: 'lab' },
+      { slot: '04:00 - 05:00 PM', subject: 'Aptitude & Reasoning', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' }
     ],
-    'Fri': [
-      { slot: '8:15-9:10', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '9:10-10:05', subject: 'DLCD', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
-      { slot: '10:05-11:00', subject: 'DM', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
-      { slot: '11:00-11:30', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '11:30-12:25', subject: 'OOPs', faculty: 'NF-2', room: 'Room 4202', type: 'lecture' },
-      { slot: '12:25-1:20', subject: 'DS', faculty: 'Ms. Poonam', room: 'Room 4202', type: 'lecture' },
-      { slot: '1:20-2:15', subject: 'Special Doubt Clearing', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'tutorial' },
-      { slot: '2:15-3:10', subject: 'Weekend Project Colloquium', faculty: 'Dr. Megha Gupta', room: 'Room 4202', type: 'activity' }
+    'Friday': [
+      { slot: '09:00 - 10:00 AM', subject: 'Computational Methods (CM)', faculty: 'Mr. Yogesh', room: 'Room 4202', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'Object Oriented Programming (OOPS)', faculty: 'Dr. Aditi Zear', room: 'Room 4202', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'Digital Logic Circuits (DLCD)', faculty: 'Ms. Shipra', room: 'Room 4202', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Discrete Mathematics (DM)', faculty: 'Ms. Ruchita Sareen', room: 'Room 4202', type: 'lecture' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '02:00 - 03:00 PM', subject: 'IoT Project Studio', faculty: 'Dr. Manish Verma', room: 'Lab 204', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'IoT Project Studio', faculty: 'Dr. Manish Verma', room: 'Lab 204', type: 'lab' },
+      { slot: '04:00 - 05:00 PM', subject: 'Weekly Department Review', faculty: 'Prof. S. K. Naitik', room: 'Seminar Hall 1', type: 'lecture' }
     ]
   }
 };
 
-// Preset 2: DTU Department of Computer Science & Engineering Time Table Odd 2026-27 CO-III Semester Section A4 (from Uploaded Image 2)
-export const PRESET_DTU_A4_TIMETABLE = {
-  university: 'DTU',
+export const PRESET_SECTION_A4_TIMETABLE = {
+  id: 'TT-SEC-A4',
+  college: 'Apex Institute of Technology & Management (AITM)',
   department: 'Computer Science & Engineering (CSE)',
-  semester: '3rd Semester (CO-III)',
+  semester: '3rd Semester (Year 2)',
   section: 'Section-A4',
-  roomNo: 'Room No. AB4-205',
-  effectiveDate: 'w.e.f. 28/07/2026',
-  campus: 'Department of Computer Science and Engineering, DTU Bawana Road',
-  hodName: 'Prof. S. K. Naitik / Anurag (Time Table Incharge, CSE Deptt.)',
-  timeTableIncharge: 'Anurag (Time Table Incharge, CSE Deptt.)',
+  roomNo: 'Room AB4-205, Academic Block 4',
+  campus: 'Main Academic Campus',
+  effectiveDate: 'Odd Semester 2026-27',
+  timeTableIncharge: 'Prof. Anurag',
+  hodName: 'Prof. S. K. Naitik (HOD CSE)',
   timeSlots: [
-    '8--9',
-    '9--10',
-    '10--11',
-    '11--12',
-    '12--1',
-    '1--2',
-    '2--3',
-    '3--4',
-    '4--5',
-    '5--6'
+    '08:00 - 09:00 AM',
+    '09:00 - 10:00 AM',
+    '10:00 - 11:00 AM',
+    '11:00 - 12:00 PM',
+    '12:00 - 01:00 PM',
+    '01:00 - 02:00 PM',
+    '02:00 - 03:00 PM',
+    '03:00 - 04:00 PM',
+    '04:00 - 05:00 PM',
+    '05:00 - 06:00 PM'
   ],
-  days: ['MON', 'TUE', 'WED', 'THUR', 'FRI'],
+  days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
   schedule: {
-    'MON': [
-      { slot: '8--9', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '9--10', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '10--11', subject: 'Lab-Digital Logic Design-G1 [ECE Dept] / Lab CS205 DAA-G2 [Dr N Anand][Comp Net Lab] / Lab CS203 OOD-G3 [Dr Aditi Zear][ML Lab]', faculty: 'Dr N Anand / Dr Aditi Zear', room: 'ML Lab / Comp Net Lab', type: 'lab' },
-      { slot: '11--12', subject: 'Lab-Digital Logic Design-G1 / Lab CS205 DAA-G2 / Lab CS203 OOD-G3', faculty: 'Dr N Anand / Dr Aditi Zear', room: 'ML Lab / Comp Net Lab', type: 'lab' },
-      { slot: '12--1', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'AB4-303', type: 'lecture' },
-      { slot: '1--2', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '2--3', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'AB4-205', type: 'lecture' },
-      { slot: '3--4', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'AB4-205', type: 'lecture' },
-      { slot: '4--5', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '5--6', subject: 'Free Slot', faculty: '', room: '', type: 'free' }
+    'Monday': [
+      { slot: '08:00 - 09:00 AM', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '09:00 - 10:00 AM', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lab CS207 OS (G1)', faculty: 'Dr. Nipun Bansal', room: 'Lab 2', type: 'lab' },
+      { slot: '02:00 - 03:00 PM', subject: 'Lab CS207 OS (G1)', faculty: 'Dr. Nipun Bansal', room: 'Lab 2', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'Digital Logic Circuits', faculty: 'ECE Dept', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '04:00 - 05:00 PM', subject: 'Tutorial DAA (G1)', faculty: 'Ms. Kiran Bala', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '05:00 - 06:00 PM', subject: 'Self-Study & Revision', faculty: '', room: 'Library', type: 'lecture' }
     ],
-    'TUE': [
-      { slot: '8--9', subject: 'Reserved Slot', faculty: '', room: '', type: 'reserved' },
-      { slot: '9--10', subject: 'Reserved Slot', faculty: '', room: '', type: 'reserved' },
-      { slot: '10--11', subject: 'Lab CS205 Design & Analysis of Algorithm-G1 [Dr. N Anand]', faculty: 'Dr. N Anand', room: 'Computer Network Lab', type: 'lab' },
-      { slot: '11--12', subject: 'Lab CS205 Design & Analysis of Algorithm-G1 [Dr. N Anand]', faculty: 'Dr. N Anand', room: 'Computer Network Lab', type: 'lab' },
-      { slot: '12--1', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '1--2', subject: 'TH-Digital Logic Design', faculty: 'ECE Department', room: 'AB4-205', type: 'lecture' },
-      { slot: '2--3', subject: 'Lab-OS Design CS207-A4/G1 [Dr Nipun Bansal][Data Mining Lab] / Lab DLD-G2 [ECE] / Lab DAA-G3 [Ms. Monika][CA Lab]', faculty: 'Dr Nipun Bansal / Ms. Monika', room: 'Data Mining Lab / CA Lab', type: 'lab' },
-      { slot: '3--4', subject: 'Lab-OS Design CS207-A4/G1 / Lab DLD-G2 / Lab DAA-G3', faculty: 'Dr Nipun Bansal / Ms. Monika', room: 'Data Mining Lab / CA Lab', type: 'lab' },
-      { slot: '4--5', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '5--6', subject: 'Free Slot', faculty: '', room: '', type: 'free' }
+    'Tuesday': [
+      { slot: '08:00 - 09:00 AM', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '09:00 - 10:00 AM', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lab CS203 OOD (G2)', faculty: 'Dr. Aditi Zear', room: 'Lab 4', type: 'lab' },
+      { slot: '02:00 - 03:00 PM', subject: 'Lab CS203 OOD (G2)', faculty: 'Dr. Aditi Zear', room: 'Lab 4', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'Digital Logic Circuits', faculty: 'ECE Dept', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '04:00 - 05:00 PM', subject: 'Tutorial OS (G1)', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '05:00 - 06:00 PM', subject: 'Mentoring Session', faculty: 'Prof. Anurag', room: 'Room AB4-205', type: 'lecture' }
     ],
-    'WED': [
-      { slot: '8--9', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '9--10', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'AB4-205', type: 'lecture' },
-      { slot: '10--11', subject: 'Tutorial-CS209 Software Engineering G3', faculty: 'Ms. Kiran Bala', room: 'AB4-205', type: 'tutorial' },
-      { slot: '11--12', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'AB4-205', type: 'lecture' },
-      { slot: '12--1', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '1--2', subject: 'TH-Digital Logic Design', faculty: 'ECE Department', room: 'AB4-205', type: 'lecture' },
-      { slot: '2--3', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'AB4-205', type: 'lecture' },
-      { slot: '3--4', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'AB4-205', type: 'lecture' },
-      { slot: '4--5', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '5--6', subject: 'Free Slot', faculty: '', room: '', type: 'free' }
+    'Wednesday': [
+      { slot: '08:00 - 09:00 AM', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '09:00 - 10:00 AM', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '01:00 - 02:00 PM', subject: 'Lab CS205 DAA (G1)', faculty: 'Dr N Anand', room: 'Lab 1', type: 'lab' },
+      { slot: '02:00 - 03:00 PM', subject: 'Lab CS205 DAA (G1)', faculty: 'Dr N Anand', room: 'Lab 1', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'Digital Logic Circuits', faculty: 'ECE Dept', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '04:00 - 05:00 PM', subject: 'Tutorial OOPS (G2)', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '05:00 - 06:00 PM', subject: 'Coding Club Practical', faculty: 'Student Council', room: 'Lab 204', type: 'lab' }
     ],
-    'THUR': [
-      { slot: '8--9', subject: 'Reserved Slot', faculty: '', room: '', type: 'reserved' },
-      { slot: '9--10', subject: 'Reserved Slot', faculty: '', room: '', type: 'reserved' },
-      { slot: '10--11', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'AB4-205', type: 'lecture' },
-      { slot: '11--12', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'AB4-205', type: 'lecture' },
-      { slot: '12--1', subject: 'TH-Digital Logic Design', faculty: 'ECE Department', room: 'AB4-205', type: 'lecture' },
-      { slot: '1--2', subject: 'LUNCH BREAK', faculty: '', room: '', type: 'break' },
-      { slot: '2--3', subject: 'Lab-OS Design CS207-A4/G2 [Dr Nipun Bansal][Data Mining Lab] / Lab CS203 OOD G1 [Dr Aditi Zear][DBMS Lab] / Lab DLD G3 [ECE]', faculty: 'Dr Nipun Bansal / Dr Aditi Zear', room: 'Data Mining Lab / DBMS Lab', type: 'lab' },
-      { slot: '3--4', subject: 'Lab-OS Design CS207-A4/G2 / Lab CS203 OOD G1 / Lab DLD G3', faculty: 'Dr Nipun Bansal / Dr Aditi Zear', room: 'Data Mining Lab / DBMS Lab', type: 'lab' },
-      { slot: '4--5', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '5--6', subject: 'Free Slot', faculty: '', room: '', type: 'free' }
+    'Thursday': [
+      { slot: '08:00 - 09:00 AM', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '09:00 - 10:00 AM', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '01:00 - 02:00 PM', subject: 'Digital Electronics Lab', faculty: 'ECE Dept', room: 'EC Lab 3', type: 'lab' },
+      { slot: '02:00 - 03:00 PM', subject: 'Digital Electronics Lab', faculty: 'ECE Dept', room: 'EC Lab 3', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'Software Project Sprint', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '04:00 - 05:00 PM', subject: 'Tutorial SE (G1)', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '05:00 - 06:00 PM', subject: 'Library Hour', faculty: '', room: 'Central Library', type: 'lecture' }
     ],
-    'FRI': [
-      { slot: '8--9', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '9--10', subject: 'Tutorial-CS209 Software Engineering G2', faculty: 'Ms. Kiran Bala', room: 'AB4-203', type: 'tutorial' },
-      { slot: '10--11', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'AB4-203', type: 'lecture' },
-      { slot: '11--12', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'AB4-203', type: 'lecture' },
-      { slot: '12--1', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'AB4-203', type: 'lecture' },
-      { slot: '1--2', subject: 'Tutorial-CS209 Software Engineering G1', faculty: 'Ms. Kiran Bala', room: 'AB4-205', type: 'tutorial' },
-      { slot: '2--3', subject: 'Lab-OS Design CS207-A4/G3 [Dr Nipun Bansal][IPM Lab] / Lab CS203 OOD G2 [Dr Aditi Zear][DBMS Lab]', faculty: 'Dr Nipun Bansal / Dr Aditi Zear', room: 'IPM Lab / DBMS Lab', type: 'lab' },
-      { slot: '3--4', subject: 'Lab-OS Design CS207-A4/G3 / Lab CS203 OOD G2', faculty: 'Dr Nipun Bansal / Dr Aditi Zear', room: 'IPM Lab / DBMS Lab', type: 'lab' },
-      { slot: '4--5', subject: 'Free Slot', faculty: '', room: '', type: 'free' },
-      { slot: '5--6', subject: 'Free Slot', faculty: '', room: '', type: 'free' }
+    'Friday': [
+      { slot: '08:00 - 09:00 AM', subject: 'TH-CS207 SE', faculty: 'Dr. Ravin Ahuja', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '09:00 - 10:00 AM', subject: 'TH-CS205 DAA', faculty: 'Dr N Anand', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '10:00 - 11:00 AM', subject: 'TH-CS207 OS', faculty: 'Dr. Nipun Bansal', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '11:00 - 12:00 PM', subject: 'TH-CS203 Oops', faculty: 'Dr. Aditi Zear', room: 'Room AB4-205', type: 'lecture' },
+      { slot: '12:00 - 01:00 PM', subject: 'Lunch Break', faculty: '', room: 'Campus Cafeteria', type: 'break' },
+      { slot: '01:00 - 02:00 PM', subject: 'Cloud Architecture Workshop', faculty: 'Dr. Manish Verma', room: 'Lab 204', type: 'lab' },
+      { slot: '02:00 - 03:00 PM', subject: 'Cloud Architecture Workshop', faculty: 'Dr. Manish Verma', room: 'Lab 204', type: 'lab' },
+      { slot: '03:00 - 04:00 PM', subject: 'Industrial Expert Lecture', faculty: 'Guest Faculty', room: 'Auditorium 1', type: 'lecture' },
+      { slot: '04:00 - 05:00 PM', subject: 'Weekly Department Colloquium', faculty: 'Prof. S. K. Naitik', room: 'Seminar Hall', type: 'lecture' },
+      { slot: '05:00 - 06:00 PM', subject: 'Weekend Sports & Extra-Curricular', faculty: 'Sports Council', room: 'Sports Arena', type: 'lecture' }
     ]
   }
 };
+
+export const PRESET_GGSIPU_S2_TIMETABLE = PRESET_SECTION_S2_TIMETABLE;
+export const PRESET_DTU_A4_TIMETABLE = PRESET_SECTION_A4_TIMETABLE;
 
 export const DEFAULT_TIMETABLES = [
-  PRESET_GGSIPU_S2_TIMETABLE,
-  PRESET_DTU_A4_TIMETABLE
+  PRESET_SECTION_S2_TIMETABLE,
+  PRESET_SECTION_A4_TIMETABLE
 ];
-
-export const getCurriculumForUniversity = (uni = 'GGSIPU') => {
-  if (uni === 'DTU') return DTU_CURRICULUM;
-  return GGSIPU_CURRICULUM;
-};
-
-export const getSubjectsList = (uni = 'GGSIPU', branch = 'Computer Science & Engineering (CSE)', semester = '3rd Semester') => {
-  const catalog = getCurriculumForUniversity(uni);
-  const branchData = catalog[branch] || Object.values(catalog)[0] || {};
-  
-  // Fuzzy match semester
-  const semKey = Object.keys(branchData).find(s => 
-    s.toLowerCase().includes(semester.toLowerCase()) || semester.toLowerCase().includes(s.toLowerCase())
-  );
-
-  return branchData[semKey] || branchData['3rd Semester'] || branchData['6th Semester'] || [];
-};
