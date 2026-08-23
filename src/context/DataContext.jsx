@@ -502,16 +502,17 @@ export const DataProvider = ({ children }) => {
 
             const myIds = [myUser?.id, myUser?.enrollment, myUser?.email].filter(Boolean);
             const myName = myUser?.name ? myUser.name.toLowerCase().trim() : '';
-            const myRole = myUser?.role ? myUser.role.toLowerCase().trim() : '';
 
+            // 🔒 STRICT 1-ON-1 PEER ISOLATION:
+            // A message is ONLY delivered if the targetRecipient specifically matches this user's unique ID, enrollment, email, or exact full name.
+            // NEVER use broad role matching (e.g. role === 'teacher') to prevent message leaks to other faculty members!
             const isForMe = myIds.includes(targetRecipient) || 
-                            (myName && targetRecipientName === myName) || 
-                            (myRole && targetRecipientRole === myRole && ['teacher', 'faculty', 'hod', 'staff'].includes(myRole));
+                            (myName && targetRecipientName === myName);
                             
             const isFromMe = myIds.includes(sender) || 
                              (myName && senderName === myName);
 
-            // ⛔ DROP if neither for me nor from me (prevents message leakage across unrelated roles)
+            // ⛔ DROP immediately if neither specifically addressed to me nor sent by me!
             if (!isForMe && !isFromMe) {
               return;
             }
