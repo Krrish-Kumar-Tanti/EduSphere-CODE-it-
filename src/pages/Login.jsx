@@ -274,7 +274,7 @@ export default function Login() {
         {/* Header Branding */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/90 border border-slate-200 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3 shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Smart Campus Operating System
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Smart Campus
           </div>
           
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900">
@@ -855,7 +855,7 @@ export default function Login() {
 
         {/* Footer Credit */}
         <div className="text-center mt-6 text-xs text-slate-500">
-          Smart Campus Operating System • <span className="text-slate-800 font-semibold">Team CODE it</span>
+          Smart Campus • <span className="text-slate-800 font-semibold">Team CODE it</span>
         </div>
 
       </div>
