@@ -102,7 +102,7 @@ export const INTENT_RESPONSES = [
     ],
     response: `💬 **Ultra-Private 1-on-1 Direct WhatsApp Chat:**
 
-1. **Peer-to-Peer Privacy**: Har chat strict thread isolation (`[User1_User2]`) par kaam karti hai. Student aur Teacher ki baatein HOD ya Staff ke screen par **kabhi leak nahi hoti**.
+1. **Peer-to-Peer Privacy**: Har chat strict thread isolation [User1_User2] par kaam karti hai. Student aur Teacher ki baatein HOD ya Staff ke screen par **kabhi leak nahi hoti**.
 2. **Instant Audio & Toasts**: Message aane par recipient ke screen par real-time audio chime aur floating popup toast display hota hai.
 3. **Double Ticks & Files**: WhatsApp ki tarah Blue double-ticks, dynamic timestamps aur file attachments supported hain!`
   },

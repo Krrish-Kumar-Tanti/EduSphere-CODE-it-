@@ -1,4 +1,4 @@
-import { ALL_DELHI_COLLEGES } from './collegesData';
+import { ALL_DELHI_COLLEGES } from './collegesData.js';
 
 export const UNIVERSAL_COLLEGES = ALL_DELHI_COLLEGES;
 export { ALL_DELHI_COLLEGES };
