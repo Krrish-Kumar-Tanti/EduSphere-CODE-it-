@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: edusphere-campus-os
-    env: node
+    name: edusphere-backend-api
+    runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install
+    startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
         value: production
