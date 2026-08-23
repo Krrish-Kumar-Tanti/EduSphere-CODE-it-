@@ -23,7 +23,8 @@ import {
   Trash2,
   X,
   HardHat,
-  MessageSquare
+  MessageSquare,
+  MessageCircle
 } from 'lucide-react';
 
 export default function TicketInbox({ activeDomain, setActiveDomain }) {
@@ -305,10 +306,27 @@ export default function TicketInbox({ activeDomain, setActiveDomain }) {
                           {ticket.location}
                         </span>
                       )}
-                      <span className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-slate-400" />
-                        {ticket.studentName || 'Student Requester'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1 font-medium text-slate-700">
+                          <User className="w-3.5 h-3.5 text-slate-400" />
+                          {ticket.studentName || 'Student Requester'}
+                        </span>
+
+                        <button
+                          onClick={() => openDirectChat({
+                            id: ticket.studentEnrollment || `STU-${ticket.studentName?.replace(/\s+/g, '') || '8842'}`,
+                            enrollment: ticket.studentEnrollment || '04214802722',
+                            name: ticket.studentName || 'Student Requester',
+                            role: 'student',
+                            department: ticket.department || 'Campus Student'
+                          })}
+                          className="px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center gap-1 transition border border-emerald-200"
+                          title={`Chat with ${ticket.studentName}`}
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                          <span>Chat</span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Attached Proof Image */}

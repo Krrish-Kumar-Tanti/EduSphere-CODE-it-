@@ -64,10 +64,12 @@ export default function DirectChatDrawer() {
     if (!activeChatPartner || !currentUser) return false;
     const currentId = currentUser.id || currentUser.enrollment;
     const partnerId = activeChatPartner.id || activeChatPartner.enrollment;
+    const targetRecipient = m.recipientId || m.receiverId;
+    const targetSender = m.senderId;
     
     return (
-      (m.senderId === currentId && m.receiverId === partnerId) ||
-      (m.senderId === partnerId && m.receiverId === currentId)
+      (targetSender === currentId && targetRecipient === partnerId) ||
+      (targetSender === partnerId && targetRecipient === currentId)
     );
   });
 

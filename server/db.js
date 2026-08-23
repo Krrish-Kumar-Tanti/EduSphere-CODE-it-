@@ -138,15 +138,21 @@ export function initDB() {
 
     CREATE TABLE IF NOT EXISTS direct_messages (
       id TEXT PRIMARY KEY,
+      threadId TEXT NOT NULL,
       senderId TEXT NOT NULL,
       senderName TEXT NOT NULL,
       senderRole TEXT NOT NULL,
       senderAvatar TEXT,
-      receiverId TEXT NOT NULL,
-      receiverName TEXT NOT NULL,
-      receiverRole TEXT NOT NULL,
-      message TEXT NOT NULL,
+      recipientId TEXT NOT NULL,
+      receiverId TEXT,
+      recipientName TEXT NOT NULL,
+      receiverName TEXT,
+      recipientRole TEXT NOT NULL,
+      receiverRole TEXT,
+      text TEXT NOT NULL,
+      message TEXT,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+      isRead INTEGER DEFAULT 0,
       readReceipt INTEGER DEFAULT 0,
       fileUrl TEXT,
       fileName TEXT
@@ -222,6 +228,17 @@ export function initDB() {
   ]);
 
   migrateTable('direct_messages', [
+    { name: 'threadId', type: 'TEXT' },
+    { name: 'recipientId', type: 'TEXT' },
+    { name: 'recipientName', type: 'TEXT' },
+    { name: 'recipientRole', type: 'TEXT' },
+    { name: 'receiverId', type: 'TEXT' },
+    { name: 'receiverName', type: 'TEXT' },
+    { name: 'receiverRole', type: 'TEXT' },
+    { name: 'text', type: 'TEXT' },
+    { name: 'message', type: 'TEXT' },
+    { name: 'isRead', type: 'INTEGER DEFAULT 0' },
+    { name: 'readReceipt', type: 'INTEGER DEFAULT 0' },
     { name: 'fileUrl', type: 'TEXT' },
     { name: 'fileName', type: 'TEXT' }
   ]);
@@ -231,6 +248,8 @@ export function initDB() {
     db.prepare('CREATE INDEX IF NOT EXISTS idx_att_date_sub_sec ON attendance_records(date, subject, section)').run();
     db.prepare('CREATE INDEX IF NOT EXISTS idx_att_enrollment_date ON attendance_records(enrollment, date)').run();
     db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_pair ON direct_messages(senderId, receiverId)').run();
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_thread ON direct_messages(threadId)').run();
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_msg_recipient ON direct_messages(recipientId)').run();
   } catch (e) {}
 
   // Seed default users if missing
@@ -686,31 +705,45 @@ export function initDB() {
 
     // Seed Direct Messages
     const insertMsg = db.prepare(`
-      INSERT OR REPLACE INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+      INSERT OR REPLACE INTO direct_messages (
+        id, threadId, senderId, senderName, senderRole, senderAvatar, 
+        recipientId, receiverId, recipientName, receiverName, recipientRole, receiverRole, 
+        text, message, readReceipt, isRead
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1)
     `);
 
     insertMsg.run(
       'MSG-001',
+      'FAC-1092_STU-2026-8842',
       'STU-2026-8842',
       'Krrish Kumar Tanti',
       'student',
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
       'FAC-1092',
+      'FAC-1092',
+      'Dr. Manish Verma',
       'Dr. Manish Verma',
       'teacher',
+      'teacher',
+      'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose memory benchmarks pre-configured?',
       'Good afternoon Dr. Verma! Regarding tomorrow’s OS Lab practical, should we bring our Docker compose memory benchmarks pre-configured?'
     );
 
     insertMsg.run(
       'MSG-002',
+      'FAC-1092_STU-2026-8842',
       'FAC-1092',
       'Dr. Manish Verma',
       'teacher',
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
       'STU-2026-8842',
+      'STU-2026-8842',
+      'Krrish Kumar Tanti',
       'Krrish Kumar Tanti',
       'student',
+      'student',
+      'Hello Krrish! Yes, please have the memory management container ready. We will benchmark Banker’s algorithm live in Lab 204.',
       'Hello Krrish! Yes, please have the memory management container ready. We will benchmark Banker’s algorithm live in Lab 204.'
     );
 

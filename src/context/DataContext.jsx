@@ -480,22 +480,41 @@ export const DataProvider = ({ children }) => {
 
         case 'DIRECT_MESSAGE_SENT':
           if (payload) {
+            let currentUid = null;
+            try {
+              const userObj = JSON.parse(localStorage.getItem('edusphere_current_user') || 'null');
+              currentUid = userObj?.id || userObj?.enrollment;
+            } catch (e) {}
+
+            const targetRecipient = payload.recipientId || payload.receiverId;
+            const sender = payload.senderId;
+
+            // ⛔ DROP IMMEDIATELY if current logged-in user is neither recipient nor sender!
+            if (!currentUid || (targetRecipient !== currentUid && sender !== currentUid)) {
+              return;
+            }
+
             setDirectMessages(prev => {
               if (prev.some(m => m.id === payload.id)) return prev;
               return [...prev, payload];
             });
 
-            // Play incoming WhatsApp sound & show toast on recipient tab
-            sounds.playMessageReceived();
-            setIncomingChatToast({
-              id: payload.id,
-              senderId: payload.senderId,
-              senderName: payload.senderName,
-              senderRole: payload.senderRole,
-              senderAvatar: payload.senderAvatar,
-              message: payload.message,
-              time: 'Just now'
-            });
+            // Play incoming WhatsApp sound & show toast ONLY on the intended recipient's tab
+            if (targetRecipient === currentUid) {
+              sounds.playMessageReceived();
+              setIncomingChatToast({
+                id: payload.id,
+                threadId: payload.threadId || [sender, targetRecipient].sort().join('_'),
+                senderId: payload.senderId,
+                senderName: payload.senderName,
+                senderRole: payload.senderRole,
+                senderAvatar: payload.senderAvatar,
+                recipientId: targetRecipient,
+                message: payload.text || payload.message,
+                text: payload.text || payload.message,
+                time: 'Just now'
+              });
+            }
           }
           break;
 
@@ -727,17 +746,27 @@ export const DataProvider = ({ children }) => {
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const msgId = `MSG-${Date.now().toString().slice(-6)}`;
 
+    const senderId = currentUser?.id || currentUser?.enrollment || 'STU-001';
+    const recipientId = targetPartner.id || targetPartner.enrollment || 'FAC-1092';
+    const threadId = [senderId, recipientId].sort().join('_');
+
     const newMsg = {
       id: msgId,
-      senderId: currentUser?.id || currentUser?.enrollment || 'STU-001',
+      threadId,
+      senderId,
       senderName: currentUser?.name || 'Student Scholar',
       senderRole: currentUser?.role || 'student',
       senderAvatar: currentUser?.avatar,
-      receiverId: targetPartner.id || targetPartner.enrollment || 'FAC-1092',
-      receiverName: targetPartner.name,
+      recipientId,
+      receiverId: recipientId,
+      recipientName: targetPartner.name || 'Campus Member',
+      receiverName: targetPartner.name || 'Campus Member',
+      recipientRole: targetPartner.role || 'teacher',
       receiverRole: targetPartner.role || 'teacher',
+      text: messageText.trim(),
       message: messageText.trim(),
       timestamp: `Today, ${nowTime}`,
+      isRead: 0,
       readReceipt: 0,
       fileUrl: attachmentFile?.url || null,
       fileName: attachmentFile?.name || null
@@ -753,13 +782,18 @@ export const DataProvider = ({ children }) => {
       if (attachmentFile?.file) {
         const formData = new FormData();
         formData.append('attachment', attachmentFile.file);
-        formData.append('senderId', newMsg.senderId);
+        formData.append('threadId', threadId);
+        formData.append('senderId', senderId);
         formData.append('senderName', newMsg.senderName);
         formData.append('senderRole', newMsg.senderRole);
         formData.append('senderAvatar', newMsg.senderAvatar || '');
-        formData.append('receiverId', newMsg.receiverId);
+        formData.append('recipientId', recipientId);
+        formData.append('receiverId', recipientId);
+        formData.append('recipientName', newMsg.recipientName);
         formData.append('receiverName', newMsg.receiverName);
+        formData.append('recipientRole', newMsg.recipientRole);
         formData.append('receiverRole', newMsg.receiverRole);
+        formData.append('text', newMsg.text);
         formData.append('message', newMsg.message);
 
         await fetch(`${API_BASE}/messages`, {

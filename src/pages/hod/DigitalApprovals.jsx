@@ -18,12 +18,13 @@ import {
   Building,
   User,
   Filter,
-  Check
+  Check,
+  MessageCircle
 } from 'lucide-react';
 
 export default function DigitalApprovals() {
   const { currentUser } = useAuth();
-  const { approvals, signApproval, rejectApproval, acknowledgeApproval } = useData();
+  const { approvals, signApproval, rejectApproval, acknowledgeApproval, openDirectChat } = useData();
 
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'Pending' | 'Approved' | 'Rejected'
   const [selectedDoc, setSelectedDoc] = useState(null);
@@ -187,11 +188,28 @@ export default function DigitalApprovals() {
                 </div>
 
                 {/* Requester & Financial/Duration Details */}
-                <div className="grid grid-cols-2 gap-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-[11px]">
-                  <div>
-                    <span className="text-slate-400 block text-[10px] font-bold uppercase">Submitted By:</span>
-                    <span className="font-bold text-slate-800">{app.requester}</span>
-                    <span className="text-slate-500 block text-[10px]">{app.requesterRole}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-[11px]">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-bold uppercase">Submitted By:</span>
+                      <span className="font-bold text-slate-800">{app.requester}</span>
+                      <span className="text-slate-500 block text-[10px]">{app.requesterRole}</span>
+                    </div>
+
+                    <button
+                      onClick={() => openDirectChat({
+                        id: app.enrollment || `USR-${app.requester.replace(/\s+/g, '')}`,
+                        enrollment: app.enrollment || '04214802722',
+                        name: app.requester,
+                        role: app.requesterRole?.toLowerCase().includes('faculty') || app.requesterRole?.toLowerCase().includes('dr.') || app.requesterRole?.toLowerCase().includes('prof') ? 'teacher' : 'student',
+                        department: app.department
+                      })}
+                      className="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center gap-1 transition border border-indigo-200"
+                      title={`Direct Chat with ${app.requester}`}
+                    >
+                      <MessageCircle className="w-3 h-3" />
+                      <span>Chat</span>
+                    </button>
                   </div>
 
                   <div>

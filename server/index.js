@@ -361,38 +361,44 @@ app.get('/api/qrcode', async (req, res) => {
 // 2. ULTRA-PRIVATE 1-ON-1 WHATSAPP DIRECT CHAT
 // ==========================================
 
-// Get Messages (Strict Peer-to-Peer Partitioning)
-app.get('/api/messages', (req, res) => {
+// Get Messages (Strict Thread and Peer-to-Peer Isolation)
+app.get(['/api/messages', '/api/messages/:userId'], (req, res) => {
   try {
-    const { user1, user2, userId } = req.query;
+    const userId = req.params.userId || req.query.userId;
+    const { user1, user2, threadId } = req.query;
     let messages = [];
 
-    if (user1 && user2) {
-      // Strictly filter for the exact conversation pair
+    if (threadId) {
       messages = db.prepare(`
         SELECT * FROM direct_messages 
-        WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+        WHERE threadId = ?
         ORDER BY timestamp ASC
-      `).all(user1, user2, user2, user1);
+      `).all(threadId);
+    } else if (user1 && user2) {
+      const computedThread = [user1, user2].sort().join('_');
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        WHERE threadId = ? OR (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+        ORDER BY timestamp ASC
+      `).all(computedThread, user1, user2, user2, user1);
     } else if (userId) {
-      // Return only messages sent or received by this specific user
       messages = db.prepare(`
         SELECT * FROM direct_messages 
-        WHERE senderId = ? OR receiverId = ?
+        WHERE senderId = ? OR receiverId = ? OR recipientId = ?
         ORDER BY timestamp ASC
-      `).all(userId, userId);
+      `).all(userId, userId, userId);
     } else {
-      // In production / safety, do not leak all global chats
+      // Return empty array to prevent global leak
       messages = [];
     }
 
-    return res.json({ success: true, messages });
+    return res.json({ success: true, count: messages.length, messages });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
 });
 
-// Send Direct Message
+// Send Direct Message (Strict Thread Scoping)
 app.post('/api/messages', upload.single('attachment'), (req, res) => {
   try {
     const { 
@@ -400,37 +406,57 @@ app.post('/api/messages', upload.single('attachment'), (req, res) => {
       senderName, 
       senderRole, 
       senderAvatar, 
+      recipientId,
       receiverId, 
+      recipientName,
       receiverName, 
+      recipientRole,
       receiverRole, 
+      text,
       message = '' 
     } = req.body;
 
-    if (!senderId || !receiverId) {
-      return res.status(400).json({ error: 'Sender and receiver IDs are required.' });
+    const targetRecipientId = recipientId || receiverId;
+    const targetRecipientName = recipientName || receiverName || 'Faculty Member';
+    const targetRecipientRole = recipientRole || receiverRole || 'teacher';
+    const messageBody = (text || message || '').trim();
+
+    if (!senderId || !targetRecipientId) {
+      return res.status(400).json({ error: 'Sender and recipient IDs are required.' });
     }
 
     const fileUrl = req.file ? `http://localhost:${PORT}/uploads/${req.file.filename}` : req.body.fileUrl || null;
     const fileName = req.file ? req.file.originalname : req.body.fileName || null;
 
-    if (!message.trim() && !fileUrl) {
+    if (!messageBody && !fileUrl) {
       return res.status(400).json({ error: 'Message text or attachment required.' });
     }
 
+    const threadId = [senderId, targetRecipientId].sort().join('_');
     const msgId = `MSG-${Date.now().toString().slice(-6)}`;
+
     db.prepare(`
-      INSERT INTO direct_messages (id, senderId, senderName, senderRole, senderAvatar, receiverId, receiverName, receiverRole, message, readReceipt, fileUrl, fileName)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+      INSERT INTO direct_messages (
+        id, threadId, senderId, senderName, senderRole, senderAvatar, 
+        recipientId, receiverId, recipientName, receiverName, recipientRole, receiverRole, 
+        text, message, readReceipt, isRead, fileUrl, fileName
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?)
     `).run(
       msgId,
+      threadId,
       senderId,
       senderName || 'Campus User',
       senderRole || 'student',
       senderAvatar || null,
-      receiverId,
-      receiverName || 'Faculty Member',
-      receiverRole || 'teacher',
-      message.trim(),
+      targetRecipientId,
+      targetRecipientId,
+      targetRecipientName,
+      targetRecipientName,
+      targetRecipientRole,
+      targetRecipientRole,
+      messageBody,
+      messageBody,
       fileUrl,
       fileName
     );
@@ -445,13 +471,22 @@ app.post('/api/messages', upload.single('attachment'), (req, res) => {
 // Mark messages as read
 app.patch('/api/messages/read', (req, res) => {
   try {
-    const { senderId, receiverId } = req.body;
-    if (senderId && receiverId) {
+    const { senderId, receiverId, recipientId, threadId } = req.body;
+    const targetRecipient = recipientId || receiverId;
+
+    if (threadId) {
       db.prepare(`
         UPDATE direct_messages 
-        SET readReceipt = 1 
-        WHERE senderId = ? AND receiverId = ?
-      `).run(senderId, receiverId);
+        SET readReceipt = 1, isRead = 1 
+        WHERE threadId = ?
+      `).run(threadId);
+    } else if (senderId && targetRecipient) {
+      const computedThread = [senderId, targetRecipient].sort().join('_');
+      db.prepare(`
+        UPDATE direct_messages 
+        SET readReceipt = 1, isRead = 1 
+        WHERE threadId = ? OR (senderId = ? AND receiverId = ?)
+      `).run(computedThread, senderId, targetRecipient);
     }
     return res.json({ success: true, message: 'Messages marked as read.' });
   } catch (e) {
