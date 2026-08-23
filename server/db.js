@@ -211,6 +211,9 @@ export function initDB() {
     { name: 'section', type: 'TEXT DEFAULT "CSE-A"' },
     { name: 'student_id', type: 'TEXT' },
     { name: 'student_name', type: 'TEXT' },
+    { name: 'enrollment', type: 'TEXT' },
+    { name: 'userId', type: 'TEXT' },
+    { name: 'verifiedVia', type: 'TEXT' },
     { name: 'marked_by', type: 'TEXT' }
   ]);
 
@@ -220,6 +223,7 @@ export function initDB() {
     { name: 'faculty_id', type: 'TEXT' },
     { name: 'file_url', type: 'TEXT' },
     { name: 'file_size', type: 'TEXT DEFAULT "4.2 MB"' },
+    { name: 'fileSize', type: 'TEXT DEFAULT "4.2 MB"' },
     { name: 'file_type', type: 'TEXT DEFAULT "PDF"' },
     { name: 'upload_date', type: 'TEXT DEFAULT "Today"' },
     { name: 'downloads_count', type: 'INTEGER DEFAULT 0' },
@@ -643,15 +647,15 @@ export function initDB() {
 
     // Initial Notes
     const insertNote = db.prepare(`
-      INSERT OR REPLACE INTO notes (id, title, subject, semester, faculty, faculty_name, faculty_id, file_url, file_size, file_type, upload_date, downloads_count, unit, university)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO notes (id, title, subject, semester, faculty, faculty_name, faculty_id, file_url, file_size, fileSize, file_type, upload_date, downloads_count, unit, university)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    insertNote.run('NOTE-01', 'Unit 3: Virtual Memory & Page Replacement Algorithms.pdf', 'Operating Systems (CSE-301)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '4.2 MB', 'PDF', '21 Aug 2026', 142, 'Unit 3', 'GGSIPU');
-    insertNote.run('NOTE-02', 'Module 4: TCP Congestion Control & Sliding Window Protocol.pdf', 'Computer Networks (CSE-303)', '6th Semester', 'Prof. Priya Nair', 'Prof. Priya Nair', 'FAC-1092', null, '3.1 MB', 'PDF', '20 Aug 2026', 98, 'Unit 4', 'GGSIPU');
-    insertNote.run('NOTE-03', 'Lab Manual: AWS Lambda & Docker Containerization Walkthrough.pdf', 'Cloud Computing (CSE-305)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '8.5 MB', 'PDF', '19 Aug 2026', 215, 'Unit 2', 'GGSIPU');
-    insertNote.run('NOTE-04', 'TH-CS207 OS: Process Scheduling & Deadlock Prevention.pdf', 'Operating System Design (TH-CS207)', '3rd Semester', 'Dr. Nipun Bansal', 'Dr. Nipun Bansal', 'FAC-2072', null, '5.1 MB', 'PDF', '18 Aug 2026', 188, 'Unit 2', 'DTU');
-    insertNote.run('NOTE-05', 'TH-CS203 OOD: GoF Design Patterns & UML Class Diagrams.pdf', 'Object Oriented Design (TH-CS203)', '3rd Semester', 'Dr. Aditi Zear', 'Dr. Aditi Zear', 'FAC-2031', null, '6.4 MB', 'PDF', '17 Aug 2026', 204, 'Unit 3', 'DTU');
+    insertNote.run('NOTE-01', 'Unit 3: Virtual Memory & Page Replacement Algorithms.pdf', 'Operating Systems (CSE-301)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '4.2 MB', '4.2 MB', 'PDF', '21 Aug 2026', 142, 'Unit 3', 'GGSIPU');
+    insertNote.run('NOTE-02', 'Module 4: TCP Congestion Control & Sliding Window Protocol.pdf', 'Computer Networks (CSE-303)', '6th Semester', 'Prof. Priya Nair', 'Prof. Priya Nair', 'FAC-1092', null, '3.1 MB', '3.1 MB', 'PDF', '20 Aug 2026', 98, 'Unit 4', 'GGSIPU');
+    insertNote.run('NOTE-03', 'Lab Manual: AWS Lambda & Docker Containerization Walkthrough.pdf', 'Cloud Computing (CSE-305)', '6th Semester', 'Dr. Manish Verma', 'Dr. Manish Verma', 'FAC-1092', null, '8.5 MB', '8.5 MB', 'PDF', '19 Aug 2026', 215, 'Unit 2', 'GGSIPU');
+    insertNote.run('NOTE-04', 'TH-CS207 OS: Process Scheduling & Deadlock Prevention.pdf', 'Operating System Design (TH-CS207)', '3rd Semester', 'Dr. Nipun Bansal', 'Dr. Nipun Bansal', 'FAC-2072', null, '5.1 MB', '5.1 MB', 'PDF', '18 Aug 2026', 188, 'Unit 2', 'DTU');
+    insertNote.run('NOTE-05', 'TH-CS203 OOD: GoF Design Patterns & UML Class Diagrams.pdf', 'Object Oriented Design (TH-CS203)', '3rd Semester', 'Dr. Aditi Zear', 'Dr. Aditi Zear', 'FAC-2031', null, '6.4 MB', '6.4 MB', 'PDF', '17 Aug 2026', 204, 'Unit 3', 'DTU');
 
     // Initial Broadcasts
     const insertBc = db.prepare(`
@@ -663,8 +667,8 @@ export function initDB() {
 
     // Seed August 2026 Calendar Attendance Ledger for Student
     const insertAttRecord = db.prepare(`
-      INSERT OR REPLACE INTO attendance_records (id, student_id, student_name, enrollment, subject, section, date, status, marked_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO attendance_records (id, student_id, userId, student_name, enrollment, subject, section, date, status, verifiedVia, marked_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const pastDates = [
@@ -693,12 +697,14 @@ export function initDB() {
       insertAttRecord.run(
         `ATT-REC-${idx + 1}`,
         'STU-2026-8842',
+        'STU-2026-8842',
         'Krrish Kumar Tanti',
         '04214802722',
         rec.subject,
         'CSE-A',
         rec.date,
         rec.status,
+        'Dual-Factor BLE Mesh Node',
         'Dr. Manish Verma'
       );
     });

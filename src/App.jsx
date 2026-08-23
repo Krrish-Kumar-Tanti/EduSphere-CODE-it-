@@ -15,7 +15,8 @@ import IncomingChatToast from './components/IncomingChatToast';
 
 function AppContent() {
   const { currentUser, isAuthenticated } = useAuth();
-  const { registerTabUser } = useData();
+  const data = useData();
+  const registerTabUser = data?.registerTabUser;
 
   React.useEffect(() => {
     if (currentUser && registerTabUser) {
