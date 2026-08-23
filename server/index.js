@@ -419,8 +419,11 @@ app.get(['/api/messages', '/api/messages/:userId'], (req, res) => {
         ORDER BY timestamp ASC
       `).all(userId, userId, userId);
     } else {
-      // Return empty array to prevent global leak
-      messages = [];
+      messages = db.prepare(`
+        SELECT * FROM direct_messages 
+        ORDER BY timestamp ASC 
+        LIMIT 200
+      `).all();
     }
 
     return res.json({ success: true, count: messages.length, messages });

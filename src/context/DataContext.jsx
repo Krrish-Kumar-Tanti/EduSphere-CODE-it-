@@ -772,13 +772,58 @@ export const DataProvider = ({ children }) => {
         if (subData.success && Array.isArray(subData.substitutions) && subData.substitutions.length > 0) {
           setSubstitutions(subData.substitutions);
         }
+
+        // Fetch direct messages & check for new incoming messages across laptops
+        const msgRes = await fetch(`${API_BASE}/messages`);
+        const msgData = await msgRes.json();
+        if (msgData.success && Array.isArray(msgData.messages)) {
+          setDirectMessages(prev => {
+            const prevIds = new Set(prev.map(m => m.id));
+            const newIncoming = msgData.messages.filter(m => !prevIds.has(m.id));
+            
+            if (newIncoming.length > 0) {
+              const myUser = tabUserRef.current || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('edusphere_auth_user') || 'null') : null);
+              const myIds = [myUser?.id, myUser?.enrollment, myUser?.email].filter(Boolean);
+              const myName = myUser?.name ? myUser.name.toLowerCase().trim() : '';
+
+              newIncoming.forEach(payload => {
+                const targetRecipient = payload.recipientId || payload.receiverId;
+                const targetRecipientName = (payload.recipientName || payload.receiverName || '').toLowerCase().trim();
+                const sender = payload.senderId;
+                const senderName = (payload.senderName || '').toLowerCase().trim();
+
+                const isForMe = myIds.includes(targetRecipient) || (myName && targetRecipientName === myName);
+                const isFromMe = myIds.includes(sender) || (myName && senderName === myName);
+
+                if (isForMe && !isFromMe) {
+                  sounds.playMessageReceived();
+                  setIncomingChatToast({
+                    id: payload.id,
+                    threadId: payload.threadId || [sender, targetRecipient].sort().join('_'),
+                    senderId: payload.senderId,
+                    senderName: payload.senderName || 'Student Scholar',
+                    senderRole: payload.senderRole || 'student',
+                    senderAvatar: payload.senderAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+                    recipientId: targetRecipient,
+                    message: payload.text || payload.message || 'New message',
+                    text: payload.text || payload.message || 'New message',
+                    time: payload.timestamp || 'Just now'
+                  });
+                }
+              });
+
+              return [...prev, ...newIncoming];
+            }
+            return prev;
+          });
+        }
       } catch (e) {
         // Backend offline fallback - keeping state intact
       }
     };
 
     fetchFreshData();
-    const pollInterval = setInterval(fetchFreshData, 3000);
+    const pollInterval = setInterval(fetchFreshData, 2000);
     return () => clearInterval(pollInterval);
   }, []);
 
