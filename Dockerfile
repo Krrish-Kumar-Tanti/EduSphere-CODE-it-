@@ -1,26 +1,28 @@
-# Multi-stage production container build for EduSphere Smart Campus OS
-FROM node:20-alpine AS build
+# Production container build for EduSphere Smart Campus OS
+FROM node:22-slim AS build
 
 WORKDIR /app
 
-# Install build dependencies for better-sqlite3 native compilation
-RUN apk add --no-cache python3 make g++
+# Install build dependencies for native compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 RUN npm run build
 
-# Production Runner Stage
-FROM node:20-alpine AS runner
+# Production Runner Stage (Debian glibc for rock-solid SQLite stability)
+FROM node:22-slim AS runner
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++
-
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
