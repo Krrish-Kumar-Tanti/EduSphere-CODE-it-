@@ -38,8 +38,54 @@ export default function Navbar() {
   const RoleIcon = badge?.icon || Sparkles;
 
   const handleOpenMessenger = () => {
-    const defaultPartner = facultyDirectory?.find(f => f.id !== (currentUser?.id || currentUser?.enrollment)) || facultyDirectory?.[0];
-    if (defaultPartner && openDirectChat) {
+    const myId = currentUser?.id || currentUser?.enrollment;
+    const myName = currentUser?.name?.toLowerCase().trim();
+
+    // 1. If there's a recent message thread for this user, open that partner!
+    const recentMsg = [...(directMessages || [])].reverse().find(m => 
+      m.senderId === myId || m.recipientId === myId || 
+      (myName && (m.senderName?.toLowerCase().trim() === myName || m.recipientName?.toLowerCase().trim() === myName))
+    );
+
+    if (recentMsg && openDirectChat) {
+      const isSender = (recentMsg.senderId === myId || recentMsg.senderName?.toLowerCase().trim() === myName);
+      const partnerId = isSender ? (recentMsg.recipientId || recentMsg.receiverId) : recentMsg.senderId;
+      const partnerName = isSender ? (recentMsg.recipientName || recentMsg.receiverName) : recentMsg.senderName;
+      const partnerRole = isSender ? (recentMsg.recipientRole || recentMsg.receiverRole) : recentMsg.senderRole;
+      const partnerAvatar = isSender ? recentMsg.recipientAvatar : recentMsg.senderAvatar;
+
+      openDirectChat({
+        id: partnerId,
+        enrollment: partnerId,
+        name: partnerName,
+        role: partnerRole || (currentUser?.role === 'teacher' ? 'student' : 'teacher'),
+        avatar: partnerAvatar,
+        designation: partnerRole === 'student' ? 'Student Scholar' : 'Faculty Member'
+      });
+      return;
+    }
+
+    // 2. Role-specific smart defaults:
+    if (currentUser?.role === 'teacher' && openDirectChat) {
+      openDirectChat({
+        id: '04214802722',
+        enrollment: '04214802722',
+        name: 'Krrish Kumar Tanti',
+        role: 'student',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
+        designation: 'Student Scholar'
+      });
+      return;
+    }
+
+    const defaultPartner = facultyDirectory?.find(f => f.id !== myId) || {
+      id: 'FAC-1092',
+      name: 'Dr. Manish Verma',
+      role: 'teacher',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250',
+      designation: 'Associate Professor'
+    };
+    if (openDirectChat) {
       openDirectChat(defaultPartner);
     }
   };

@@ -51,12 +51,33 @@ export default function DirectChatDrawer() {
     'Thank you, noted!'
   ];
 
-  // Filter contacts by search query
-  const filteredContacts = facultyDirectory.filter(f => 
-    f.id !== (currentUser?.id || currentUser?.enrollment) &&
+  const { studentsRoster } = useData();
+
+  // Combine contacts across Students and Faculty so all roles can message each other
+  const allCampusContacts = [
+    ...(studentsRoster || []).map(s => ({
+      id: s.roll || s.id || 'STU-001',
+      enrollment: s.roll,
+      name: s.name,
+      role: 'student',
+      designation: 'Student Scholar',
+      department: 'Computer Science & Engineering (CSE)',
+      avatar: s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
+    })),
+    ...(facultyDirectory || []).map(f => ({
+      ...f,
+      role: f.role || (f.id?.startsWith('HOD') ? 'hod' : (f.id?.startsWith('STF') ? 'staff' : 'teacher'))
+    }))
+  ];
+
+  // Filter contacts by search query & exclude self
+  const myCurrentId = currentUser?.id || currentUser?.enrollment;
+  const filteredContacts = allCampusContacts.filter(f => 
+    f.id !== myCurrentId && f.enrollment !== myCurrentId &&
     (f.name?.toLowerCase().includes(searchContact.toLowerCase()) ||
      f.department?.toLowerCase().includes(searchContact.toLowerCase()) ||
-     f.subject?.toLowerCase().includes(searchContact.toLowerCase()))
+     f.subject?.toLowerCase().includes(searchContact.toLowerCase()) ||
+     f.designation?.toLowerCase().includes(searchContact.toLowerCase()))
   );
 
   // Strict isolation filter: conversation strictly between currentUser and activeChatPartner
