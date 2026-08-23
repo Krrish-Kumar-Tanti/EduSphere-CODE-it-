@@ -5,12 +5,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.join(__dirname, 'edusphere.db');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const dbPath = isServerless ? path.join('/tmp', 'edusphere.db') : path.join(__dirname, 'edusphere.db');
 const db = new Database(dbPath);
 
 // Enable WAL mode & foreign keys for high performance
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+try {
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+} catch (e) {}
 
 // Initialize Database Tables & Migrations
 export function initDB() {

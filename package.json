@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue.bold,green.bold\" \"node server/index.js\" \"vite --host\"",
     "client": "vite --host",

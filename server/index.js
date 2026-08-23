@@ -1253,6 +1253,10 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`⚡ EduSphere High-Performance SQLite Backend API running on http://0.0.0.0:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`⚡ EduSphere High-Performance SQLite Backend API running on http://0.0.0.0:${PORT}`);
+  });
+}
+
+export default app;
