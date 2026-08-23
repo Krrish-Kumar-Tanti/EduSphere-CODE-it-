@@ -1,8 +1,14 @@
-// Centralized API Base URL resolver supporting local development & production deployments
-export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
-  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
-  : 'http://localhost:5001/api';
+// Centralized API Base URL resolver with automatic Local vs Production switching
+const isLocal = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' || 
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname.startsWith('192.168.')
+);
+
+const RENDER_PROD_URL = 'https://edusphere-code-it-2.onrender.com';
 
 export const BACKEND_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
   ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-  : 'http://localhost:5001';
+  : (isLocal ? 'http://localhost:5001' : RENDER_PROD_URL);
+
+export const API_BASE = `${BACKEND_URL}/api`;
