@@ -280,9 +280,7 @@ export default function Login() {
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900">
             EduSphere
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
-            Unified next-gen academic OS with Universal Delhi NCR College Affiliation, 3D holographic virtual IDs, and live attendance mesh.
-          </p>
+         
         </div>
 
         {/* Mode Switcher Tabs (Sign In vs Register 4-Role Digital ID) */}
