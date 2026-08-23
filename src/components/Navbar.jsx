@@ -35,11 +35,13 @@ export default function Navbar() {
   };
 
   const badge = getRoleBadge(currentUser?.role);
-  const RoleIcon = badge.icon;
+  const RoleIcon = badge?.icon || Sparkles;
 
   const handleOpenMessenger = () => {
-    const defaultPartner = facultyDirectory.find(f => f.id !== (currentUser?.id || currentUser?.enrollment)) || facultyDirectory[0];
-    openDirectChat(defaultPartner);
+    const defaultPartner = facultyDirectory?.find(f => f.id !== (currentUser?.id || currentUser?.enrollment)) || facultyDirectory?.[0];
+    if (defaultPartner && openDirectChat) {
+      openDirectChat(defaultPartner);
+    }
   };
 
   return (

@@ -142,8 +142,8 @@ export default function Login() {
     }
   };
 
-  const currentConfig = roleConfigs[selectedRole];
-  const CurrentIcon = currentConfig.icon;
+  const currentConfig = roleConfigs[selectedRole] || roleConfigs.student;
+  const CurrentIcon = currentConfig?.icon || GraduationCap;
 
   const handleRoleSwitch = (roleId) => {
     setSelectedRole(roleId);
@@ -151,10 +151,10 @@ export default function Login() {
   };
 
   const handleQuickDemoFill = (roleId) => {
-    const cfg = roleConfigs[roleId];
+    const cfg = roleConfigs[roleId] || roleConfigs.student;
     setSelectedRole(roleId);
-    setIdentifier(cfg.demoCreds.id);
-    setPassword(cfg.demoCreds.pass);
+    setIdentifier(cfg?.demoCreds?.id || '');
+    setPassword(cfg?.demoCreds?.pass || '');
     setAuthError(null);
   };
 

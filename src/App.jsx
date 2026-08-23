@@ -1,6 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -19,6 +20,8 @@ function AppContent() {
     return <Login />;
   }
 
+  const role = currentUser?.role?.toLowerCase();
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col selection:bg-indigo-600 selection:text-white">
       {/* Global Emergency Alert Banner for Urgent Broadcasts */}
@@ -27,12 +30,13 @@ function AppContent() {
       {/* Top Navbar */}
       <Navbar />
 
-      {/* Main Role-Based Dashboard View */}
+      {/* Main Role-Based Dashboard View with Safe Fallback */}
       <main className="flex-1">
-        {currentUser.role === 'student' && <StudentDashboard />}
-        {currentUser.role === 'teacher' && <TeacherDashboard />}
-        {currentUser.role === 'hod' && <HodDashboard />}
-        {currentUser.role === 'staff' && <StaffDashboard />}
+        {role === 'student' && <StudentDashboard />}
+        {role === 'teacher' && <TeacherDashboard />}
+        {role === 'hod' && <HodDashboard />}
+        {role === 'staff' && <StaffDashboard />}
+        {!['student', 'teacher', 'hod', 'staff'].includes(role) && <StudentDashboard />}
       </main>
 
       {/* WhatsApp-Style 1-on-1 Direct Messaging Drawer & Floating Toast */}
@@ -52,11 +56,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <AppContent />
-      </DataProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <DataProvider>
+          <AppContent />
+        </DataProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
-
