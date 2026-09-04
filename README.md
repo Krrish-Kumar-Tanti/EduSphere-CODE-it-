@@ -1,4 +1,6 @@
 # 🎓 EduSphere — Next-Generation Smart Campus Operating System (v2.0)
+🔴 **Live Demo:** https://edusphere-codeit.vercel.app/ | **Login:** `04214802722` / `student@2026` (Student) , `FAC-1092` / `faculty@pass2026` (Faculty)
+
 
 [![React 19](https://img.shields.io/badge/React-19.0.0-61DAFB?logo=react&logoColor=black&style=for-the-badge)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?logo=tailwind-css&logoColor=white&style=for-the-badge)](https://tailwindcss.com/)
